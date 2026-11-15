@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#f5f3ee">
+<title>數獨 Sudoku</title>
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --panel: #ffffff;
+    --ink: #1f2933;
+    --muted: #7b8794;
+    --given: #1f2933;
+    --user: #2f6fd6;
+    --line: #c9ced6;
+    --line-bold: #3e4c59;
+    --sel: #bcd4fb;
+    --peer: #e8eef8;
+    --same: #cfdcf3;
+    --err: #d64545;
+    --err-bg: #fde8e8;
+    --btn: #ffffff;
+    --btn-ink: #1f2933;
+    --accent: #2f6fd6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15181c;
+      --panel: #1f242a;
+      --ink: #e4e7eb;
+      --muted: #9aa5b1;
+      --given: #e4e7eb;
+      --user: #7fb0ff;
+      --line: #3a424c;
+      --line-bold: #9aa5b1;
+      --sel: #2c4a7a;
+      --peer: #252c35;
+      --same: #2f3d52;
+      --err: #ff7b7b;
+      --err-bg: #4a2424;
+      --btn: #262c33;
+      --btn-ink: #e4e7eb;
+      --accent: #7fb0ff;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    display: flex; justify-content: center;
+    user-select: none; -webkit-user-select: none;
+  }
+  .app {
+    width: 100%; max-width: 480px;
+    padding: 12px 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: 1px; }
+  select, .small-btn {
+    font: inherit; font-size: 14px;
+    padding: 6px 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--btn); color: var(--btn-ink);
+  }
+  .small-btn { cursor: pointer; }
+  .status { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+  .board {
+    display: grid; grid-template-columns: repeat(9, 1fr);
+    aspect-ratio: 1 / 1; width: 100%;
+    background: var(--panel);
+    border: 2px solid var(--line-bold); border-radius: 6px; overflow: hidden;
+  }
+  .cell {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    font-size: clamp(18px, 6vw, 28px);
+    cursor: pointer;
+    color: var(--user);
+  }
+  .cell:nth-child(9n) { border-right: none; }
+  .cell:nth-child(9n+3), .cell:nth-child(9n+6) { border-right: 2px solid var(--line-bold); }
+  .cell.row3, .cell.row6 { border-bottom: 2px solid var(--line-bold); }
+  .cell.row9 { border-bottom: none; }
+  .cell.given { color: var(--given); font-weight: 600; }
+  .cell.peer { background: var(--peer); }
+  .cell.same { background: var(--same); }
+  .cell.sel { background: var(--sel); }
+  .cell.err { color: var(--err); background: var(--err-bg); }
+  .cell.sel.err { background: var(--sel); }
+  .notes {
+    position: absolute; inset: 2px;
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    font-size: clamp(8px, 2.4vw, 11px); color: var(--muted);
+  }
+  .notes span { display: flex; align-items: center; justify-content: center; }
+  .notes span.hl { color: var(--accent); font-weight: 700; }
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tool {
+    font: inherit; font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--btn); color: var(--btn-ink); cursor: pointer;
+  }
+  .tool .ic { font-size: 20px; line-height: 1; }
+  .tool.on { border-color: var(--accent); color: var(--accent); }
+  .pad { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+  .num {
+    font: inherit; font-size: clamp(20px, 6.5vw, 28px); font-weight: 500;
+    padding: 10px 0; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--btn); color: var(--accent); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+  }
+  .num small { font-size: 10px; color: var(--muted); font-weight: 400; }
+  .num.done { opacity: .3; }
+  button:active { transform: scale(.95); }
+  @media (hover: hover) { .num:hover, .tool:hover { border-color: var(--accent); } }
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: var(--panel); color: var(--ink);
+    border-radius: 14px; padding: 24px; text-align: center; max-width: 320px; width: 100%;
+  }
+  .dialog h2 { margin: 0 0 8px; }
+  .dialog p { margin: 0 0 16px; color: var(--muted); }
+  .primary {
+    font: inherit; padding: 10px 20px; border-radius: 10px; border: none;
+    background: var(--accent); color: #fff; cursor: pointer; font-size: 16px;
+  }
+  .hint-text { font-size: 12px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>數獨</h1>
+    <div style="display:flex;gap:8px">
+      <select id="level" aria-label="難度">
+        <option value="easy">簡單</option>
+        <option value="medium" selected>中等</option>
+        <option value="hard">困難</option>
+        <option value="expert">專家</option>
+      </select>
+      <button class="small-btn" id="newGame">新遊戲</button>
+    </div>
+  </header>
+
+  <div class="status">
+    <span id="levelLabel">中等</span>
+    <span>錯誤：<b id="mistakes">0</b></span>
+    <span id="timer">00:00</span>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="tools">
+    <button class="tool" id="undo"><span class="ic">↶</span>復原</button>
+    <button class="tool" id="erase"><span class="ic">⌫</span>擦除</button>
+    <button class="tool" id="notes"><span class="ic">✎</span>筆記：關</button>
+    <button class="tool" id="hint"><span class="ic">💡</span>提示</button>
+  </div>
+
+  <div class="pad" id="pad"></div>
+  <div class="hint-text">點選格子後按下方數字填入；電腦也可用鍵盤 1–9、方向鍵、Backspace、N（筆記）</div>
+</div>
+
+<div class="overlay" id="win">
+  <div class="dialog">
+    <h2>🎉 完成！</h2>
+    <p id="winText"></p>
+    <button class="primary" id="again">再玩一局</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const LEVELS = { easy: ['簡單', 40], medium: ['中等', 48], hard: ['困難', 53], expert: ['專家', 57] };
+  const STORE = 'sudoku-save-v1';
+
+  // ---------- 產生題目 ----------
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const canPlace = (g, i, n) => {
+    const r = i / 9 | 0, c = i % 9, br = r - r % 3, bc = c - c % 3;
+    for (let k = 0; k < 9; k++) {
+      if (g[r * 9 + k] === n || g[k * 9 + c] === n) return false;
+      if (g[(br + (k / 3 | 0)) * 9 + bc + k % 3] === n) return false;
+    }
+    return true;
+  };
+  const fill = g => {
+    const i = g.indexOf(0);
+    if (i < 0) return true;
+    for (const n of shuffle([1,2,3,4,5,6,7,8,9])) {
+      if (canPlace(g, i, n)) { g[i] = n; if (fill(g)) return true; g[i] = 0; }
+    }
+    return false;
+  };
+  // 計算解的數量（最多到 limit）
+  const countSolutions = (g, limit = 2) => {
+    let best = -1, bestCnt = 10;
+    for (let i = 0; i < 81; i++) if (!g[i]) {
+      let cnt = 0; for (let n = 1; n <= 9; n++) if (canPlace(g, i, n)) cnt++;
+      if (cnt < bestCnt) { bestCnt = cnt; best = i; if (cnt === 0) return 0; }
+    }
+    if (best < 0) return 1;
+    let total = 0;
+    for (let n = 1; n <= 9 && total < limit; n++) {
+      if (canPlace(g, best, n)) { g[best] = n; total += countSolutions(g, limit - total); g[best] = 0; }
+    }
+    return total;
+  };
+  const generate = holes => {
+    const sol = new Array(81).fill(0); fill(sol);
+    const puz = sol.slice(); let removed = 0;
+    for (const i of shuffle([...Array(81).keys()])) {
+      if (removed >= holes) break;
+      const keep = puz[i]; puz[i] = 0;
+      if (countSolutions(puz.slice()) !== 1) puz[i] = keep; else removed++;
+    }
+    return { puz, sol };
+  };
+
+  // ---------- 狀態 ----------
+  let S, sel = -1, notesMode = false, tick = null;
+  const $ = id => document.getElementById(id);
+  const boardEl = $('board'), padEl = $('pad');
+
+  const newGame = level => {
+    const { puz, sol } = generate(LEVELS[level][1]);
+    S = { level, puz, sol, cur: puz.slice(), notes: Array.from({ length: 81 }, () => []),
+          mistakes: 0, time: 0, history: [], done: false };
+    sel = -1; save(); render(); startTimer();
+  };
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} };
+  const load = () => { try { return JSON.parse(localStorage.getItem(STORE)); } catch (e) { return null; } };
+
+  const startTimer = () => {
+    clearInterval(tick);
+    tick = setInterval(() => {
+      if (S.done || document.hidden) return;
+      S.time++; $('timer').textContent = fmt(S.time);
+      if (S.time % 5 === 0) save();
+    }, 1000);
+  };
+  const fmt = t => `${String(t / 60 | 0).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+
+  // ---------- 畫面 ----------
+  const cells = [];
+  for (let i = 0; i < 81; i++) {
+    const d = document.createElement('div');
+    const r = (i / 9 | 0) + 1;
+    d.className = 'cell row' + r;
+    d.addEventListener('click', () => { sel = i; render(); });
+    boardEl.appendChild(d); cells.push(d);
+  }
+  const numBtns = [];
+  for (let n = 1; n <= 9; n++) {
+    const b = document.createElement('button');
+    b.className = 'num';
+    b.innerHTML = `${n}<small></small>`;
+    b.addEventListener('click', () => input(n));
+    padEl.appendChild(b); numBtns.push(b);
+  }
+
+  const isPeer = (a, b) => {
+    const ra = a / 9 | 0, ca = a % 9, rb = b / 9 | 0, cb = b % 9;
+    return ra === rb || ca === cb || ((ra / 3 | 0) === (rb / 3 | 0) && (ca / 3 | 0) === (cb / 3 | 0));
+  };
+
+  const render = () => {
+    const selVal = sel >= 0 ? S.cur[sel] : 0;
+    for (let i = 0; i < 81; i++) {
+      const d = cells[i], v = S.cur[i];
+      d.classList.toggle('given', S.puz[i] !== 0);
+      d.classList.toggle('sel', i === sel);
+      d.classList.toggle('peer', sel >= 0 && i !== sel && isPeer(i, sel));
+      d.classList.toggle('same', selVal !== 0 && v === selVal && i !== sel);
+      d.classList.toggle('err', v !== 0 && S.puz[i] === 0 && v !== S.sol[i]);
+      if (v) d.textContent = v;
+      else if (S.notes[i].length) {
+        d.innerHTML = '<div class="notes">' +
+          [1,2,3,4,5,6,7,8,9].map(n => `<span class="${n === selVal ? 'hl' : ''}">${S.notes[i].includes(n) ? n : ''}</span>`).join('') +
+          '</div>';
+      } else d.textContent = '';
+    }
+    // 每個數字剩餘數量
+    for (let n = 1; n <= 9; n++) {
+      const placed = S.cur.filter((v, i) => v === n && v === S.sol[i]).length;
+      const left = 9 - placed;
+      numBtns[n - 1].querySelector('small').textContent = left > 0 ? left : '';
+      numBtns[n - 1].classList.toggle('done', left === 0);
+    }
+    $('mistakes').textContent = S.mistakes;
+    $('timer').textContent = fmt(S.time);
+    $('levelLabel').textContent = LEVELS[S.level][0];
+    $('level').value = S.level;
+    $('notes').innerHTML = `<span class="ic">✎</span>筆記：${notesMode ? '開' : '關'}`;
+    $('notes').classList.toggle('on', notesMode);
+  };
+
+  const pushHistory = i => S.history.push({ i, v: S.cur[i], notes: S.notes[i].slice() });
+
+  const clearNotesAround = (i, n) => {
+    for (let j = 0; j < 81; j++) if (isPeer(i, j)) S.notes[j] = S.notes[j].filter(x => x !== n);
+  };
+
+  const input = n => {
+    if (S.done || sel < 0 || S.puz[sel] !== 0) return;
+    if (notesMode) {
+      if (S.cur[sel]) return;
+      pushHistory(sel);
+      const ns = S.notes[sel];
+      S.notes[sel] = ns.includes(n) ? ns.filter(x => x !== n) : [...ns, n];
+    } else {
+      if (S.cur[sel] === n) return;
+      pushHistory(sel);
+      S.cur[sel] = n; S.notes[sel] = [];
+      if (n !== S.sol[sel]) S.mistakes++;
+      else clearNotesAround(sel, n);
+    }
+    save(); render(); checkWin();
+  };
+
+  const erase = () => {
+    if (S.done || sel < 0 || S.puz[sel] !== 0) return;
+    if (!S.cur[sel] && !S.notes[sel].length) return;
+    pushHistory(sel);
+    S.cur[sel] = 0; S.notes[sel] = [];
+    save(); render();
+  };
+
+  const undo = () => {
+    if (S.done) return;
+    const h = S.history.pop(); if (!h) return;
+    S.cur[h.i] = h.v; S.notes[h.i] = h.notes; sel = h.i;
+    save(); render();
+  };
+
+  const hint = () => {
+    if (S.done) return;
+    let i = sel;
+    if (i < 0 || S.cur[i] === S.sol[i]) {
+      const empty = [...Array(81).keys()].filter(k => S.cur[k] !== S.sol[k]);
+      if (!empty.length) return;
+      i = empty[Math.random() * empty.length | 0];
+    }
+    pushHistory(i);
+    S.cur[i] = S.sol[i]; S.notes[i] = []; clearNotesAround(i, S.sol[i]); sel = i;
+    save(); render(); checkWin();
+  };
+
+  const checkWin = () => {
+    if (S.cur.every((v, i) => v === S.sol[i])) {
+      S.done = true; save();
+      $('winText').textContent = `難度：${LEVELS[S.level][0]}　用時：${fmt(S.time)}　錯誤：${S.mistakes}`;
+      setTimeout(() => $('win').classList.add('show'), 300);
+    }
+  };
+
+  // ---------- 事件 ----------
+  $('newGame').addEventListener('click', () => {
+    if (!S.done && S.history.length && !confirm('確定要放棄目前這局，開始新遊戲嗎？')) return;
+    newGame($('level').value);
+  });
+  $('level').addEventListener('change', () => {
+    if (!S.done && S.history.length && !confirm('切換難度會開始新遊戲，確定嗎？')) { $('level').value = S.level; return; }
+    newGame($('level').value);
+  });
+  $('again').addEventListener('click', () => { $('win').classList.remove('show'); newGame(S.level); });
+  $('undo').addEventListener('click', undo);
+  $('erase').addEventListener('click', erase);
+  $('notes').addEventListener('click', () => { notesMode = !notesMode; render(); });
+  $('hint').addEventListener('click', hint);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'SELECT') return;
+    const k = e.key;
+    if (k >= '1' && k <= '9') { input(+k); return; }
+    if (k === 'Backspace' || k === 'Delete' || k === '0') { erase(); return; }
+    if (k === 'n' || k === 'N') { notesMode = !notesMode; render(); return; }
+    if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); undo(); return; }
+    const mv = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 }[k];
+    if (mv) {
+      e.preventDefault();
+      if (sel < 0) sel = 0;
+      else {
+        const r = sel / 9 | 0, c = sel % 9;
+        if (k === 'ArrowUp') sel = ((r + 8) % 9) * 9 + c;
+        if (k === 'ArrowDown') sel = ((r + 1) % 9) * 9 + c;
+        if (k === 'ArrowLeft') sel = r * 9 + (c + 8) % 9;
+        if (k === 'ArrowRight') sel = r * 9 + (c + 1) % 9;
+      }
+      render();
+    }
+  });
+
+  // ---------- 開始 ----------
+  const saved = load();
+  if (saved && saved.sol && !saved.done) { S = saved; render(); startTimer(); }
+  else newGame('medium');
+})();
+</script>
+</body>
+</html>
