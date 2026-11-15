@@ -27,6 +27,7 @@
     --soft: #5a7394;      /* 次要文字：灰藍色 */
     --sudoku: #3d8bfd;    /* 數獨卡片的主色：藍色 */
     --guess: #ff9f1c;     /* 終極密碼卡片的主色：橘黃色 */
+    --mole: #e8608a;      /* 鼴鼠大胃王卡片的主色：粉紅色（像星形鼻子） */
     --font: "Huninn", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
     /* 字體：先用粉圓體，沒有的話依序換成電腦裡有的中文字體 */
   }
@@ -35,13 +36,13 @@
     /* 如果使用者的手機或電腦開了「深色模式」，就換成下面這組顏色 */
     :root:not([data-theme="light"]) {
       --bg: #10213a; --card: #1a3050; --ink: #eaf3ff; --soft: #a9bdd8;
-      --sudoku: #7ab0ff; --guess: #ffb84d; color-scheme: dark;
+      --sudoku: #7ab0ff; --guess: #ffb84d; --mole: #ff8fb0; color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     /* 發佈平台手動切成深色時，也用同一組深色 */
     --bg: #10213a; --card: #1a3050; --ink: #eaf3ff; --soft: #a9bdd8;
-    --sudoku: #7ab0ff; --guess: #ffb84d; color-scheme: dark;
+    --sudoku: #7ab0ff; --guess: #ffb84d; --mole: #ff8fb0; color-scheme: dark;
   }
 
   body {
@@ -57,7 +58,7 @@
 
   main {
     /* main 是主要內容區 */
-    max-width: 720px;   /* 最寬 720 像素，在大螢幕上不會拉太開 */
+    max-width: 900px;   /* 最寬 900 像素，三張卡片剛好排一排 */
     margin: 0 auto;     /* 左右自動置中 */
   }
 
@@ -79,7 +80,7 @@
   .games {
     /* 放兩張卡片的區域 */
     display: grid;                                          /* 用「格子」排版 */
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     /* 每張卡片至少 240 像素寬；螢幕夠寬就並排，不夠就自動上下排 */
     gap: 20px;                                              /* 卡片之間隔 20 像素 */
   }
@@ -105,6 +106,7 @@
 
   .sudoku { --c: var(--sudoku); }   /* 數獨卡片用藍色 */
   .guess  { --c: var(--guess); }    /* 終極密碼卡片用橘黃色 */
+  .mole   { --c: var(--mole); }     /* 鼴鼠大胃王卡片用粉紅色 */
 
   .icon {
     /* 卡片上方的大圖示區 */
@@ -195,6 +197,47 @@
       <span class="name">終極密碼</span>
       <!-- 遊戲名稱 -->
       <span class="desc">選一個難度，猜猜電腦心裡想的數字</span>
+      <!-- 遊戲說明 -->
+      <span class="play">開始玩</span>
+      <!-- 看起來像按鈕的標籤 -->
+    </a>
+
+    <a class="game mole" href="mole.html">
+      <!-- 第三張卡片：點了會打開 mole.html（鼴鼠大胃王） -->
+      <div class="icon">
+        <!-- 粉紅色的大圖示 -->
+        <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
+          <!-- 用 SVG 畫一個鼴鼠頭 -->
+          <ellipse cx="48" cy="54" rx="36" ry="32" fill="#4f4049"/>
+          <!-- 灰咖啡色的臉 -->
+          <ellipse cx="22" cy="60" rx="7" ry="5" fill="#ff9fb6"/>
+          <!-- 左邊腮紅 -->
+          <ellipse cx="74" cy="60" rx="7" ry="5" fill="#ff9fb6"/>
+          <!-- 右邊腮紅 -->
+          <path d="M28 44 q5 -5 10 0" stroke="#1b1218" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- 左眼（瞇瞇眼） -->
+          <path d="M58 44 q5 -5 10 0" stroke="#1b1218" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- 右眼 -->
+          <g fill="#ff7aa2" transform="translate(48 60)">
+            <!-- 星形鼻子：一圈 10 個小橢圓 -->
+            <ellipse rx="4" ry="10" transform="rotate(0)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(36)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(72)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(108) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(144) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(180) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(216) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(252) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(288) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(324) translate(0 -9)"/>
+            <circle r="7" fill="#ffb3c8"/>
+            <!-- 鼻子中間 -->
+          </g>
+        </svg>
+      </div>
+      <span class="name">鼴鼠大胃王</span>
+      <!-- 遊戲名稱 -->
+      <span class="desc">在地底隧道追著蟲跑，60 秒內全部吃光！</span>
       <!-- 遊戲說明 -->
       <span class="play">開始玩</span>
       <!-- 看起來像按鈕的標籤 -->
