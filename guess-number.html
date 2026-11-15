@@ -4,150 +4,704 @@
 <!-- 網頁的開始；lang="zh-Hant" 表示內容是繁體中文 -->
 
 <head>
-  <!-- head（頭部）：放網頁的設定，這裡的東西不會直接顯示在畫面上 -->
+  <!-- head（頭部）：放網頁的設定，不會直接顯示在畫面上 -->
 
   <meta charset="UTF-8">
-  <!-- 使用 UTF-8 編碼，這樣中文字才不會變成亂碼 -->
+  <!-- 使用 UTF-8 編碼，中文才不會變成亂碼 -->
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 讓網頁在手機上也會依照手機螢幕寬度顯示，不會縮得很小 -->
+  <!-- 讓網頁在手機上依照螢幕寬度顯示 -->
 
   <title>終極密碼</title>
   <!-- 瀏覽器分頁上顯示的標題 -->
 
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
+  <!-- 從 Google Fonts 載入圓圓的中文字體「粉圓體」 -->
+
   <style>
     /* ===== 這裡開始是 CSS：負責「長什麼樣子」 ===== */
+    /* 風格：晚上在森林裡露營。星空 → 樹林 → 岩石卡片 → 營火 */
+
+    :root {
+      /* 先把要用的顏色取好名字，後面就可以重複使用 */
+      --sky-top: #0b1730;      /* 天空最上面：深夜藍 */
+      --sky-bottom: #183a2c;   /* 天空下面：接近樹林的深綠 */
+      --rock: #6f7378;         /* 岩石：灰色 */
+      --rock-dark: #4c5056;    /* 岩石的陰影：深灰 */
+      --wood: #8a5a2b;         /* 木頭：咖啡色 */
+      --wood-dark: #5e3a17;    /* 木頭的深色紋路 */
+      --paper: #fbeed3;        /* 米黃色：木頭招牌上的字 */
+      --fire: #ffb347;         /* 營火的橘色 */
+      --big: #ff8a7a;          /* 「太大了」用的紅橘色 */
+      --small: #8fd3ff;        /* 「太小了」用的淺藍色 */
+      --win: #ffe066;          /* 「答對了」用的金黃色 */
+      color-scheme: dark;      /* 告訴瀏覽器這是深色畫面，輸入框也會變深色 */
+    }
+
+    * {
+      /* * 代表「所有元素」 */
+      box-sizing: border-box;  /* 計算寬度時把邊框和內距算進去，排版比較好算 */
+    }
 
     body {
-      /* body 是整個網頁的身體，這裡設定整頁的樣式 */
-      font-family: sans-serif;
-      /* 使用沒有裝飾線的字體，看起來比較清楚 */
-      text-align: center;
-      /* 讓所有文字置中 */
-      padding: 20px;
-      /* 網頁四周留 20 像素的空白，才不會貼著邊邊 */
+      /* 整頁的樣式 */
+      margin: 0;                                   /* 拿掉瀏覽器預設的外邊距 */
+      min-height: 100vh;                           /* 至少跟螢幕一樣高 */
+      font-family: "Huninn", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      /* 字體：先用粉圓體，沒有就換成電腦裡的中文字體 */
+      color: var(--paper);                         /* 文字是米黃色 */
+      text-align: center;                          /* 文字置中 */
+      background-color: var(--sky-top);            /* 背景底色（萬一漸層沒出來時用） */
+      background-image:
+        radial-gradient(2px 2px at 30px 40px, #ffffff, transparent),
+        radial-gradient(1.5px 1.5px at 120px 90px, #ffffff, transparent),
+        radial-gradient(2px 2px at 200px 30px, #fff7c2, transparent),
+        radial-gradient(1px 1px at 260px 140px, #ffffff, transparent),
+        radial-gradient(1.5px 1.5px at 80px 170px, #ffffff, transparent),
+        linear-gradient(var(--sky-top), var(--sky-bottom));
+      /* 背景圖：前面五個小圓點是星星，最後一個是由深藍到深綠的天空 */
+      background-size: 300px 220px, 300px 220px, 300px 220px, 300px 220px, 300px 220px, 100% 100%;
+      /* 星星每 300×220 像素重複一次，就會滿天都是；天空漸層鋪滿整個畫面 */
+      background-attachment: fixed;                /* 捲動時背景不會跟著跑 */
+      padding: 20px 16px 140px;                    /* 上 20、左右 16、下面留 140 給樹林 */
+    }
+
+    .trees {
+      /* 畫面最下面的一排樹 */
+      position: fixed;          /* 固定在畫面上，不會跟著捲動 */
+      left: 0;                  /* 貼齊左邊 */
+      bottom: 0;                /* 貼齊下面 */
+      width: 100%;              /* 跟畫面一樣寬 */
+      height: 120px;            /* 高 120 像素 */
+      z-index: 0;               /* 放在最後面一層 */
+    }
+
+    main {
+      /* 主要內容區 */
+      position: relative;       /* 讓 z-index 有作用 */
+      z-index: 1;               /* 放在樹的前面 */
+      max-width: 460px;         /* 最寬 460 像素，在電腦上不會太寬 */
+      margin: 0 auto;           /* 左右置中 */
+    }
+
+    .back {
+      /* 左上角「回遊戲選單」連結 */
+      display: block;           /* 自己佔一行 */
+      text-align: left;         /* 靠左 */
+      color: var(--paper);      /* 米黃色字 */
+      opacity: 0.8;             /* 稍微淡一點 */
+      text-decoration: none;    /* 拿掉底線 */
+      margin-bottom: 8px;       /* 下面留一點空 */
+    }
+
+    h1 {
+      /* 大標題「終極密碼」 */
+      font-size: 44px;                            /* 大大的字 */
+      margin: 0 0 16px;                           /* 下面留 16 像素 */
+      color: var(--win);                          /* 金黃色，像營火的光 */
+      text-shadow: 0 0 16px rgba(255, 179, 71, 0.6);  /* 發光的效果 */
+    }
+
+    .rock {
+      /* 岩石卡片：放遊戲內容的地方 */
+      background: linear-gradient(160deg, var(--rock), var(--rock-dark));
+      /* 灰色漸層，像一塊大石頭 */
+      border-radius: 42px 30px 48px 26px / 30px 44px 28px 40px;
+      /* 四個角的圓弧都不一樣，看起來像天然的石頭 */
+      box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.2), 0 10px 24px rgba(0, 0, 0, 0.5);
+      /* 第一個是石頭底部的暗面，第二個是石頭下面的影子 */
+      padding: 24px 20px;        /* 卡片內部空間 */
+    }
+
+    .wood {
+      /* 木頭招牌樣式（所有按鈕都用這個） */
+      font-family: inherit;      /* 用跟網頁一樣的字體 */
+      font-size: 22px;           /* 字的大小 */
+      color: var(--paper);       /* 米黃色字 */
+      background-color: var(--wood);  /* 咖啡色底 */
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent 0px, transparent 7px,
+        rgba(0, 0, 0, 0.12) 7px, rgba(0, 0, 0, 0.12) 9px
+      );
+      /* 每隔幾像素畫一條深色細線，看起來像木頭紋路 */
+      border: 3px solid var(--wood-dark);    /* 深咖啡色的邊框 */
+      border-radius: 10px;                   /* 小圓角 */
+      box-shadow: 0 5px 0 var(--wood-dark);  /* 下方的厚度，看起來像一塊木板 */
+      padding: 10px 22px;                    /* 按鈕內部空間 */
+      cursor: pointer;                       /* 滑鼠移上去變成手指 */
+    }
+
+    .wood:active {
+      /* 按下按鈕的那一瞬間 */
+      transform: translateY(4px);            /* 往下壓 4 像素 */
+      box-shadow: 0 1px 0 var(--wood-dark);  /* 厚度變薄，像真的被按下去 */
+    }
+
+    .wood:focus-visible,
+    input:focus-visible {
+      /* 用鍵盤選到按鈕或輸入框時 */
+      outline: 3px solid var(--win);         /* 出現金黃色框框 */
+      outline-offset: 3px;                   /* 框框離一點距離 */
+    }
+
+    .levels {
+      /* 放五個難度按鈕的區域 */
+      display: flex;              /* 用彈性排版 */
+      flex-direction: column;     /* 由上往下排 */
+      gap: 14px;                  /* 按鈕之間隔 14 像素 */
+    }
+
+    .levels .wood {
+      /* 難度按鈕：比一般按鈕更大 */
+      display: flex;                      /* 左邊放範圍、右邊放難度名稱 */
+      justify-content: space-between;     /* 兩邊分開 */
+      align-items: center;                /* 上下置中 */
+      width: 100%;                        /* 跟卡片一樣寬 */
+      font-size: 24px;                    /* 字大一點 */
+    }
+
+    .levels small {
+      /* 難度按鈕右邊的小字（例如「超簡單」） */
+      font-size: 17px;            /* 小一點 */
+      opacity: 0.85;              /* 稍微淡一點 */
+    }
+
+    .info {
+      /* 遊戲中上面那一行說明 */
+      font-size: 20px;            /* 字大小 */
+      margin: 0 0 16px;           /* 下面留 16 像素 */
+    }
+
+    .row {
+      /* 輸入框和「猜！」按鈕那一排 */
+      display: flex;              /* 並排 */
+      gap: 10px;                  /* 中間隔 10 像素 */
+      justify-content: center;    /* 置中 */
     }
 
     input {
-      /* 設定輸入框的樣式 */
-      font-size: 24px;
-      /* 輸入框裡的字大小是 24 像素，比較好按好看 */
-      width: 120px;
-      /* 輸入框寬度 120 像素 */
-      padding: 8px;
-      /* 輸入框內部留一點空間 */
+      /* 輸入數字的框 */
+      font-family: inherit;       /* 用網頁的字體 */
+      font-size: 26px;            /* 數字大大的 */
+      width: 150px;               /* 寬 150 像素，10000 也放得下 */
+      padding: 8px;               /* 內部空間 */
+      text-align: center;         /* 數字置中 */
+      border: 3px solid var(--rock-dark);  /* 深灰色邊框 */
+      border-radius: 12px;        /* 圓角 */
+      background: #2b2e33;        /* 深色底 */
+      color: var(--paper);        /* 米黃色字 */
     }
 
-    button {
-      /* 設定按鈕的樣式 */
-      font-size: 24px;
-      /* 按鈕上的字大小 24 像素 */
-      padding: 8px 20px;
-      /* 按鈕內部：上下留 8 像素、左右留 20 像素 */
+    input:disabled {
+      /* 猜中後輸入框不能再打字時 */
+      opacity: 0.5;               /* 變淡 */
     }
 
     #message {
-      /* 「#message」是指 id 叫做 message 的那個元素（用來顯示提示文字） */
-      font-size: 28px;
-      /* 提示文字大一點，讓玩家一眼看到 */
-      margin-top: 20px;
-      /* 跟上面的東西隔開 20 像素 */
+      /* 顯示「太大了」「太小了」「答對了」的地方 */
+      font-size: 28px;            /* 大字 */
+      min-height: 40px;           /* 就算沒有字也先佔好位置，畫面才不會跳動 */
+      margin: 18px 0 6px;         /* 上下的空間 */
     }
 
+    .big   { color: var(--big); }    /* 太大了：紅橘色 */
+    .small { color: var(--small); }  /* 太小了：淺藍色 */
+    .win   { color: var(--win); }    /* 答對了：金黃色 */
+
+    .count {
+      /* 「已經猜了幾次」 */
+      font-size: 18px;            /* 字大小 */
+      opacity: 0.9;               /* 稍微淡一點 */
+      margin: 0 0 16px;           /* 下面留空 */
+    }
+
+    #peekButton {
+      /* 「偷看一下」按鈕 */
+      font-size: 18px;            /* 比其他按鈕小一點 */
+      user-select: none;          /* 長按時不要選到文字 */
+      -webkit-user-select: none;  /* 給 Safari 用的同一個設定 */
+      -webkit-touch-callout: none; /* iPhone 長按時不要跳出選單 */
+      touch-action: none;         /* 手指按著時不要捲動畫面 */
+    }
+
+    #rangeText {
+      /* 偷看時才會出現的範圍文字 */
+      font-size: 24px;            /* 字大小 */
+      color: var(--win);          /* 金黃色 */
+      min-height: 34px;           /* 先佔好位置，出現時畫面不會跳 */
+      margin-top: 10px;           /* 上面留空 */
+    }
+
+    #playAgainButton {
+      /* 「再玩一次」按鈕 */
+      margin-top: 12px;           /* 上面留空 */
+    }
+
+    /* ---------- 營火 ---------- */
+    .campfire {
+      /* 營火整體 */
+      position: relative;         /* 讓裡面的火花可以用絕對位置擺放 */
+      width: 120px;               /* 寬 120 像素 */
+      height: 120px;              /* 高 120 像素 */
+      margin: 24px auto 0;        /* 上面留 24、左右置中 */
+    }
+
+    .flame {
+      /* 火焰（用 🔥 表情符號） */
+      position: absolute;         /* 自由擺放 */
+      left: 0;                    /* 從左邊開始 */
+      right: 0;                   /* 到右邊結束（所以會置中） */
+      bottom: 26px;               /* 離底部 26 像素，放在木頭上面 */
+      font-size: 64px;            /* 火焰大小 */
+      animation: flicker 0.9s ease-in-out infinite alternate;
+      /* 播放下面的 flicker 動畫，0.9 秒一次，一直重複、來回播放 */
+      transform-origin: bottom center;  /* 變形時以底部為中心，火才不會飄走 */
+    }
+
+    @keyframes flicker {
+      /* 火焰晃動的動畫 */
+      from { transform: scale(1, 1) rotate(-3deg); }       /* 開始：正常大小，往左歪一點 */
+      to   { transform: scale(1.08, 1.15) rotate(3deg); }  /* 結束：變高一點，往右歪一點 */
+    }
+
+    .log {
+      /* 木柴 */
+      position: absolute;         /* 自由擺放 */
+      bottom: 14px;               /* 離底部 14 像素 */
+      left: 20px;                 /* 離左邊 20 像素 */
+      width: 80px;                /* 長 80 像素 */
+      height: 16px;               /* 粗 16 像素 */
+      background: var(--wood);    /* 咖啡色 */
+      border: 2px solid var(--wood-dark);  /* 深咖啡色邊 */
+      border-radius: 8px;         /* 圓頭 */
+    }
+    .log.one { transform: rotate(14deg); }   /* 第一根木柴往右斜 */
+    .log.two { transform: rotate(-14deg); }  /* 第二根木柴往左斜，交叉成 X */
+
+    .spark {
+      /* 火花：平常看不到 */
+      position: absolute;         /* 自由擺放 */
+      bottom: 60px;               /* 從火焰的位置出發 */
+      width: 8px;                 /* 寬 8 像素 */
+      height: 8px;                /* 高 8 像素 */
+      border-radius: 50%;         /* 圓形 */
+      background: var(--win);     /* 金黃色 */
+      box-shadow: 0 0 8px var(--fire);  /* 發光 */
+      opacity: 0;                 /* 平常是透明的（看不到） */
+    }
+    .spark:nth-child(4) { left: 20px; animation-delay: 0s; }    /* 第 1 顆火花的位置和延遲 */
+    .spark:nth-child(5) { left: 45px; animation-delay: 0.3s; }  /* 第 2 顆 */
+    .spark:nth-child(6) { left: 70px; animation-delay: 0.15s; } /* 第 3 顆 */
+    .spark:nth-child(7) { left: 95px; animation-delay: 0.45s; } /* 第 4 顆 */
+    .spark:nth-child(8) { left: 58px; animation-delay: 0.6s; }  /* 第 5 顆 */
+
+    .campfire.party .spark {
+      /* 當營火加上 party 這個名字時（猜中時），火花開始飛 */
+      animation-name: rise;                 /* 播放下面的 rise 動畫 */
+      animation-duration: 1.2s;             /* 每次 1.2 秒 */
+      animation-iteration-count: infinite;  /* 一直重複 */
+    }
+    .campfire.party .flame {
+      /* 猜中時火焰變大 */
+      font-size: 84px;
+    }
+
+    @keyframes rise {
+      /* 火花往上飛的動畫 */
+      from { opacity: 1; transform: translateY(0); }        /* 開始：看得到，在原地 */
+      to   { opacity: 0; transform: translateY(-110px); }   /* 結束：飛高 110 像素，慢慢消失 */
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      /* 如果使用者在設定裡選了「減少動態效果」，就把動畫關掉 */
+      .flame, .campfire.party .spark { animation: none; }
+    }
     /* ===== CSS 結束 ===== */
   </style>
-  <!-- style 標籤結束 -->
 </head>
-<!-- head 結束 -->
 
 <body>
-  <!-- body（身體）：這裡的東西會顯示在畫面上 -->
   <!-- ===== 這裡開始是 HTML：負責「畫面上有什麼東西」 ===== -->
 
-  <p><a href="index.html">‹ 回遊戲選單</a></p>
-  <!-- a 是「超連結」，點了會跳到 href 寫的網頁；這裡是回到選單 index.html -->
+  <svg class="trees" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+    <!-- svg 是用「座標」畫圖的方法；這裡畫畫面最下面的一排樹（只是裝飾） -->
+    <polygon points="0,120 30,30 60,120" fill="#0f2a1e"/>
+    <!-- polygon 是多邊形，三個點連起來就是一棵三角形的樹 -->
+    <polygon points="40,120 80,10 120,120" fill="#12321f"/>
+    <!-- 第二棵樹，比較高 -->
+    <polygon points="100,120 135,45 170,120" fill="#0f2a1e"/>
+    <!-- 第三棵樹 -->
+    <polygon points="230,120 270,20 310,120" fill="#12321f"/>
+    <!-- 第四棵樹 -->
+    <polygon points="290,120 325,50 360,120" fill="#0f2a1e"/>
+    <!-- 第五棵樹 -->
+    <polygon points="340,120 375,15 410,120" fill="#12321f"/>
+    <!-- 第六棵樹 -->
+    <rect x="0" y="110" width="400" height="10" fill="#0a1f15"/>
+    <!-- rect 是長方形，這裡當作地面 -->
+  </svg>
 
-  <h1>終極密碼</h1>
-  <!-- h1 是大標題，顯示「終極密碼」 -->
+  <main>
+    <!-- main：主要內容 -->
 
-  <p>我心裡想了一個 1 到 100 之間的數字，你猜猜看！</p>
-  <!-- p 是一段文字，用來說明遊戲規則 -->
+    <a class="back" href="index.html">‹ 回遊戲選單</a>
+    <!-- 超連結：點了回到選單 index.html -->
 
-  <input type="number" id="guessInput" min="1" max="100">
-  <!-- 輸入框：type="number" 表示只能輸入數字；id="guessInput" 是幫它取名字，讓 JavaScript 找得到它 -->
+    <h1>終極密碼</h1>
+    <!-- 大標題 -->
 
-  <button id="guessButton">猜！</button>
-  <!-- 按鈕：上面寫著「猜！」；id="guessButton" 是它的名字 -->
+    <!-- ---------- 畫面一：選難度 ---------- -->
+    <section id="startScreen" class="rock">
+      <!-- section 是一個「區塊」；id="startScreen" 讓 JavaScript 找得到它 -->
 
-  <p id="message"></p>
-  <!-- 用來顯示「太大了」「太小了」「答對了！」的地方，一開始是空的 -->
+      <p class="info">今晚要挑戰哪一個難度？</p>
+      <!-- 說明文字 -->
 
+      <div class="levels">
+        <!-- 五個難度按鈕；onclick 表示「被點的時候，執行後面寫的程式」 -->
+
+        <button class="wood" onclick="startGame(1, 20)">1～20 <small>超簡單</small></button>
+        <!-- 點了就用 1 到 20 開始遊戲 -->
+
+        <button class="wood" onclick="startGame(1, 50)">1～50 <small>簡單</small></button>
+        <!-- 點了就用 1 到 50 開始遊戲 -->
+
+        <button class="wood" onclick="startGame(1, 100)">1～100 <small>普通</small></button>
+        <!-- 點了就用 1 到 100 開始遊戲 -->
+
+        <button class="wood" onclick="startGame(500, 1000)">500～1000 <small>困難</small></button>
+        <!-- 點了就用 500 到 1000 開始遊戲 -->
+
+        <button class="wood" onclick="startGame(1000, 10000)">1000～10000 <small>超級難</small></button>
+        <!-- 點了就用 1000 到 10000 開始遊戲 -->
+      </div>
+    </section>
+    <!-- 畫面一結束 -->
+
+    <!-- ---------- 畫面二：猜數字 ---------- -->
+    <section id="gameScreen" class="rock" hidden>
+      <!-- hidden 表示「先藏起來」，選好難度後才會出現 -->
+
+      <p class="info" id="infoText"></p>
+      <!-- 告訴玩家數字的範圍，內容由 JavaScript 填進來 -->
+
+      <div class="row">
+        <!-- 輸入框和按鈕放在同一排 -->
+
+        <input type="number" id="guessInput" inputmode="numeric" aria-label="輸入你猜的數字">
+        <!-- 輸入框；inputmode="numeric" 讓手機跳出數字鍵盤 -->
+
+        <button class="wood" id="guessButton">猜！</button>
+        <!-- 「猜！」按鈕 -->
+      </div>
+
+      <p id="message"></p>
+      <!-- 顯示「太大了」「太小了」「答對了！」 -->
+
+      <p class="count" id="countText">已經猜了 0 次</p>
+      <!-- 顯示猜了幾次 -->
+
+      <button class="wood" id="peekButton">👁 偷看一下（按住）</button>
+      <!-- 偷看按鈕：按住才會顯示範圍 -->
+
+      <p id="rangeText"></p>
+      <!-- 偷看時出現範圍的地方，平常是空的 -->
+
+      <button class="wood" id="playAgainButton" hidden>再玩一次</button>
+      <!-- 「再玩一次」按鈕，猜中之前先藏起來 -->
+    </section>
+    <!-- 畫面二結束 -->
+
+    <div class="campfire" id="campfire" aria-hidden="true">
+      <!-- 營火（只是裝飾，所以 aria-hidden 告訴讀螢幕軟體跳過它） -->
+      <div class="log one"></div>
+      <!-- 第一根木柴 -->
+      <div class="log two"></div>
+      <!-- 第二根木柴 -->
+      <div class="flame">🔥</div>
+      <!-- 火焰 -->
+      <span class="spark"></span>
+      <!-- 火花 1 -->
+      <span class="spark"></span>
+      <!-- 火花 2 -->
+      <span class="spark"></span>
+      <!-- 火花 3 -->
+      <span class="spark"></span>
+      <!-- 火花 4 -->
+      <span class="spark"></span>
+      <!-- 火花 5 -->
+    </div>
+  </main>
   <!-- ===== HTML 結束 ===== -->
 
   <script>
     // ===== 這裡開始是 JavaScript：負責「動作和規則」 =====
 
-    let answer = Math.floor(Math.random() * 100) + 1;
-    // 讓電腦選一個 1～100 的秘密數字，存進叫做 answer（答案）的變數
-    // Math.random() 會產生 0 到 0.999… 之間的小數
-    // 乘以 100 之後變成 0 到 99.999…
-    // Math.floor() 把小數點後面去掉，變成 0 到 99 的整數
-    // 最後 +1，就變成 1 到 100 了
+    // ---------- 1. 準備要用的變數 ----------
+    let answer = 0;
+    // 電腦心裡的秘密數字，開始遊戲時才決定
+
+    let minNumber = 1;
+    // 這次難度的最小數字
+
+    let maxNumber = 100;
+    // 這次難度的最大數字
+
+    let low = 1;
+    // 「偷看」用的：目前答案可能的最小值，會越猜越大
+
+    let high = 100;
+    // 「偷看」用的：目前答案可能的最大值，會越猜越小
+
+    let guessCount = 0;
+    // 已經猜了幾次
+
+    // ---------- 2. 找到網頁上的東西 ----------
+    let startScreen = document.getElementById("startScreen");
+    // 選難度的畫面
+
+    let gameScreen = document.getElementById("gameScreen");
+    // 猜數字的畫面
+
+    let infoText = document.getElementById("infoText");
+    // 顯示範圍說明的文字
 
     let guessInput = document.getElementById("guessInput");
-    // 從網頁中找到名字叫 guessInput 的輸入框，存起來方便之後使用
+    // 輸入框
 
     let guessButton = document.getElementById("guessButton");
-    // 從網頁中找到名字叫 guessButton 的按鈕
+    // 「猜！」按鈕
 
     let message = document.getElementById("message");
-    // 從網頁中找到名字叫 message 的文字區，等一下用來顯示結果
+    // 顯示結果的文字
 
-    function checkGuess() {
-      // 建立一個叫做 checkGuess（檢查猜測）的「功能」，按下按鈕時會執行這裡面的程式
+    let countText = document.getElementById("countText");
+    // 顯示猜了幾次的文字
 
-      let guess = Number(guessInput.value);
-      // 拿到玩家在輸入框打的內容，用 Number() 把它變成數字，存進 guess（猜的數字）
+    let peekButton = document.getElementById("peekButton");
+    // 「偷看一下」按鈕
 
-      if (guessInput.value === "") {
-        // 如果輸入框是空的（玩家什麼都沒打）
-        message.textContent = "請先輸入一個數字喔！";
-        // 就提醒玩家要先輸入數字
-      } else if (guess < 1 || guess > 100) {
-        // 否則，如果數字小於 1 或大於 100（超出範圍）
-        message.textContent = "請輸入 1 到 100 之間的數字！";
-        // 就提醒玩家數字要在範圍內
-      } else if (guess > answer) {
-        // 否則，如果猜的數字比答案大
-        message.textContent = guess + " 太大了！";
-        // 顯示「太大了」
-      } else if (guess < answer) {
-        // 否則，如果猜的數字比答案小
-        message.textContent = guess + " 太小了！";
-        // 顯示「太小了」
-      } else {
-        // 剩下的情況就是猜的數字等於答案
-        message.textContent = "答對了！答案就是 " + answer + "！";
-        // 顯示「答對了！」
-      }
-      // if 判斷結束
+    let rangeText = document.getElementById("rangeText");
+    // 偷看時顯示範圍的地方
+
+    let playAgainButton = document.getElementById("playAgainButton");
+    // 「再玩一次」按鈕
+
+    let campfire = document.getElementById("campfire");
+    // 營火
+
+    // ---------- 3. 開始遊戲（點難度按鈕時執行） ----------
+    function startGame(min, max) {
+      // min 和 max 是難度按鈕傳進來的數字，例如 1 和 20
+
+      minNumber = min;
+      // 記住這次的最小數字
+
+      maxNumber = max;
+      // 記住這次的最大數字
+
+      answer = Math.floor(Math.random() * (max - min + 1)) + min;
+      // 在 min～max 之間選一個秘密數字
+      // (max - min + 1) 是總共有幾個數字可以選，例如 1～20 有 20 個
+      // Math.random() 乘上這個數，再用 Math.floor 去掉小數，得到 0 到 19
+      // 最後加上 min，就變成 1 到 20
+
+      low = min;
+      // 一開始，答案可能的最小值就是 min
+
+      high = max;
+      // 一開始，答案可能的最大值就是 max
+
+      guessCount = 0;
+      // 次數歸零
+
+      infoText.textContent = "我想了一個 " + min + "～" + max + " 的數字，猜猜看！";
+      // 更新說明文字
+
+      message.textContent = "";
+      // 清空上一局的結果
+
+      message.className = "";
+      // 拿掉上一局結果的顏色
+
+      countText.textContent = "已經猜了 0 次";
+      // 次數顯示歸零
+
+      rangeText.textContent = "";
+      // 清空偷看的文字
 
       guessInput.value = "";
-      // 把輸入框清空，方便玩家輸入下一個數字
+      // 清空輸入框
+
+      guessInput.disabled = false;
+      // 讓輸入框可以打字
+
+      guessButton.disabled = false;
+      // 讓「猜！」按鈕可以按
+
+      peekButton.hidden = false;
+      // 顯示「偷看一下」按鈕
+
+      playAgainButton.hidden = true;
+      // 藏起「再玩一次」按鈕
+
+      campfire.classList.remove("party");
+      // 營火恢復成平常的樣子（停止火花）
+
+      startScreen.hidden = true;
+      // 藏起選難度的畫面
+
+      gameScreen.hidden = false;
+      // 顯示猜數字的畫面
 
       guessInput.focus();
-      // 讓游標自動回到輸入框，不用再點一次
+      // 游標自動放到輸入框
     }
-    // checkGuess 功能結束
 
+    // ---------- 4. 檢查玩家猜的數字 ----------
+    function checkGuess() {
+      // 按下「猜！」時執行
+
+      let guess = Number(guessInput.value);
+      // 拿到玩家輸入的內容，變成數字
+
+      if (guessInput.value === "") {
+        // 如果什麼都沒輸入
+        message.textContent = "請先輸入一個數字喔！";
+        // 提醒玩家
+        message.className = "";
+        // 不加顏色
+      } else if (guess < minNumber || guess > maxNumber || guess % 1 !== 0) {
+        // 如果超出範圍，或不是整數（guess % 1 是除以 1 的餘數，整數的餘數是 0）
+        message.textContent = "要輸入 " + minNumber + "～" + maxNumber + " 的整數喔！";
+        // 提醒玩家正確的範圍
+        message.className = "";
+        // 不加顏色
+      } else {
+        // 剩下的就是「合格」的猜測
+
+        guessCount = guessCount + 1;
+        // 次數加 1
+
+        countText.textContent = "已經猜了 " + guessCount + " 次";
+        // 更新次數顯示
+
+        if (guess > answer) {
+          // 猜的比答案大
+          message.textContent = guess + " 太大了！";
+          // 顯示「太大了」
+          message.className = "big";
+          // 用紅橘色
+
+          if (guess - 1 < high) {
+            // 如果這次的資訊讓範圍變更小
+            high = guess - 1;
+            // 答案最大只可能是 guess - 1
+          }
+        } else if (guess < answer) {
+          // 猜的比答案小
+          message.textContent = guess + " 太小了！";
+          // 顯示「太小了」
+          message.className = "small";
+          // 用淺藍色
+
+          if (guess + 1 > low) {
+            // 如果這次的資訊讓範圍變更小
+            low = guess + 1;
+            // 答案最小只可能是 guess + 1
+          }
+        } else {
+          // 猜中了！
+          message.textContent = "答對了！答案就是 " + answer + "！";
+          // 顯示「答對了！」
+          message.className = "win";
+          // 用金黃色
+
+          countText.textContent = "你猜了 " + guessCount + " 次就答對了！";
+          // 告訴玩家總共猜了幾次
+
+          guessInput.disabled = true;
+          // 輸入框不能再打字
+
+          guessButton.disabled = true;
+          // 「猜！」按鈕不能再按
+
+          peekButton.hidden = true;
+          // 已經猜中了，藏起偷看按鈕
+
+          rangeText.textContent = "";
+          // 清空偷看的文字
+
+          playAgainButton.hidden = false;
+          // 顯示「再玩一次」按鈕
+
+          campfire.classList.add("party");
+          // 營火加上 party，火花開始往上飛
+        }
+      }
+
+      if (guessInput.disabled === false) {
+        // 如果遊戲還沒結束
+        guessInput.value = "";
+        // 清空輸入框
+        guessInput.focus();
+        // 游標回到輸入框
+      }
+    }
+
+    // ---------- 5. 偷看範圍（按住才顯示） ----------
+    function showRange() {
+      // 手指或滑鼠按下去時執行
+      rangeText.textContent = "答案在 " + low + "～" + high + " 之間";
+      // 顯示目前的範圍
+    }
+
+    function hideRange() {
+      // 手指或滑鼠放開時執行
+      rangeText.textContent = "";
+      // 把範圍藏起來
+    }
+
+    // ---------- 6. 再玩一次：回到選難度的畫面 ----------
+    function playAgain() {
+      // 按下「再玩一次」時執行
+      campfire.classList.remove("party");
+      // 營火恢復平常樣子
+      gameScreen.hidden = true;
+      // 藏起猜數字的畫面
+      startScreen.hidden = false;
+      // 顯示選難度的畫面
+    }
+
+    // ---------- 7. 把按鈕和功能連起來 ----------
     guessButton.addEventListener("click", checkGuess);
-    // 告訴按鈕：「被點一下（click）的時候，就去執行 checkGuess」
+    // 點「猜！」→ 檢查猜測
+
+    playAgainButton.addEventListener("click", playAgain);
+    // 點「再玩一次」→ 回到選難度
+
+    peekButton.addEventListener("pointerdown", showRange);
+    // pointerdown：手指或滑鼠「按下去」→ 顯示範圍
+
+    peekButton.addEventListener("pointerup", hideRange);
+    // pointerup：手指或滑鼠「放開」→ 藏起範圍
+
+    peekButton.addEventListener("pointerleave", hideRange);
+    // pointerleave：按著的時候滑出按鈕外面 → 也藏起來
+
+    peekButton.addEventListener("pointercancel", hideRange);
+    // pointercancel：被系統打斷（例如來電）→ 也藏起來
+
+    peekButton.addEventListener("contextmenu", function (event) {
+      // 手機長按會跳出選單，這裡把它擋掉
+      event.preventDefault();
+      // preventDefault 的意思是「不要做原本預設的事」
+    });
 
     // ===== JavaScript 結束 =====
   </script>
-  <!-- script 標籤結束 -->
 </body>
-<!-- body 結束 -->
 
 </html>
 <!-- 整份網頁結束 -->
