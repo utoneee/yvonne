@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!-- 告訴瀏覽器：這是一份 HTML5 網頁 -->
+<html lang="zh-Hant">
+<!-- 網頁的開始；lang="zh-Hant" 表示內容是繁體中文 -->
+
+<head>
+  <!-- head（頭部）：放網頁的設定，這裡的東西不會直接顯示在畫面上 -->
+
+  <meta charset="UTF-8">
+  <!-- 使用 UTF-8 編碼，這樣中文字才不會變成亂碼 -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 讓網頁在手機上也會依照手機螢幕寬度顯示，不會縮得很小 -->
+
+  <title>終極密碼</title>
+  <!-- 瀏覽器分頁上顯示的標題 -->
+
+  <style>
+    /* ===== 這裡開始是 CSS：負責「長什麼樣子」 ===== */
+
+    body {
+      /* body 是整個網頁的身體，這裡設定整頁的樣式 */
+      font-family: sans-serif;
+      /* 使用沒有裝飾線的字體，看起來比較清楚 */
+      text-align: center;
+      /* 讓所有文字置中 */
+      padding: 20px;
+      /* 網頁四周留 20 像素的空白，才不會貼著邊邊 */
+    }
+
+    input {
+      /* 設定輸入框的樣式 */
+      font-size: 24px;
+      /* 輸入框裡的字大小是 24 像素，比較好按好看 */
+      width: 120px;
+      /* 輸入框寬度 120 像素 */
+      padding: 8px;
+      /* 輸入框內部留一點空間 */
+    }
+
+    button {
+      /* 設定按鈕的樣式 */
+      font-size: 24px;
+      /* 按鈕上的字大小 24 像素 */
+      padding: 8px 20px;
+      /* 按鈕內部：上下留 8 像素、左右留 20 像素 */
+    }
+
+    #message {
+      /* 「#message」是指 id 叫做 message 的那個元素（用來顯示提示文字） */
+      font-size: 28px;
+      /* 提示文字大一點，讓玩家一眼看到 */
+      margin-top: 20px;
+      /* 跟上面的東西隔開 20 像素 */
+    }
+
+    /* ===== CSS 結束 ===== */
+  </style>
+  <!-- style 標籤結束 -->
+</head>
+<!-- head 結束 -->
+
+<body>
+  <!-- body（身體）：這裡的東西會顯示在畫面上 -->
+  <!-- ===== 這裡開始是 HTML：負責「畫面上有什麼東西」 ===== -->
+
+  <h1>終極密碼</h1>
+  <!-- h1 是大標題，顯示「終極密碼」 -->
+
+  <p>我心裡想了一個 1 到 100 之間的數字，你猜猜看！</p>
+  <!-- p 是一段文字，用來說明遊戲規則 -->
+
+  <input type="number" id="guessInput" min="1" max="100">
+  <!-- 輸入框：type="number" 表示只能輸入數字；id="guessInput" 是幫它取名字，讓 JavaScript 找得到它 -->
+
+  <button id="guessButton">猜！</button>
+  <!-- 按鈕：上面寫著「猜！」；id="guessButton" 是它的名字 -->
+
+  <p id="message"></p>
+  <!-- 用來顯示「太大了」「太小了」「答對了！」的地方，一開始是空的 -->
+
+  <!-- ===== HTML 結束 ===== -->
+
+  <script>
+    // ===== 這裡開始是 JavaScript：負責「動作和規則」 =====
+
+    let answer = Math.floor(Math.random() * 100) + 1;
+    // 讓電腦選一個 1～100 的秘密數字，存進叫做 answer（答案）的變數
+    // Math.random() 會產生 0 到 0.999… 之間的小數
+    // 乘以 100 之後變成 0 到 99.999…
+    // Math.floor() 把小數點後面去掉，變成 0 到 99 的整數
+    // 最後 +1，就變成 1 到 100 了
+
+    let guessInput = document.getElementById("guessInput");
+    // 從網頁中找到名字叫 guessInput 的輸入框，存起來方便之後使用
+
+    let guessButton = document.getElementById("guessButton");
+    // 從網頁中找到名字叫 guessButton 的按鈕
+
+    let message = document.getElementById("message");
+    // 從網頁中找到名字叫 message 的文字區，等一下用來顯示結果
+
+    function checkGuess() {
+      // 建立一個叫做 checkGuess（檢查猜測）的「功能」，按下按鈕時會執行這裡面的程式
+
+      let guess = Number(guessInput.value);
+      // 拿到玩家在輸入框打的內容，用 Number() 把它變成數字，存進 guess（猜的數字）
+
+      if (guessInput.value === "") {
+        // 如果輸入框是空的（玩家什麼都沒打）
+        message.textContent = "請先輸入一個數字喔！";
+        // 就提醒玩家要先輸入數字
+      } else if (guess < 1 || guess > 100) {
+        // 否則，如果數字小於 1 或大於 100（超出範圍）
+        message.textContent = "請輸入 1 到 100 之間的數字！";
+        // 就提醒玩家數字要在範圍內
+      } else if (guess > answer) {
+        // 否則，如果猜的數字比答案大
+        message.textContent = guess + " 太大了！";
+        // 顯示「太大了」
+      } else if (guess < answer) {
+        // 否則，如果猜的數字比答案小
+        message.textContent = guess + " 太小了！";
+        // 顯示「太小了」
+      } else {
+        // 剩下的情況就是猜的數字等於答案
+        message.textContent = "答對了！答案就是 " + answer + "！";
+        // 顯示「答對了！」
+      }
+      // if 判斷結束
+
+      guessInput.value = "";
+      // 把輸入框清空，方便玩家輸入下一個數字
+
+      guessInput.focus();
+      // 讓游標自動回到輸入框，不用再點一次
+    }
+    // checkGuess 功能結束
+
+    guessButton.addEventListener("click", checkGuess);
+    // 告訴按鈕：「被點一下（click）的時候，就去執行 checkGuess」
+
+    // ===== JavaScript 結束 =====
+  </script>
+  <!-- script 標籤結束 -->
+</body>
+<!-- body 結束 -->
+
+</html>
+<!-- 整份網頁結束 -->
