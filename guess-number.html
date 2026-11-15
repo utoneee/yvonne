@@ -68,7 +68,7 @@
       background-size: 300px 220px, 300px 220px, 300px 220px, 300px 220px, 300px 220px, 100% 100%;
       /* 星星每 300×220 像素重複一次，就會滿天都是 */
       background-attachment: fixed;                /* 捲動時背景不會跟著跑 */
-      padding: 16px 16px 40px;                     /* 上 16、左右 16、下 40 */
+      padding: 10px 16px 12px;                     /* 上 10、左右 16、下 12（留少一點，畫面才放得下） */
       -webkit-user-select: none;                   /* 連點按鍵時不要選到文字（Safari 用） */
       user-select: none;                           /* 連點按鍵時不要選到文字 */
     }
@@ -103,6 +103,11 @@
       border-radius: 999px;               /* 膠囊形狀 */
       padding: 4px 12px;                  /* 內部空間 */
       cursor: pointer;                    /* 滑鼠變手指 */
+    }
+
+    .playing h1 {
+      /* 開始猜之後（body 加上 playing），藏起大標題，省下空間 */
+      display: none;
     }
 
     h1 {
@@ -191,7 +196,8 @@
       /* 包住「營火場景」和「鍵盤區」 */
       display: flex;              /* 彈性排版 */
       flex-direction: column;     /* 直的畫面：上下排（場景在上、鍵盤在下） */
-      gap: 14px;                  /* 兩塊之間隔 14 像素 */
+      gap: 10px;                  /* 兩塊之間隔 10 像素 */
+      margin-top: 8px;            /* 跟最上面一排隔開 */
     }
 
     .camp,
@@ -210,7 +216,11 @@
       /* 森林帳篷場景（SVG 圖） */
       display: block;             /* 自己佔一整行 */
       width: 100%;                /* 跟外框一樣寬 */
+      aspect-ratio: 400 / 350;    /* 寬高比例跟畫布一樣 */
       height: auto;               /* 高度照比例自動算 */
+      max-height: calc(100vh - 394px);   /* 舊瀏覽器用：最高不能超過「螢幕高度 - 鍵盤那些的高度」 */
+      max-height: calc(100dvh - 394px);  /* 新瀏覽器用：dvh 會扣掉手機瀏覽器的網址列，比較準 */
+      min-height: 190px;          /* 但最少也要 190 像素高 */
       margin: 0 auto;             /* 置中 */
       border-radius: 22px;        /* 圓角 */
     }
@@ -225,19 +235,23 @@
       background: rgba(8, 18, 36, 0.62);  /* 半透明深藍色，字才看得清楚 */
       border-radius: 14px;             /* 圓角 */
       padding: 6px 10px;               /* 內部空間 */
+      container-type: inline-size;     /* 讓裡面的字可以「照牌子寬度」決定大小（cqw 單位） */
+      white-space: nowrap;             /* 字永遠不換行 */
     }
 
     #infoText {
       /* 範圍說明 */
-      font-size: 15px;            /* 字小一點 */
+      font-size: 15px;            /* 舊瀏覽器用的字大小 */
+      font-size: min(15px, 4.6cqw);  /* 新瀏覽器：最大 15 像素，牌子變窄時跟著縮小（cqw = 牌子寬度的 1%） */
       margin: 0;                  /* 拿掉預設空白 */
       opacity: 0.9;               /* 稍微淡一點 */
     }
 
     #message {
       /* 顯示「太大了」「太小了」「答對了！」 */
-      font-size: 24px;            /* 大字 */
-      min-height: 32px;           /* 先佔好位置，畫面才不會跳動 */
+      font-size: 22px;            /* 舊瀏覽器用的字大小 */
+      font-size: min(24px, 6.6cqw);  /* 新瀏覽器：最大 24 像素，放不下就自動縮小 */
+      line-height: 1.35;          /* 行高 */
       margin: 2px 0;              /* 上下留一點空 */
     }
 
@@ -246,35 +260,32 @@
     .win   { color: var(--win); }    /* 答對了：金黃色 */
 
     #countText {
-      /* 猜了幾次 */
-      font-size: 15px;            /* 字小一點 */
+      /* 猜了幾次（偷看時會暫時變成範圍） */
+      font-size: 15px;            /* 舊瀏覽器用的字大小 */
+      font-size: min(15px, 4.6cqw);  /* 新瀏覽器：跟著牌子寬度縮放 */
       margin: 0;                  /* 拿掉預設空白 */
     }
 
-    .tools {
-      /* 場景下面：偷看按鈕＋範圍文字 */
+    #countText.peek {
+      /* 偷看時：金黃色、大一點 */
+      color: var(--win);
+      font-size: min(18px, 5.4cqw);
+    }
+
+    .screenRow {
+      /* 數字石板＋偷看按鈕，放在同一排 */
       display: flex;              /* 並排 */
-      flex-wrap: wrap;            /* 太擠時自動換行 */
-      justify-content: center;    /* 置中 */
-      align-items: center;        /* 上下置中 */
-      gap: 8px 14px;              /* 上下隔 8、左右隔 14 */
-      margin-top: 12px;           /* 跟場景隔開 */
-      min-height: 46px;           /* 先佔好位置 */
+      gap: 10px;                  /* 中間隔 10 像素 */
+      margin-bottom: 10px;        /* 下面留空 */
     }
 
     #peekButton {
-      /* 「偷看一下」按鈕 */
-      font-size: 17px;             /* 比其他按鈕小一點 */
-      padding: 6px 14px;           /* 內部空間小一點 */
+      /* 「偷看」按鈕 */
+      font-size: 15px;             /* 字小一點 */
+      line-height: 1.2;            /* 行高 */
+      padding: 0 10px;             /* 左右內距 */
       -webkit-touch-callout: none; /* iPhone 長按時不要跳出選單 */
       touch-action: none;          /* 手指按著時不要捲動畫面 */
-    }
-
-    #rangeText {
-      /* 偷看時才會出現的範圍文字 */
-      font-size: 20px;            /* 字大小 */
-      color: var(--win);          /* 金黃色 */
-      margin: 0;                  /* 拿掉預設空白 */
     }
 
     /* ---------- 場景裡的動畫 ---------- */
@@ -384,14 +395,14 @@
     /* ---------- 數字鍵盤 ---------- */
     #display {
       /* 顯示打了什麼數字的石板 */
-      font-size: 42px;                    /* 數字大大的 */
+      flex: 1;                            /* 佔掉偷看按鈕以外的寬度 */
+      font-size: 36px;                    /* 數字大大的 */
       letter-spacing: 4px;                /* 數字之間拉開一點 */
-      min-height: 66px;                   /* 高度固定，不會跳 */
-      line-height: 58px;                  /* 讓數字上下置中 */
+      min-height: 52px;                   /* 高度固定，不會跳 */
+      line-height: 46px;                  /* 讓數字上下置中 */
       background: var(--slate);           /* 深色石板 */
       border: 3px solid var(--rock-dark); /* 深灰色邊 */
       border-radius: 14px;                /* 圓角 */
-      margin-bottom: 14px;                /* 下面留空 */
       font-variant-numeric: tabular-nums; /* 每個數字一樣寬，比較整齊 */
     }
 
@@ -404,20 +415,25 @@
       /* 12 個按鍵排成 3 欄 4 列 */
       display: grid;                          /* 用格子排版 */
       grid-template-columns: repeat(3, 1fr);  /* 3 欄，每欄一樣寬 */
-      gap: 12px;                              /* 按鍵之間隔 12 像素 */
+      gap: 10px;                              /* 按鍵之間隔 10 像素 */
     }
 
     .key {
       /* 每一個按鍵 */
-      font-size: 30px;            /* 數字大大的 */
+      font-size: 28px;            /* 數字大大的 */
       padding: 0;                 /* 不要內距，用高度控制大小 */
-      height: 58px;               /* 高 58 像素，手指好按 */
+      height: 50px;               /* 高 50 像素，手指還是好按 */
     }
 
     .key.go {
       /* 「猜！」鍵：用營火橘色，特別顯眼 */
       background-color: #c8661c;  /* 橘咖啡色 */
       font-size: 26px;            /* 字小一點才放得下 */
+    }
+
+    .pad.rock {
+      /* 鍵盤區的石頭卡片：內距小一點，省空間 */
+      padding: 14px;
     }
 
     #playAgainButton {
@@ -445,6 +461,21 @@
         flex: 1.25;                 /* 場景比鍵盤寬一點 */
       }
 
+      .sceneWrap {
+        width: fit-content;         /* 外框縮到跟場景一樣寬，牌子才會剛好在場景上 */
+        max-width: 100%;            /* 但不能超過這一欄 */
+        margin: 0 auto;             /* 置中 */
+      }
+
+      .scene {
+        width: auto;                /* 寬度照比例自動算 */
+        max-width: 100%;            /* 不能超過這一欄 */
+        height: 440px;              /* 舊瀏覽器用 */
+        height: min(calc(100dvh - 60px), 440px);  /* 橫的時候用「高度」決定大小：幾乎整個螢幕高，最多 440 */
+        max-height: none;           /* 拿掉直式用的高度限制 */
+        min-height: 0;              /* 拿掉直式用的最小高度 */
+      }
+
       .levels {
         display: grid;                                          /* 難度按鈕改成格子 */
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));  /* 一排放好幾個 */
@@ -454,20 +485,21 @@
     @media (max-height: 500px) {
       /* 螢幕很矮的時候（例如手機橫拿），把東西縮小一點 */
 
-      body { padding-top: 8px; }                   /* 上面少留一點空 */
+      body { padding: 6px 16px; }                  /* 上下少留一點空 */
       h1 { font-size: 26px; margin: 0 0 6px; }     /* 標題變小 */
       .rock { padding: 12px 14px; }                /* 卡片內部空間變小 */
-      .sceneWrap { width: fit-content; max-width: 100%; margin: 0 auto; }
-      /* 外框縮到跟場景一樣寬，文字牌子才不會比場景寬 */
-      .scene { width: auto; height: calc(100vh - 150px); max-width: 100%; }
-      /* 場景改用「高度」決定大小，才不會超出螢幕 */
-      .sign { width: 92%; padding: 4px 8px; }     /* 牌子寬一點、內距小一點 */
-      #infoText, #countText { font-size: 12px; }  /* 小字再小一點 */
-      #message { font-size: 18px; min-height: 24px; }  /* 結果文字小一點 */
-      #display { font-size: 32px; min-height: 48px; line-height: 40px; margin-bottom: 8px; }
-      /* 數字石板變小 */
-      .keys { gap: 8px; }                          /* 按鍵間隔變小 */
-      .key { height: 44px; font-size: 24px; }      /* 按鍵變矮 */
+      .board { margin-top: 4px; }                  /* 少留一點空 */
+      #muteButton { font-size: 14px; padding: 2px 10px; }  /* 音效開關變小 */
+      .scene { height: calc(100vh - 48px); height: calc(100dvh - 48px); }
+      /* 場景幾乎用掉整個螢幕高度 */
+      .sign { width: 92%; padding: 4px 8px; top: 6px; }  /* 牌子寬一點、內距小一點 */
+      .pad.rock { padding: 10px; }                 /* 鍵盤區內距更小 */
+      .screenRow { margin-bottom: 6px; gap: 6px; } /* 石板那一排變緊 */
+      #display { font-size: 26px; min-height: 38px; line-height: 32px; }  /* 數字石板變小 */
+      #peekButton { font-size: 13px; }             /* 偷看按鈕字變小 */
+      .keys { gap: 6px; }                          /* 按鍵間隔變小 */
+      .key { height: 38px; font-size: 22px; box-shadow: 0 3px 0 var(--wood-dark); }  /* 按鍵變矮 */
+      .key.go { font-size: 20px; }                 /* 猜！小一點 */
     }
     /* ===== CSS 結束 ===== */
   </style>
@@ -528,9 +560,10 @@
         <div class="sceneWrap">
           <!-- 包住場景和文字牌子 -->
 
-          <svg class="scene" id="scene" viewBox="0 -50 400 350" aria-hidden="true">
+          <svg class="scene" id="scene" viewBox="0 -50 400 350" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
             <!-- svg 是用「座標」畫圖的方法；viewBox 表示畫布從 (0,-50) 開始，寬 400、高 350 -->
             <!-- 上面多留 50 的夜空，給文字牌子放 -->
+            <!-- preserveAspectRatio="xMidYMax slice"：螢幕太矮時，從「最上面」裁掉夜空，底下的帳篷和火堆都留著 -->
 
             <defs>
               <!-- defs：先定義好「零件」，後面可以重複拿來用 -->
@@ -802,20 +835,18 @@
           </div>
         </div>
 
-        <div class="tools">
-          <!-- 場景下面：偷看按鈕和範圍 -->
-          <button class="wood" id="peekButton">👁 偷看一下（按住）</button>
-          <!-- 偷看按鈕：按住才會顯示範圍 -->
-          <p id="rangeText"></p>
-          <!-- 偷看時出現範圍的地方 -->
-        </div>
       </div>
 
       <div class="pad rock">
         <!-- 右邊（或下面）：數字鍵盤區 -->
 
-        <div id="display" class="empty">?</div>
-        <!-- 顯示打了什麼數字的石板 -->
+        <div class="screenRow">
+          <!-- 數字石板和偷看按鈕放同一排 -->
+          <div id="display" class="empty">?</div>
+          <!-- 顯示打了什麼數字的石板 -->
+          <button class="wood" id="peekButton">👁<br>偷看</button>
+          <!-- 偷看按鈕：按住顯示範圍、放開藏起來；點一下會顯示 2 秒（br 是換行） -->
+        </div>
 
         <div class="keys" id="keys">
           <!-- 12 個按鍵；onclick 寫著按下去要做什麼；id="keys" 讓 JavaScript 猜中後可以把它藏起來 -->
@@ -896,6 +927,21 @@
     let timers = [];
     // 記住所有「等一下再做」的計時器，重新開始時可以一次取消
 
+    let countLine = "已經猜了 0 次";
+    // 牌子最下面那一行「平常」要顯示的字（偷看結束後要換回來）
+
+    let peeking = false;
+    // 現在是不是正在偷看
+
+    let pressing = false;
+    // 手指或滑鼠是不是還按在偷看按鈕上
+
+    let peekStart = 0;
+    // 開始按偷看按鈕的時間
+
+    let peekTimer = null;
+    // 「點一下」時，2 秒後自動藏起來的計時器
+
     // ---------- 2. 找到網頁上的東西 ----------
     let startScreen = document.getElementById("startScreen");
     // 選難度的畫面
@@ -915,14 +961,23 @@
     // 顯示猜了幾次
     let peekButton = document.getElementById("peekButton");
     // 「偷看一下」按鈕
-    let rangeText = document.getElementById("rangeText");
-    // 偷看時顯示範圍的地方
     let playAgainButton = document.getElementById("playAgainButton");
     // 「再玩一次」按鈕
     let display = document.getElementById("display");
     // 顯示數字的石板
     let keys = document.getElementById("keys");
     // 12 個按鍵
+
+    function setCount(text) {
+      // 更新「猜了幾次」那一行
+      countLine = text;
+      // 記住平常要顯示的字
+      if (peeking === false) {
+        // 如果沒有在偷看
+        countText.textContent = text;
+        // 就直接顯示
+      }
+    }
     let muteButton = document.getElementById("muteButton");
     // 音效開關
 
@@ -1176,10 +1231,10 @@
       // 開場提示
       message.className = "";
       // 拿掉顏色
-      countText.textContent = "已經猜了 0 次";
+      endPeek();
+      // 結束偷看
+      setCount("已經猜了 0 次");
       // 次數顯示歸零
-      rangeText.textContent = "";
-      // 清空偷看的文字
       peekButton.hidden = false;
       // 顯示偷看按鈕
       playAgainButton.hidden = true;
@@ -1195,6 +1250,8 @@
       // 藏起選難度畫面
       gameScreen.hidden = false;
       // 顯示猜數字畫面
+      document.body.classList.add("playing");
+      // body 加上 playing → 藏起大標題，省下空間
     }
 
     // ---------- 6. 數字鍵盤 ----------
@@ -1276,7 +1333,7 @@
       // 開始刷打火石，先鎖住按鍵
       guessCount = guessCount + 1;
       // 次數加 1
-      countText.textContent = "已經猜了 " + guessCount + " 次";
+      setCount("已經猜了 " + guessCount + " 次");
       // 更新次數
       message.textContent = "刷——";
       // 顯示刷打火石的聲音
@@ -1335,12 +1392,12 @@
           // 顯示答對
           message.className = "win";
           // 金黃色
-          countText.textContent = "你猜了 " + guessCount + " 次就答對了！";
+          endPeek();
+          // 結束偷看
+          setCount("你猜了 " + guessCount + " 次就答對了！");
           // 告訴玩家總共猜幾次
           peekButton.hidden = true;
           // 藏起偷看按鈕
-          rangeText.textContent = "";
-          // 清空偷看文字
           keys.hidden = true;
           // 藏起數字鍵盤（已經猜中了，用不到）
           playAgainButton.hidden = false;
@@ -1403,17 +1460,52 @@
       });
     }
 
-    // ---------- 8. 偷看範圍（按住才顯示） ----------
+    // ---------- 8. 偷看範圍（按住顯示；點一下顯示 2 秒） ----------
     function showRange() {
       // 手指或滑鼠按下去時執行
-      rangeText.textContent = "答案在 " + low + "～" + high + " 之間";
-      // 顯示目前的範圍
+      clearTimeout(peekTimer);
+      // 如果之前有「2 秒後藏起來」的計時器，先取消
+      pressing = true;
+      // 記住：正按著
+      peekStart = Date.now();
+      // 記住按下去的時間（Date.now() 是現在的時間，單位是毫秒）
+      peeking = true;
+      // 記住：正在偷看
+      countText.textContent = "答案在 " + low + "～" + high + " 之間";
+      // 牌子最下面那行換成範圍
+      countText.classList.add("peek");
+      // 變成金黃色
     }
 
-    function hideRange() {
+    function releaseRange() {
       // 手指或滑鼠放開時執行
-      rangeText.textContent = "";
-      // 藏起來
+      if (pressing === false) return;
+      // 本來就沒按著，就不理它
+      pressing = false;
+      // 記住：放開了
+      if (Date.now() - peekStart < 300) {
+        // 如果按不到 0.3 秒（只是「點一下」）
+        peekTimer = setTimeout(endPeek, 2000);
+        // 就再顯示 2 秒才藏起來
+      } else {
+        // 如果是「按住」一段時間
+        endPeek();
+        // 放開就馬上藏起來
+      }
+    }
+
+    function endPeek() {
+      // 結束偷看，換回「猜了幾次」
+      clearTimeout(peekTimer);
+      // 取消計時器
+      pressing = false;
+      // 沒有按著
+      peeking = false;
+      // 沒有在偷看
+      countText.textContent = countLine;
+      // 換回平常的字
+      countText.classList.remove("peek");
+      // 拿掉金黃色
     }
 
     // ---------- 9. 再玩一次：回到選難度 ----------
@@ -1425,6 +1517,8 @@
       // 藏起猜數字畫面
       startScreen.hidden = false;
       // 顯示選難度畫面
+      document.body.classList.remove("playing");
+      // 拿掉 playing → 大標題回來
     }
 
     // ---------- 10. 把按鈕和功能連起來 ----------
@@ -1436,12 +1530,12 @@
 
     peekButton.addEventListener("pointerdown", showRange);
     // pointerdown：手指或滑鼠「按下去」→ 顯示範圍
-    peekButton.addEventListener("pointerup", hideRange);
-    // pointerup：「放開」→ 藏起範圍
-    peekButton.addEventListener("pointerleave", hideRange);
-    // pointerleave：按著滑出按鈕外面 → 也藏起來
-    peekButton.addEventListener("pointercancel", hideRange);
-    // pointercancel：被系統打斷 → 也藏起來
+    peekButton.addEventListener("pointerup", releaseRange);
+    // pointerup：「放開」→ 按住的話馬上藏，點一下的話 2 秒後藏
+    peekButton.addEventListener("pointerleave", releaseRange);
+    // pointerleave：按著滑出按鈕外面 → 當作放開
+    peekButton.addEventListener("pointercancel", releaseRange);
+    // pointercancel：被系統打斷 → 當作放開
     peekButton.addEventListener("contextmenu", function (event) {
       // 手機長按會跳出選單
       event.preventDefault();
