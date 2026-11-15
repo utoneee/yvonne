@@ -142,8 +142,9 @@
     <h1>數獨</h1>
     <div style="display:flex;gap:8px">
       <select id="level" aria-label="難度">
+        <option value="kids" selected>入門（小學生）</option>
         <option value="easy">簡單</option>
-        <option value="medium" selected>中等</option>
+        <option value="medium">中等</option>
         <option value="hard">困難</option>
         <option value="expert">專家</option>
       </select>
@@ -152,7 +153,7 @@
   </header>
 
   <div class="status">
-    <span id="levelLabel">中等</span>
+    <span id="levelLabel">入門</span>
     <span>錯誤：<b id="mistakes">0</b></span>
     <span id="timer">00:00</span>
   </div>
@@ -180,7 +181,8 @@
 
 <script>
 (() => {
-  const LEVELS = { easy: ['簡單', 40], medium: ['中等', 48], hard: ['困難', 53], expert: ['專家', 57] };
+  // [名稱, 挖空數, 是否只能用「基本推理」解開]
+  const LEVELS = { kids: ['入門', 30, true], easy: ['簡單', 38, true], medium: ['中等', 48], hard: ['困難', 53], expert: ['專家', 57] };
   const STORE = 'sudoku-save-v1';
 
   // ---------- 產生題目 ----------
@@ -215,13 +217,37 @@
     }
     return total;
   };
-  const generate = holes => {
+  // 只用「這格只剩一個數字能填」的方法，看能不能解完（適合小朋友）
+  const nakedSinglesSolvable = p => {
+    const g = p.slice();
+    let progress = true;
+    while (progress) {
+      progress = false;
+      for (let i = 0; i < 81; i++) if (!g[i]) {
+        let only = 0, cnt = 0;
+        for (let n = 1; n <= 9; n++) if (canPlace(g, i, n)) { cnt++; only = n; }
+        if (cnt === 0) return false;
+        if (cnt === 1) { g[i] = only; progress = true; }
+      }
+    }
+    return g.every(v => v);
+  };
+  const generate = (holes, simpleOnly) => {
     const sol = new Array(81).fill(0); fill(sol);
     const puz = sol.slice(); let removed = 0;
-    for (const i of shuffle([...Array(81).keys()])) {
+    // 簡單題：每個九宮格平均挖空，避免某一區空太多
+    const order = shuffle([...Array(81).keys()]);
+    if (simpleOnly) {
+      const box = i => ((i / 27 | 0) * 3) + ((i % 9) / 3 | 0);
+      const seen = new Array(9).fill(0);
+      const rank = {}; order.forEach(i => { rank[i] = seen[box(i)]++; });
+      order.sort((a, b) => rank[a] - rank[b]);
+    }
+    for (const i of order) {
       if (removed >= holes) break;
       const keep = puz[i]; puz[i] = 0;
-      if (countSolutions(puz.slice()) !== 1) puz[i] = keep; else removed++;
+      const ok = simpleOnly ? nakedSinglesSolvable(puz) : countSolutions(puz.slice()) === 1;
+      if (!ok) puz[i] = keep; else removed++;
     }
     return { puz, sol };
   };
@@ -232,7 +258,7 @@
   const boardEl = $('board'), padEl = $('pad');
 
   const newGame = level => {
-    const { puz, sol } = generate(LEVELS[level][1]);
+    const { puz, sol } = generate(LEVELS[level][1], LEVELS[level][2]);
     S = { level, puz, sol, cur: puz.slice(), notes: Array.from({ length: 81 }, () => []),
           mistakes: 0, time: 0, history: [], done: false };
     sel = -1; save(); render(); startTimer();
@@ -402,8 +428,8 @@
 
   // ---------- 開始 ----------
   const saved = load();
-  if (saved && saved.sol && !saved.done) { S = saved; render(); startTimer(); }
-  else newGame('medium');
+  if (saved && saved.sol && !saved.done && LEVELS[saved.level]) { S = saved; render(); startTimer(); }
+  else newGame('kids');
 })();
 </script>
 </body>
