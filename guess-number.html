@@ -185,6 +185,116 @@
       font-size: 24px;                    /* 字大一點 */
     }
 
+    .modes {
+      /* 「單人」「雙人」兩個大按鈕 */
+      display: grid;                          /* 格子排版 */
+      grid-template-columns: 1fr 1fr;         /* 兩欄一樣寬 */
+      gap: 14px;                              /* 中間隔 14 像素 */
+    }
+
+    .modes .wood,
+    .animal {
+      /* 模式按鈕和動物按鈕：圖案在上、字在下 */
+      display: flex;                          /* 彈性排版 */
+      flex-direction: column;                 /* 由上往下排 */
+      align-items: center;                    /* 置中 */
+      gap: 4px;                               /* 間隔 4 像素 */
+      padding: 14px 8px;                      /* 內部空間 */
+      font-size: 24px;                        /* 字大小 */
+    }
+
+    .face {
+      /* 大大的表情符號（動物、人） */
+      font-size: 44px;                        /* 很大 */
+      line-height: 1.1;                       /* 行高 */
+    }
+
+    .modes small,
+    .animal small {
+      /* 按鈕下面的小字 */
+      font-size: 15px;                        /* 小一點 */
+      opacity: 0.85;                          /* 淡一點 */
+      min-height: 18px;                       /* 先佔好位置 */
+    }
+
+    .animals {
+      /* 四隻動物排成 2×2 */
+      display: grid;                          /* 格子排版 */
+      grid-template-columns: repeat(2, 1fr);  /* 兩欄 */
+      gap: 12px;                              /* 間隔 12 像素 */
+    }
+
+    .animal {
+      /* 動物按鈕：邊框用動物自己的顏色（--a） */
+      border-color: var(--a);                 /* 動物的顏色 */
+    }
+
+    .animal:disabled {
+      /* 被玩家 1 選走的動物：變灰、不能按 */
+      filter: grayscale(1);                   /* 變成黑白 */
+      opacity: 0.45;                          /* 變淡 */
+      cursor: default;                        /* 滑鼠不變手指 */
+      transform: none;                        /* 按了也不會往下壓 */
+    }
+
+    .drawCards {
+      /* 抽籤時的兩張動物卡片 */
+      display: flex;                          /* 並排 */
+      justify-content: center;                /* 置中 */
+      gap: 18px;                              /* 中間隔 18 像素 */
+      margin: 6px 0 12px;                     /* 上下留空 */
+    }
+
+    .drawCard {
+      /* 一張抽籤卡片 */
+      width: 120px;                           /* 寬 120 像素 */
+      padding: 12px 6px;                      /* 內部空間 */
+      border-radius: 18px;                    /* 圓角 */
+      background: rgba(0, 0, 0, 0.25);        /* 深色底 */
+      border: 4px solid transparent;          /* 先準備好透明的邊框 */
+      font-size: 20px;                        /* 名字的大小 */
+      transition: transform 0.08s, border-color 0.08s, background 0.08s;  /* 閃的時候有一點點動畫 */
+    }
+
+    .drawCard.on {
+      /* 輪到這張卡片亮起來 */
+      border-color: var(--a);                 /* 邊框變成動物的顏色 */
+      background: rgba(255, 255, 255, 0.15);  /* 底變亮 */
+      transform: scale(1.1);                  /* 變大一點 */
+    }
+
+    .drawCard span {
+      /* 卡片上的「玩家 1／小兔」 */
+      white-space: pre-line;                  /* 讓 \n 真的換行 */
+      line-height: 1.3;                       /* 行高 */
+    }
+
+    #infoText.turn {
+      /* 雙人時「輪到誰」那行：大一點、清楚一點 */
+      font-size: 18px;                        /* 舊瀏覽器用 */
+      font-size: min(19px, 5.4cqw);           /* 跟著牌子寬度縮放 */
+      opacity: 1;                             /* 不要變淡 */
+    }
+
+    #drawText {
+      /* 「🐰 小兔先猜！」 */
+      font-size: 26px;                        /* 大字 */
+      min-height: 36px;                       /* 先佔好位置 */
+      color: var(--win);                      /* 金黃色 */
+      margin: 0;                              /* 拿掉預設空白 */
+    }
+
+    #infoText.flash {
+      /* 換人的時候，「輪到誰」那行跳一下 */
+      animation: turnPop 0.5s ease-out;
+    }
+
+    @keyframes turnPop {
+      /* 跳一下：先變大再變回來 */
+      from { transform: scale(1.35); }
+      to   { transform: scale(1); }
+    }
+
     .levels small {
       /* 難度按鈕右邊的小字（例如「超簡單」） */
       font-size: 17px;            /* 小一點 */
@@ -250,7 +360,7 @@
     #message {
       /* 顯示「太大了」「太小了」「答對了！」 */
       font-size: 22px;            /* 舊瀏覽器用的字大小 */
-      font-size: min(24px, 6.6cqw);  /* 新瀏覽器：最大 24 像素，放不下就自動縮小 */
+      font-size: min(24px, 6cqw);    /* 新瀏覽器：最大 24 像素，放不下就自動縮小 */
       line-height: 1.35;          /* 行高 */
       margin: 2px 0;              /* 上下留一點空 */
     }
@@ -522,9 +632,41 @@
     <h1>終極密碼</h1>
     <!-- 大標題 -->
 
-    <!-- ---------- 畫面一：選難度 ---------- -->
+    <!-- ---------- 畫面一：開始前的設定（分成四個步驟，一次只顯示一個） ---------- -->
     <section id="startScreen" class="rock">
       <!-- section 是一個「區塊」 -->
+
+      <div id="stepMode">
+        <!-- 步驟 1：選單人或雙人 -->
+        <p class="info">今晚要怎麼玩？</p>
+        <!-- 說明文字 -->
+        <div class="modes">
+          <button class="wood" onclick="chooseMode('single')"><span class="face">🙂</span>單人<small>自己挑戰</small></button>
+          <!-- 單人按鈕；span 和 small 是按鈕裡的小區塊 -->
+          <button class="wood" onclick="chooseMode('double')"><span class="face">🙂🙂</span>雙人<small>兩個人輪流猜</small></button>
+          <!-- 雙人按鈕 -->
+        </div>
+      </div>
+
+      <div id="stepAnimal" hidden>
+        <!-- 步驟 2（雙人才有）：選動物 -->
+        <p class="info" id="animalTitle">玩家 1 選一隻動物</p>
+        <!-- 說明是誰在選 -->
+        <div class="animals">
+          <!-- 四隻動物；style="--a:…" 是每隻動物自己的顏色 -->
+          <button class="wood animal" id="animal0" style="--a:#e3b07a" onclick="pickAnimal(0)"><span class="face">🐻</span>小熊<small></small></button>
+          <!-- 小熊 -->
+          <button class="wood animal" id="animal1" style="--a:#ff9ec4" onclick="pickAnimal(1)"><span class="face">🐰</span>小兔<small></small></button>
+          <!-- 小兔 -->
+          <button class="wood animal" id="animal2" style="--a:#ff9248" onclick="pickAnimal(2)"><span class="face">🦊</span>狐狸<small></small></button>
+          <!-- 狐狸 -->
+          <button class="wood animal" id="animal3" style="--a:#9fd98a" onclick="pickAnimal(3)"><span class="face">🐿️</span>松鼠<small></small></button>
+          <!-- 松鼠 -->
+        </div>
+      </div>
+
+      <div id="stepLevel" hidden>
+      <!-- 步驟 3：選難度 -->
 
       <p class="info">今晚要挑戰哪一個難度？</p>
       <!-- 說明文字 -->
@@ -532,20 +674,35 @@
       <div class="levels">
         <!-- 五個難度按鈕；onclick 表示「被點的時候，執行後面寫的程式」 -->
 
-        <button class="wood" onclick="startGame(1, 20)">1～20 <small>超簡單</small></button>
+        <button class="wood" onclick="chooseLevel(1, 20)">1～20 <small>超簡單</small></button>
         <!-- 點了就用 1 到 20 開始遊戲 -->
 
-        <button class="wood" onclick="startGame(1, 50)">1～50 <small>簡單</small></button>
+        <button class="wood" onclick="chooseLevel(1, 50)">1～50 <small>簡單</small></button>
         <!-- 點了就用 1 到 50 開始遊戲 -->
 
-        <button class="wood" onclick="startGame(1, 100)">1～100 <small>普通</small></button>
+        <button class="wood" onclick="chooseLevel(1, 100)">1～100 <small>普通</small></button>
         <!-- 點了就用 1 到 100 開始遊戲 -->
 
-        <button class="wood" onclick="startGame(500, 1000)">500～1000 <small>困難</small></button>
+        <button class="wood" onclick="chooseLevel(500, 1000)">500～1000 <small>困難</small></button>
         <!-- 點了就用 500 到 1000 開始遊戲 -->
 
-        <button class="wood" onclick="startGame(1000, 10000)">1000～10000 <small>超級難</small></button>
+        <button class="wood" onclick="chooseLevel(1000, 10000)">1000～10000 <small>超級難</small></button>
         <!-- 點了就用 1000 到 10000 開始遊戲 -->
+      </div>
+      </div>
+
+      <div id="stepDraw" hidden>
+        <!-- 步驟 4（雙人才有）：抽籤決定誰先猜 -->
+        <p class="info">抽籤決定誰先猜……</p>
+        <!-- 說明文字 -->
+        <div class="drawCards">
+          <div class="drawCard" id="drawCard0"><div class="face" id="drawFace0"></div><span id="drawName0"></span></div>
+          <!-- 玩家 1 的卡片 -->
+          <div class="drawCard" id="drawCard1"><div class="face" id="drawFace1"></div><span id="drawName1"></span></div>
+          <!-- 玩家 2 的卡片 -->
+        </div>
+        <p id="drawText"></p>
+        <!-- 抽到誰就顯示「誰先猜！」 -->
       </div>
     </section>
     <!-- 畫面一結束 -->
@@ -927,6 +1084,23 @@
     let timers = [];
     // 記住所有「等一下再做」的計時器，重新開始時可以一次取消
 
+    let ANIMALS = [
+      // 四隻動物的資料：表情符號、名字、顏色（[] 是「清單」，{} 是「一包資料」）
+      { face: "🐻", name: "小熊", color: "#e3b07a" },
+      { face: "🐰", name: "小兔", color: "#ff9ec4" },
+      { face: "🦊", name: "狐狸", color: "#ff9248" },
+      { face: "🐿️", name: "松鼠", color: "#9fd98a" }
+    ];
+
+    let mode = "single";
+    // 現在是 "single"（單人）還是 "double"（雙人）
+
+    let players = [];
+    // 雙人時，兩位玩家各選了哪隻動物（放的是動物的編號，例如 [1, 2] 是小兔和狐狸）
+
+    let turn = 0;
+    // 雙人時，現在輪到第幾位玩家（0 是玩家 1，1 是玩家 2）
+
     let countLine = "已經猜了 0 次";
     // 牌子最下面那一行「平常」要顯示的字（偷看結束後要換回來）
 
@@ -1198,7 +1372,184 @@
       }
     }
 
-    // ---------- 5. 開始遊戲（點難度按鈕時執行） ----------
+    // ---------- 5. 開始前的步驟：選模式 → 選動物 → 選難度 → 抽籤 ----------
+    function showStep(stepId) {
+      // 只顯示其中一個步驟，其他藏起來
+      let steps = ["stepMode", "stepAnimal", "stepLevel", "stepDraw"];
+      // 四個步驟的名字
+      for (let i = 0; i < steps.length; i = i + 1) {
+        // 每一個步驟……
+        document.getElementById(steps[i]).hidden = (steps[i] !== stepId);
+        // ……如果不是要顯示的那個，就藏起來（!== 是「不等於」）
+      }
+    }
+
+    function chooseMode(pickedMode) {
+      // 按下「單人」或「雙人」時執行
+      mode = pickedMode;
+      // 記住選了哪個模式
+      soundKey();
+      // 響一聲
+      if (mode === "single") {
+        // 單人
+        showStep("stepLevel");
+        // 直接去選難度
+      } else {
+        // 雙人
+        players = [];
+        // 清空之前選的動物
+        for (let i = 0; i < 4; i = i + 1) {
+          // 四個動物按鈕……
+          let button = document.getElementById("animal" + i);
+          // 找到第 i 個按鈕
+          button.disabled = false;
+          // 恢復成可以按
+          button.querySelector("small").textContent = "";
+          // 清掉「玩家 1」的小字
+        }
+        document.getElementById("animalTitle").textContent = "玩家 1 選一隻動物";
+        // 說明換成玩家 1
+        showStep("stepAnimal");
+        // 去選動物
+      }
+    }
+
+    function pickAnimal(index) {
+      // 按下某隻動物時執行；index 是動物的編號（0～3）
+      players.push(index);
+      // 把這隻動物放進玩家清單
+      let button = document.getElementById("animal" + index);
+      // 找到這隻動物的按鈕
+      button.disabled = true;
+      // 選走了，別人不能再選
+      button.querySelector("small").textContent = "玩家 " + players.length;
+      // 下面寫上是哪位玩家選的
+      soundKey();
+      // 響一聲
+      if (players.length === 1) {
+        // 如果才選了一隻（玩家 1 選完）
+        document.getElementById("animalTitle").textContent = "玩家 2 選一隻動物";
+        // 換玩家 2 選
+      } else {
+        // 兩隻都選好了
+        later(300, function () {
+          // 等 0.3 秒，讓玩家看到自己選的
+          showStep("stepLevel");
+          // 去選難度
+        });
+      }
+    }
+
+    function chooseLevel(min, max) {
+      // 按下難度按鈕時執行
+      if (mode === "single") {
+        // 單人：直接開始
+        startGame(min, max);
+      } else {
+        // 雙人：先抽籤
+        drawLots(min, max);
+      }
+    }
+
+    function drawLots(min, max) {
+      // 抽籤：兩張卡片輪流亮，越來越慢，最後停在先猜的人
+      showStep("stepDraw");
+      // 顯示抽籤畫面
+      for (let i = 0; i < 2; i = i + 1) {
+        // 兩張卡片……
+        let animal = ANIMALS[players[i]];
+        // 這位玩家的動物資料
+        document.getElementById("drawFace" + i).textContent = animal.face;
+        // 放上表情符號
+        document.getElementById("drawName" + i).textContent = "玩家 " + (i + 1) + "\n" + animal.name;
+        // 放上名字（\n 是換行：上面「玩家 1」、下面動物名字）
+        document.getElementById("drawCard" + i).style.setProperty("--a", animal.color);
+        // 卡片用動物的顏色
+        document.getElementById("drawCard" + i).classList.remove("on");
+        // 先都不亮
+      }
+      document.getElementById("drawText").textContent = "";
+      // 清空結果文字
+
+      let winner = Math.floor(Math.random() * 2);
+      // 先偷偷抽好誰先猜（0 或 1）
+      let lit = 0;
+      // 現在亮的是哪一張
+      let delay = 70;
+      // 每次換卡片要等多久（毫秒），會越來越久
+
+      function flashNext() {
+        // 亮下一張卡片（「函式裡面的函式」，只給抽籤用）
+        document.getElementById("drawCard0").classList.toggle("on", lit === 0);
+        // 卡片 0：如果 lit 是 0 就亮，不是就暗
+        document.getElementById("drawCard1").classList.toggle("on", lit === 1);
+        // 卡片 1：如果 lit 是 1 就亮，不是就暗
+        playTone(880, 0.05, 0.12);
+        // 「嗶」
+        if (delay > 380 && lit === winner) {
+          // 已經夠慢了，而且剛好停在抽中的人 → 結束
+          let animal = ANIMALS[players[winner]];
+          // 抽中的動物
+          document.getElementById("drawText").textContent = animal.face + " " + animal.name + "先猜！";
+          // 顯示誰先猜
+          playTone(1320, 0.4, 0.2);
+          // 「叮！」
+          turn = winner;
+          // 記住輪到誰
+          setTimeout(function () {
+            // 等 1.4 秒讓大家看清楚
+            startGame(min, max);
+            // 開始遊戲
+          }, 1400);
+          return;
+          // 結束，不再閃
+        }
+        lit = 1 - lit;
+        // 換另一張（1 - 0 = 1，1 - 1 = 0）
+        delay = delay * 1.18;
+        // 下一次等久一點 → 越閃越慢
+        setTimeout(flashNext, delay);
+        // 等 delay 毫秒後再閃下一張
+      }
+
+      flashNext();
+      // 開始閃
+    }
+
+    function updateTurnLine() {
+      // 更新牌子最上面那一行
+      if (mode === "single") {
+        // 單人
+        infoText.textContent = "電腦想了一個 " + minNumber + "～" + maxNumber + " 的數字";
+        // 顯示範圍說明
+        infoText.style.color = "";
+        // 用原本的顏色
+        infoText.classList.remove("turn");
+        // 用一般大小的字
+      } else {
+        // 雙人
+        infoText.classList.add("turn");
+        // 用比較大的字
+        let animal = ANIMALS[players[turn]];
+        // 現在輪到的動物
+        infoText.textContent = "輪到 " + animal.face + " " + animal.name + "　（" + minNumber + "～" + maxNumber + "）";
+        // 顯示「輪到誰」和範圍
+        infoText.style.color = animal.color;
+        // 用那隻動物的顏色
+      }
+    }
+
+    function countWords(times) {
+      // 「猜了幾次」那行要怎麼寫
+      if (mode === "double") {
+        // 雙人
+        return "兩人一共猜了 " + times + " 次";
+      }
+      return "已經猜了 " + times + " 次";
+      // 單人
+    }
+
+    // ---------- 6. 開始遊戲（選好難度、抽完籤之後執行） ----------
     function startGame(min, max) {
       // min 和 max 是難度按鈕傳進來的數字，例如 1 和 20
 
@@ -1225,15 +1576,15 @@
       gameOver = false;
       // 遊戲還沒結束
 
-      infoText.textContent = "電腦想了一個 " + min + "～" + max + " 的數字";
-      // 更新範圍說明
+      updateTurnLine();
+      // 更新牌子最上面一行（單人：範圍；雙人：輪到誰）
       message.textContent = "猜一個數字，刷打火石生火！";
       // 開場提示
       message.className = "";
       // 拿掉顏色
       endPeek();
       // 結束偷看
-      setCount("已經猜了 0 次");
+      setCount(countWords(0));
       // 次數顯示歸零
       peekButton.hidden = false;
       // 顯示偷看按鈕
@@ -1254,7 +1605,7 @@
       // body 加上 playing → 藏起大標題，省下空間
     }
 
-    // ---------- 6. 數字鍵盤 ----------
+    // ---------- 7. 數字鍵盤 ----------
     function updateDisplay() {
       // 把打的數字顯示在石板上
       if (typed === "") {
@@ -1300,7 +1651,7 @@
       // 更新石板
     }
 
-    // ---------- 7. 猜！刷打火石 ----------
+    // ---------- 8. 猜！刷打火石 ----------
     function checkGuess() {
       // 按下「猜！」時執行
       if (busy || gameOver) return;
@@ -1333,7 +1684,7 @@
       // 開始刷打火石，先鎖住按鍵
       guessCount = guessCount + 1;
       // 次數加 1
-      setCount("已經猜了 " + guessCount + " 次");
+      setCount(countWords(guessCount));
       // 更新次數
       message.textContent = "刷——";
       // 顯示刷打火石的聲音
@@ -1388,14 +1739,31 @@
           // 加上 lit → 火「呼、呼」地長大、照亮場景
           soundRoar();
           // 「轟」
-          message.textContent = "生火成功！答案是 " + answer + "！";
-          // 顯示答對
           message.className = "win";
           // 金黃色
           endPeek();
           // 結束偷看
-          setCount("你猜了 " + guessCount + " 次就答對了！");
-          // 告訴玩家總共猜幾次
+          if (mode === "single") {
+            // 單人
+            message.textContent = "生火成功！答案是 " + answer + "！";
+            // 顯示答對
+            setCount("你猜了 " + guessCount + " 次就答對了！");
+            // 告訴玩家總共猜幾次
+          } else {
+            // 雙人
+            let animal = ANIMALS[players[turn]];
+            // 猜中的動物
+            message.textContent = animal.face + " " + animal.name + "生火成功！答案是 " + answer + "！";
+            // 顯示誰猜中
+            setCount(animal.name + "贏了！兩人一共猜了 " + guessCount + " 次");
+            // 誰贏了、一共猜了幾次
+            infoText.textContent = "電腦想了一個 " + minNumber + "～" + maxNumber + " 的數字";
+            // 最上面那行換回範圍說明
+            infoText.style.color = "";
+            // 用原本的顏色
+            infoText.classList.remove("turn");
+            // 用一般大小的字
+          }
           peekButton.hidden = true;
           // 藏起偷看按鈕
           keys.hidden = true;
@@ -1438,8 +1806,30 @@
       // 清空打的數字
       updateDisplay();
       // 更新石板
-      busy = false;
-      // 解鎖：冒煙的時候就可以打下一個數字
+      if (mode === "single") {
+        // 單人
+        busy = false;
+        // 解鎖：冒煙的時候就可以打下一個數字
+      } else {
+        // 雙人：等煙冒一下，再換人
+        later(1100, function () {
+          // 1.1 秒後
+          turn = 1 - turn;
+          // 換另一位玩家
+          updateTurnLine();
+          // 牌子換成「輪到 下一位」
+          infoText.classList.remove("flash");
+          // 先拿掉 flash……
+          infoText.getBoundingClientRect();
+          // ……讓瀏覽器重新看一次……
+          infoText.classList.add("flash");
+          // ……再加上 flash，跳一下的動畫才會重新播
+          playTone(660, 0.08, 0.12);
+          // 「叮」提醒換人
+          busy = false;
+          // 解鎖，換下一位猜
+        });
+      }
 
       later(400, function () {
         // 0.4 秒後
@@ -1460,7 +1850,7 @@
       });
     }
 
-    // ---------- 8. 偷看範圍（按住顯示；點一下顯示 2 秒） ----------
+    // ---------- 9. 偷看範圍（按住顯示；點一下顯示 2 秒） ----------
     function showRange() {
       // 手指或滑鼠按下去時執行
       clearTimeout(peekTimer);
@@ -1508,20 +1898,22 @@
       // 拿掉金黃色
     }
 
-    // ---------- 9. 再玩一次：回到選難度 ----------
+    // ---------- 10. 再玩一次：回到最開始 ----------
     function playAgain() {
       // 按下「再玩一次」時執行
       resetScene();
       // 營火熄掉，恢復原狀
       gameScreen.hidden = true;
       // 藏起猜數字畫面
+      showStep("stepMode");
+      // 回到第一步：選單人或雙人
       startScreen.hidden = false;
-      // 顯示選難度畫面
+      // 顯示開始前的設定畫面
       document.body.classList.remove("playing");
       // 拿掉 playing → 大標題回來
     }
 
-    // ---------- 10. 把按鈕和功能連起來 ----------
+    // ---------- 11. 把按鈕和功能連起來 ----------
     playAgainButton.addEventListener("click", playAgain);
     // 點「再玩一次」→ 回到選難度
 
