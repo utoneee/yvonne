@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!-- 告訴瀏覽器：這是一份 HTML5 網頁 -->
+<html lang="zh-Hant">
+<!-- 網頁開始，內容是繁體中文 -->
+<head>
+<!-- head：放網頁的設定，不會直接顯示 -->
+<meta charset="UTF-8">
+<!-- 使用 UTF-8 編碼，中文才不會變亂碼 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- 讓手機依照螢幕寬度顯示 -->
+<title>小遊戲樂園</title>
+<!-- 分頁上顯示的名字 -->
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- 給發佈平台看的設定：告訴它這頁兩側有留好安全邊距 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
+<!-- 從 Google Fonts 載入一個圓圓的中文字體「粉圓體」，很適合小朋友 -->
+
+<style>
+  /* ===== CSS：負責「長什麼樣子」 ===== */
+
+  /* 版面：上面一個大標題，下面兩張遊戲卡片，手機上會上下排 */
+  :root {
+    /* :root 是整個網頁的最上層，這裡先定義好要用的顏色，取名字方便重複使用 */
+    --bg: #dff1ff;        /* 背景：淡淡的天空藍 */
+    --card: #ffffff;      /* 卡片：白色 */
+    --ink: #1d3557;       /* 文字：深藍色 */
+    --soft: #5a7394;      /* 次要文字：灰藍色 */
+    --sudoku: #3d8bfd;    /* 數獨卡片的主色：藍色 */
+    --guess: #ff9f1c;     /* 終極密碼卡片的主色：橘黃色 */
+    --mole: #e8608a;      /* 鼴鼠大胃王卡片的主色：粉紅色（像星形鼻子） */
+    --font: "Huninn", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    /* 字體：先用粉圓體，沒有的話依序換成電腦裡有的中文字體 */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* 如果使用者的手機或電腦開了「深色模式」，就換成下面這組顏色 */
+    :root:not([data-theme="light"]) {
+      --bg: #10213a; --card: #1a3050; --ink: #eaf3ff; --soft: #a9bdd8;
+      --sudoku: #7ab0ff; --guess: #ffb84d; --mole: #ff8fb0; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    /* 發佈平台手動切成深色時，也用同一組深色 */
+    --bg: #10213a; --card: #1a3050; --ink: #eaf3ff; --soft: #a9bdd8;
+    --sudoku: #7ab0ff; --guess: #ffb84d; --mole: #ff8fb0; color-scheme: dark;
+  }
+
+  body {
+    /* 整頁的樣式 */
+    margin: 0;                               /* 拿掉瀏覽器預設的外邊距 */
+    background: var(--bg);                   /* 背景用上面定義的天空藍 */
+    color: var(--ink);                       /* 文字顏色 */
+    font-family: var(--font);                /* 使用圓圓的字體 */
+    padding-block: 32px;                     /* 上下留 32 像素空白 */
+    padding-left: max(16px, env(safe-area-inset-left, 0px));   /* 左邊至少留 16 像素 */
+    padding-right: max(16px, env(safe-area-inset-right, 0px)); /* 右邊至少留 16 像素 */
+  }
+
+  main {
+    /* main 是主要內容區 */
+    max-width: 900px;   /* 最寬 900 像素，三張卡片剛好排一排 */
+    margin: 0 auto;     /* 左右自動置中 */
+  }
+
+  h1 {
+    /* 大標題 */
+    font-size: clamp(36px, 9vw, 56px);  /* 字的大小會跟著螢幕變，最小 36、最大 56 */
+    margin: 0;                          /* 拿掉預設的空白 */
+    text-align: center;                 /* 置中 */
+  }
+
+  .sub {
+    /* 標題下面的一句話 */
+    text-align: center;                 /* 置中 */
+    color: var(--soft);                 /* 用次要文字的顏色 */
+    font-size: 20px;                    /* 字大小 */
+    margin: 8px 0 28px;                 /* 上 8、下 28 像素的空白 */
+  }
+
+  .games {
+    /* 放兩張卡片的區域 */
+    display: grid;                                          /* 用「格子」排版 */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    /* 每張卡片至少 240 像素寬；螢幕夠寬就並排，不夠就自動上下排 */
+    gap: 20px;                                              /* 卡片之間隔 20 像素 */
+  }
+
+  .game {
+    /* 每一張遊戲卡片（整張都是連結） */
+    display: flex;                       /* 讓裡面的東西直直排 */
+    flex-direction: column;              /* 由上往下排 */
+    align-items: center;                 /* 水平置中 */
+    gap: 10px;                           /* 裡面的東西互相隔 10 像素 */
+    padding: 28px 20px;                  /* 卡片內部空間 */
+    background: var(--card);             /* 白色卡片 */
+    border-radius: 28px;                 /* 圓圓的角 */
+    border-bottom: 8px solid var(--c);   /* 底下有一條粗粗的彩色邊，像按鈕一樣 */
+    color: var(--ink);                   /* 文字顏色 */
+    text-decoration: none;               /* 拿掉連結的底線 */
+    transition: transform 0.15s;         /* 變化時有 0.15 秒的動畫 */
+  }
+  .game:hover { transform: translateY(-4px); }             /* 滑鼠移上去時往上跳一點 */
+  .game:active { transform: translateY(2px); }             /* 按下去時往下壓一點 */
+  .game:focus-visible { outline: 4px solid var(--c); outline-offset: 4px; }
+  /* 用鍵盤選到卡片時，外面會出現彩色框框 */
+
+  .sudoku { --c: var(--sudoku); }   /* 數獨卡片用藍色 */
+  .guess  { --c: var(--guess); }    /* 終極密碼卡片用橘黃色 */
+  .mole   { --c: var(--mole); }     /* 鼴鼠大胃王卡片用粉紅色 */
+
+  .icon {
+    /* 卡片上方的大圖示區 */
+    width: 120px;                    /* 寬 120 像素 */
+    height: 120px;                   /* 高 120 像素 */
+    border-radius: 24px;             /* 圓角 */
+    background: var(--c);            /* 用卡片的主色當底色 */
+    color: #fff;                     /* 白色字 */
+    display: grid;                   /* 用格子排版 */
+    place-items: center;             /* 內容放在正中間 */
+    font-size: 72px;                 /* 大大的字 */
+  }
+
+  .mini {
+    /* 數獨圖示：畫一個 3×3 的小格子 */
+    display: grid;                              /* 格子排版 */
+    grid-template-columns: repeat(3, 26px);     /* 3 欄，每欄 26 像素 */
+    gap: 4px;                                   /* 格子間隔 4 像素 */
+    font-size: 18px;                            /* 數字大小 */
+  }
+  .mini span {
+    /* 小格子裡的每一格 */
+    height: 26px;                               /* 高 26 像素 */
+    background: rgba(255, 255, 255, 0.3);       /* 半透明白色 */
+    border-radius: 6px;                         /* 小圓角 */
+    display: grid;                              /* 格子排版 */
+    place-items: center;                        /* 數字放正中間 */
+  }
+
+  .name { font-size: 30px; }                              /* 遊戲名稱的大小 */
+  .desc { color: var(--soft); font-size: 17px; text-align: center; }  /* 遊戲說明 */
+
+  .play {
+    /* 「開始玩」的小標籤 */
+    margin-top: 6px;                  /* 上面多留一點空 */
+    padding: 8px 22px;                /* 內部空間 */
+    border-radius: 999px;             /* 很大的圓角，變成膠囊形狀 */
+    background: var(--c);             /* 主色底 */
+    color: #fff;                      /* 白字 */
+    font-size: 18px;                  /* 字大小 */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* 如果使用者不喜歡動畫，就把跳動效果關掉 */
+    .game { transition: none; }
+  }
+  /* ===== CSS 結束 ===== */
+</style>
+</head>
+
+<body>
+<!-- body：會顯示在畫面上的內容（HTML 負責「畫面上有什麼」） -->
+<main>
+  <!-- main：主要內容 -->
+
+  <h1>小遊戲樂園</h1>
+  <!-- 大標題 -->
+
+  <p class="sub">選一個遊戲開始玩吧！</p>
+  <!-- 標題下面的說明 -->
+
+  <div class="games">
+    <!-- 放遊戲卡片的區域 -->
+
+    <a class="game sudoku" href="sudoku.html">
+      <!-- 第一張卡片：整張都是連結，點了會打開 sudoku.html（數獨） -->
+      <div class="icon">
+        <!-- 藍色的大圖示 -->
+        <div class="mini">
+          <!-- 用 9 個小格子畫出數獨的樣子 -->
+          <span>5</span><span></span><span>3</span>
+          <span></span><span>7</span><span></span>
+          <span>1</span><span></span><span>9</span>
+        </div>
+      </div>
+      <span class="name">數獨</span>
+      <!-- 遊戲名稱 -->
+      <span class="desc">把 1～9 填進格子，每一行、每一列、每一宮都不能重複</span>
+      <!-- 遊戲說明 -->
+      <span class="play">開始玩</span>
+      <!-- 看起來像按鈕的標籤 -->
+    </a>
+
+    <a class="game guess" href="guess-number.html">
+      <!-- 第二張卡片：點了會打開 guess-number.html（終極密碼） -->
+      <div class="icon">?</div>
+      <!-- 橘黃色的大圖示，上面一個大問號 -->
+      <span class="name">終極密碼</span>
+      <!-- 遊戲名稱 -->
+      <span class="desc">選一個難度，猜猜電腦心裡想的數字</span>
+      <!-- 遊戲說明 -->
+      <span class="play">開始玩</span>
+      <!-- 看起來像按鈕的標籤 -->
+    </a>
+
+    <a class="game mole" href="mole.html">
+      <!-- 第三張卡片：點了會打開 mole.html（鼴鼠大胃王） -->
+      <div class="icon">
+        <!-- 粉紅色的大圖示 -->
+        <svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true">
+          <!-- 用 SVG 畫一個鼴鼠頭 -->
+          <ellipse cx="48" cy="54" rx="36" ry="32" fill="#4f4049"/>
+          <!-- 灰咖啡色的臉 -->
+          <ellipse cx="22" cy="60" rx="7" ry="5" fill="#ff9fb6"/>
+          <!-- 左邊腮紅 -->
+          <ellipse cx="74" cy="60" rx="7" ry="5" fill="#ff9fb6"/>
+          <!-- 右邊腮紅 -->
+          <path d="M28 44 q5 -5 10 0" stroke="#1b1218" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- 左眼（瞇瞇眼） -->
+          <path d="M58 44 q5 -5 10 0" stroke="#1b1218" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- 右眼 -->
+          <g fill="#ff7aa2" transform="translate(48 60)">
+            <!-- 星形鼻子：一圈 10 個小橢圓 -->
+            <ellipse rx="4" ry="10" transform="rotate(0)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(36)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(72)  translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(108) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(144) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(180) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(216) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(252) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(288) translate(0 -9)"/>
+            <ellipse rx="4" ry="10" transform="rotate(324) translate(0 -9)"/>
+            <circle r="7" fill="#ffb3c8"/>
+            <!-- 鼻子中間 -->
+          </g>
+        </svg>
+      </div>
+      <span class="name">鼴鼠大胃王</span>
+      <!-- 遊戲名稱 -->
+      <span class="desc">在地底隧道追著蟲跑，60 秒內全部吃光！</span>
+      <!-- 遊戲說明 -->
+      <span class="play">開始玩</span>
+      <!-- 看起來像按鈕的標籤 -->
+    </a>
+
+  </div>
+  <!-- 卡片區域結束 -->
+</main>
+<!-- 主要內容結束 -->
+</body>
+</html>
+<!-- 整份網頁結束；這一頁只有 HTML 和 CSS，不需要 JavaScript -->
