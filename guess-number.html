@@ -600,6 +600,27 @@
     .scene.duo .soloOnly { display: none; }
     /* 兩堆火的時候，藏起「一堆火才有的東西」 */
 
+    .reflect { opacity: 0; transition: opacity 2.4s ease-in; }
+    /* 湖面的火光倒影：平常看不到 */
+    .scene.lit .reflectSolo,
+    .scene.litL .reflectL,
+    .scene.litR .reflectR { opacity: 0.8; }
+    /* 火點著後慢慢出現（litL／litR 是左邊、右邊的火點著了） */
+
+    .placeTag {
+      /* 選難度畫面上的「今晚的營地」小牌子 */
+      display: inline-flex;                   /* 圖和字並排 */
+      align-items: center;                    /* 上下置中 */
+      gap: 8px;                               /* 間隔 */
+      background: rgba(8, 18, 36, 0.45);      /* 半透明深色 */
+      border-radius: 999px;                   /* 膠囊形狀 */
+      padding: 4px 14px 4px 8px;              /* 內部空間 */
+      font-size: 17px;                        /* 字大小 */
+      margin: 0 0 10px;                       /* 下面留空 */
+    }
+    .placeTag svg { width: 34px; height: 24px; }   /* 小帳篷圖 */
+    .placeTag b { color: var(--win); font-weight: 400; }   /* 營地名字用金黃色 */
+
     .badgeCircle { transition: stroke-width 0.3s; }
     /* 火堆旁的動物圓章 */
     .badgeCircle.active { stroke-width: 4; }
@@ -927,6 +948,9 @@
       <div id="stepLevel" hidden>
       <!-- 步驟 3：選難度 -->
 
+      <p class="placeTag"><svg viewBox="0 0 140 100" aria-hidden="true"><use href="#tent"/></svg>今晚的營地：<b id="placeName">森林營地</b></p>
+      <!-- 告訴大家這一局在哪個營地 -->
+
       <p class="info">今晚要挑戰哪一個難度？</p>
       <!-- 說明文字 -->
 
@@ -1128,6 +1152,14 @@
                 <!-- 右邊的扣環 -->
               </symbol>
 
+              <!-- 湖邊營地的黃昏天空、岩石營地的極光用的漸層顏色 -->
+              <linearGradient id="duskSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b1f4f"/><stop offset=".55" stop-color="#5a3a78"/><stop offset="1" stop-color="#e58a7c"/>
+    </linearGradient>
+    <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5cf2b0" stop-opacity="0"/><stop offset=".25" stop-color="#5cf2b0" stop-opacity=".6"/>
+      <stop offset=".6" stop-color="#3ad1e0" stop-opacity=".5"/><stop offset="1" stop-color="#8a7bff" stop-opacity="0"/>
+    </linearGradient>
               <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="200" cy="240" r="230">
                 <!-- 火光的顏色：中間最亮的橘色，往外越來越透明 -->
                 <stop offset="0" stop-color="#ffb15c" stop-opacity="0.6"/>
@@ -1139,72 +1171,197 @@
               </radialGradient>
             </defs>
 
-            <!-- ===== 背景：A 森林帳篷 ===== -->
-            <rect y="-50" width="400" height="350" fill="#1b3556"/>
-            <!-- 夜空 -->
-            <circle cx="200" cy="150" r="125" fill="#22446c"/>
-            <!-- 背後一個大大的淺色圓，讓畫面有層次 -->
-            <g fill="#2f5a86">
-              <!-- 左上的雲（g 是「一組」，裡面的東西都用同一個顏色） -->
-              <circle cx="78" cy="72" r="13"/><circle cx="96" cy="62" r="17"/><circle cx="114" cy="72" r="12"/>
+            <!-- ===== 三個營地的背景：每一局只顯示其中一個（display="none" 是藏起來） ===== -->
+            <g id="place0">
+              <!-- ===== 營地 1：森林營地（藍綠色的夜晚） ===== -->
+              <rect y="-50" width="400" height="350" fill="#1b3556"/>
+              <circle cx="200" cy="150" r="125" fill="#22446c"/>
+              <g fill="#2f5a86">
+              <circle cx="78" cy="72" r="13"/>
+              <circle cx="96" cy="62" r="17"/>
+              <circle cx="114" cy="72" r="12"/>
               <rect x="62" y="70" width="66" height="14" rx="7"/>
-            </g>
-            <g fill="#2f5a86">
-              <!-- 右邊的雲 -->
-              <circle cx="290" cy="96" r="11"/><circle cx="306" cy="88" r="15"/><circle cx="322" cy="96" r="10"/>
+              </g>
+              <g fill="#2f5a86">
+              <circle cx="290" cy="96" r="11"/>
+              <circle cx="306" cy="88" r="15"/>
+              <circle cx="322" cy="96" r="10"/>
               <rect x="276" y="94" width="58" height="12" rx="6"/>
+              </g>
+              <circle cx="372" cy="62" r="14" fill="#f4f1e1"/>
+              <circle cx="379" cy="57" r="12" fill="#1b3556"/>
+              <use href="#star" x="22" y="40" width="8" height="8"/>
+              <use href="#star" x="150" y="40" width="9" height="9"/>
+              <use href="#star" x="250" y="48" width="7" height="7"/>
+              <use href="#star" x="384" y="100" width="8" height="8"/>
+              <use href="#star" x="20" y="120" width="6" height="6"/>
+              <path d="M0 185 Q 100 150 200 172 T 400 160 V 300 H 0Z" fill="#17375c"/>
+              <g fill="#102a47">
+              <polygon points="40,200 58,140 76,200"/>
+              <polygon points="70,200 92,128 114,200"/>
+              <polygon points="108,200 126,150 144,200"/>
+              <polygon points="250,200 270,140 290,200"/>
+              <polygon points="282,200 304,124 326,200"/>
+              <polygon points="318,200 338,146 358,200"/>
+              </g>
+              <use href="#pine" x="128" y="118" width="50" height="100"/>
+              <use href="#pine" x="222" y="126" width="44" height="88"/>
+              <path d="M0 212 Q 200 196 400 212 V 300 H 0Z" fill="#1f4a3a"/>
+              <ellipse cx="200" cy="258" rx="180" ry="36" fill="#25563f"/>
+              <use href="#pine" x="-14" y="84" width="76" height="152"/>
+              <use href="#pine" x="342" y="78" width="80" height="160"/>
+              <g class="soloOnly">
+                <!-- 一堆火的時候：帳篷在左、椅子和背包在右 -->
+                <use href="#tent" x="22" y="152" width="140" height="100"/>
+                <!-- 帳篷 -->
+                <use href="#chair" x="258" y="204" width="44" height="55"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="318" y="206" width="42" height="54"/>
+                <!-- 背包 -->
+              </g>
+              <g class="duoOnly">
+                <!-- 兩堆火的時候：帳篷在中間後面，椅子和背包在角落 -->
+                <use href="#tent" x="142" y="128" width="120" height="86"/>
+                <!-- 帳篷 -->
+                <use href="#chair" x="6" y="208" width="36" height="45"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="362" y="212" width="32" height="41"/>
+                <!-- 背包 -->
+              </g>
             </g>
-            <circle cx="372" cy="62" r="14" fill="#f4f1e1"/>
-            <!-- 月亮（白色圓） -->
-            <circle cx="379" cy="57" r="12" fill="#1b3556"/>
-            <!-- 用夜空色的圓蓋住一部分 → 變成彎月 -->
-            <use href="#star" x="22" y="40" width="8" height="8"/>
-            <!-- use：拿出前面做好的「星星」零件，放在指定位置 -->
-            <use href="#star" x="150" y="40" width="9" height="9"/>
-            <!-- 星星 -->
-            <use href="#star" x="250" y="48" width="7" height="7"/>
-            <!-- 星星 -->
-            <use href="#star" x="384" y="100" width="8" height="8"/>
-            <!-- 星星 -->
-            <use href="#star" x="20" y="120" width="6" height="6"/>
-            <!-- 星星 -->
-            <path d="M0 185 Q 100 150 200 172 T 400 160 V 300 H 0Z" fill="#17375c"/>
-            <!-- 遠方的山坡（Q 和 T 會畫出彎彎的曲線） -->
-            <g fill="#102a47">
-              <!-- 遠方一排深色松樹的影子 -->
-              <polygon points="40,200 58,140 76,200"/><polygon points="70,200 92,128 114,200"/>
-              <polygon points="108,200 126,150 144,200"/><polygon points="250,200 270,140 290,200"/>
-              <polygon points="282,200 304,124 326,200"/><polygon points="318,200 338,146 358,200"/>
+
+            <g id="place1" display="none">
+              <!-- ===== 營地 2：湖邊營地（紫粉色的黃昏） ===== -->
+              <rect y="-50" width="400" height="350" fill="url(#duskSky)"/>
+              <circle cx="200" cy="200" r="120" fill="#ffb38a" opacity=".35"/>
+              <g fill="#c98bb4">
+              <circle cx="120" cy="140" r="34"/>
+              <circle cx="165" cy="112" r="40"/>
+              <circle cx="225" cy="106" r="42"/>
+              <circle cx="278" cy="128" r="36"/>
+              <circle cx="318" cy="150" r="26"/>
+              <rect x="80" y="130" width="250" height="60"/>
+              </g>
+              <g fill="#7a5a9a">
+              <circle cx="300" cy="66" r="12"/>
+              <circle cx="316" cy="58" r="16"/>
+              <circle cx="332" cy="66" r="11"/>
+              <rect x="286" y="64" width="62" height="13" rx="6"/>
+              </g>
+              <path d="M70 52 a 15 15 0 1 0 14 22 a 12 12 0 1 1 -14 -22Z" fill="#f4f1e1"/>
+              <use href="#star" x="40" y="104" width="7" height="7"/>
+              <use href="#star" x="168" y="34" width="8" height="8"/>
+              <use href="#star" x="236" y="40" width="8" height="8"/>
+              <use href="#star" x="370" y="70" width="7" height="7"/>
+              <use href="#star" x="356" y="140" width="6" height="6"/>
+              <polygon points="60,200 130,128 165,150 200,96 240,140 270,118 340,200" fill="#4a2f66"/>
+              <polygon points="200,96 186,200 150,200 165,150 160,146" fill="#5b3d7a"/>
+              <polygon points="130,128 118,200 90,200" fill="#5b3d7a"/>
+              <path d="M0 175 L 70 160 L 120 178 L 400 165 V 205 H 0Z" fill="#2a1a3e"/>
+              <g fill="#2a1a3e">
+              <polygon points="150,200 160,168 170,200"/>
+              <polygon points="166,200 178,160 190,200"/>
+              <polygon points="186,200 196,172 206,200"/>
+              <polygon points="214,200 226,158 238,200"/>
+              <polygon points="234,200 244,170 254,200"/>
+              <polygon points="252,200 264,162 276,200"/>
+              </g>
+              <rect y="198" width="400" height="44" fill="#d99bb0"/>
+              <g fill="#b97a9a">
+              <rect x="30" y="206" width="70" height="7" rx="3.5"/>
+              <rect x="120" y="214" width="46" height="6" rx="3"/>
+              <rect x="246" y="208" width="80" height="7" rx="3.5"/>
+              <rect x="300" y="222" width="60" height="6" rx="3"/>
+              <rect x="60" y="226" width="54" height="6" rx="3"/>
+              </g>
+              <g class="duoOnly">
+                <!-- 兩堆火的時候：帳篷縮小放在湖的對岸 -->
+                <use href="#tent" x="170" y="155" width="60" height="43"/>
+                <!-- 對岸的小帳篷 -->
+              </g>
+              <g class="reflect reflectSolo soloOnly" fill="#ffb15c">
+                <!-- 一堆火點著後，湖面映出的橘色火光 -->
+                <rect x="166" y="206" width="68" height="5" rx="2.5"/><rect x="178" y="216" width="44" height="4" rx="2"/><rect x="160" y="226" width="80" height="5" rx="2.5"/>
+              </g>
+              <g class="reflect reflectL duoOnly" fill="#ffb15c">
+                <!-- 左邊的火點著後，湖面映出的火光 -->
+                <rect x="76" y="206" width="68" height="5" rx="2.5"/><rect x="88" y="216" width="44" height="4" rx="2"/><rect x="70" y="226" width="80" height="5" rx="2.5"/>
+              </g>
+              <g class="reflect reflectR duoOnly" fill="#ffb15c">
+                <!-- 右邊的火點著後，湖面映出的火光 -->
+                <rect x="256" y="206" width="68" height="5" rx="2.5"/><rect x="268" y="216" width="44" height="4" rx="2"/><rect x="250" y="226" width="80" height="5" rx="2.5"/>
+              </g>
+              <!-- 湖邊的岸和兩旁的大松樹 -->
+              <path d="M0 238 Q 200 226 400 238 V 300 H 0Z" fill="#2a1d3a"/>
+              <ellipse cx="200" cy="264" rx="180" ry="30" fill="#3a2a4e"/>
+              <use href="#pine" x="-18" y="70" width="84" height="168"/>
+              <use href="#pine" x="338" y="76" width="80" height="160"/>
+              <g class="soloOnly">
+                <!-- 一堆火的時候：帳篷在左岸、椅子和背包在右 -->
+                <use href="#tent" x="24" y="156" width="140" height="100"/>
+                <!-- 帳篷 -->
+                <use href="#chair" x="258" y="208" width="44" height="55"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="318" y="210" width="42" height="54"/>
+                <!-- 背包 -->
+              </g>
+              <g class="duoOnly">
+                <!-- 兩堆火的時候：椅子和背包在角落 -->
+                <use href="#chair" x="4" y="214" width="34" height="42"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="364" y="216" width="30" height="39"/>
+                <!-- 背包 -->
+              </g>
             </g>
-            <use href="#pine" x="128" y="118" width="50" height="100"/>
-            <!-- 中間的小松樹 -->
-            <use href="#pine" x="222" y="126" width="44" height="88"/>
-            <!-- 中間的小松樹 -->
-            <path d="M0 212 Q 200 196 400 212 V 300 H 0Z" fill="#1f4a3a"/>
-            <!-- 草地 -->
-            <ellipse cx="200" cy="258" rx="160" ry="34" fill="#25563f"/>
-            <!-- 營地中間比較亮的空地 -->
-            <use href="#pine" x="-14" y="84" width="76" height="152"/>
-            <!-- 左邊的大松樹 -->
-            <use href="#pine" x="342" y="78" width="80" height="160"/>
-            <!-- 右邊的大松樹 -->
-            <g class="soloOnly">
-              <!-- 一堆火的時候：帳篷在左、椅子和背包在右 -->
-              <use href="#tent" x="22" y="152" width="140" height="100"/>
-              <!-- 帳篷 -->
-              <use href="#chair" x="258" y="204" width="44" height="55"/>
-              <!-- 露營椅 -->
-              <use href="#pack" x="318" y="206" width="42" height="54"/>
-              <!-- 背包 -->
-            </g>
-            <g class="duoOnly">
-              <!-- 兩堆火的時候：帳篷移到正中間後面，椅子和背包縮小放在角落 -->
-              <use href="#tent" x="142" y="128" width="120" height="86"/>
-              <!-- 帳篷 -->
-              <use href="#chair" x="6" y="208" width="36" height="45"/>
-              <!-- 露營椅 -->
-              <use href="#pack" x="362" y="212" width="32" height="41"/>
-              <!-- 背包 -->
+
+            <g id="place2" display="none">
+              <!-- ===== 營地 3：岩石營地（極光的夜晚） ===== -->
+              <rect y="-50" width="400" height="350" fill="#071a24"/>
+              <path d="M-20 70 C 60 20 140 90 220 40 S 360 10 420 50 L 420 80 C 340 50 280 90 210 70 S 60 60 -20 100Z" fill="url(#aurora)"/>
+              <path d="M-20 110 C 80 70 160 120 240 90 S 360 70 420 100 L 420 118 C 340 96 260 130 200 112 S 60 104 -20 128Z" fill="url(#aurora)" opacity=".6"/>
+              <circle cx="74" cy="56" r="15" fill="#f4f1e1"/>
+              <circle cx="82" cy="51" r="13" fill="#071a24"/>
+              <use href="#star" x="130" y="22" width="9" height="9"/>
+              <use href="#star" x="180" y="56" width="6" height="6"/>
+              <use href="#star" x="220" y="20" width="8" height="8"/>
+              <use href="#star" x="262" y="50" width="7" height="7"/>
+              <use href="#star" x="300" y="18" width="9" height="9"/>
+              <use href="#star" x="350" y="44" width="7" height="7"/>
+              <use href="#star" x="380" y="88" width="6" height="6"/>
+              <use href="#star" x="24" y="96" width="6" height="6"/>
+              <use href="#star" x="160" y="96" width="5" height="5"/>
+              <polygon points="0,150 55,104 95,128 160,70 220,124 280,82 340,120 400,96 400,220 0,220" fill="#1f4a52"/>
+              <polygon points="160,70 146,82 152,84 160,78 168,86 174,82" fill="#dbe8f5"/>
+              <polygon points="280,82 268,92 274,94 280,88 286,95 292,92" fill="#dbe8f5"/>
+              <polygon points="55,104 46,112 52,113 56,109 62,114 66,111" fill="#dbe8f5"/>
+              <polygon points="0,180 60,140 120,166 190,124 250,160 320,132 400,156 400,230 0,230" fill="#163a40"/>
+              <polygon points="190,124 176,230 140,230 160,152" fill="#1d4a50"/>
+              <polygon points="320,132 300,230 270,230 296,150" fill="#1d4a50"/>
+              <path d="M0 218 Q 200 200 400 216 V 300 H 0Z" fill="#3e4a48"/>
+              <ellipse cx="200" cy="260" rx="180" ry="32" fill="#4a5856"/>
+              <path d="M296 226 C 290 192 312 168 348 166 C 384 164 404 190 402 228Z" fill="#6f7a74"/>
+              <path d="M296 226 C 290 192 312 168 348 166 C 330 176 320 200 324 226Z" fill="#8f9a92"/>
+              <ellipse cx="60" cy="278" rx="12" ry="5" fill="#5d6a66"/>
+              <ellipse cx="340" cy="288" rx="16" ry="5" fill="#5d6a66"/>
+              <use href="#pine" x="-10" y="120" width="56" height="112"/>
+              <g class="soloOnly">
+                <!-- 一堆火的時候：帳篷在左、椅子和背包在右 -->
+                <use href="#tent" x="30" y="156" width="140" height="100"/>
+                <!-- 帳篷 -->
+                <use href="#chair" x="256" y="208" width="44" height="55"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="314" y="210" width="42" height="54"/>
+                <!-- 背包 -->
+              </g>
+              <g class="duoOnly">
+                <!-- 兩堆火的時候：帳篷在中間後面，背包靠在大岩石前面 -->
+                <use href="#tent" x="142" y="130" width="120" height="86"/>
+                <!-- 帳篷 -->
+                <use href="#chair" x="6" y="210" width="36" height="45"/>
+                <!-- 露營椅 -->
+                <use href="#pack" x="352" y="214" width="32" height="41"/>
+                <!-- 背包 -->
+              </g>
             </g>
 
             <g class="soloOnly">
@@ -1610,6 +1767,12 @@
     let highs = [100, 100];
     // 互相出題：兩位玩家各自那一題，答案可能的最大值
 
+    let PLACE_NAMES = ["森林營地", "湖邊營地", "岩石營地"];
+    // 三個營地的名字
+
+    let currentPlace = -1;
+    // 現在是哪個營地（-1 表示還沒抽過）
+
     let pendingMin = 1;
     // 選好的範圍（最小），等出題、抽籤完才開始遊戲
 
@@ -1946,6 +2109,8 @@
       // 響一聲
       if (mode === "single") {
         // 單人
+        pickPlace();
+        // 抽這一局的營地
         showStep("stepLevel");
         // 直接去選難度
       } else {
@@ -1999,10 +2164,41 @@
         // 兩隻都選好了
         later(300, function () {
           // 等 0.3 秒，讓玩家看到自己選的
+          pickPlace();
+          // 抽這一局的營地
           showStep("stepLevel");
           // 去選難度
         });
       }
+    }
+
+    function pickPlace() {
+      // 抽一個營地：不會跟上一局一樣
+      let next = Math.floor(Math.random() * 3);
+      // 先隨便抽一個（0、1、2）
+      if (currentPlace !== -1) {
+        // 如果上一局已經有營地了
+        next = Math.floor(Math.random() * 2);
+        // 從「另外兩個」裡面抽（先抽 0 或 1）
+        if (next >= currentPlace) {
+          next = next + 1;
+          // 碰到上一局的編號就往後跳一個，這樣就不會抽到一樣的
+        }
+      }
+      currentPlace = next;
+      // 記住這一局的營地
+      for (let i = 0; i < 3; i = i + 1) {
+        // 三個營地的背景……
+        if (i === next) {
+          document.getElementById("place" + i).setAttribute("display", "inline");
+          // 抽中的顯示出來
+        } else {
+          document.getElementById("place" + i).setAttribute("display", "none");
+          // 其他的藏起來
+        }
+      }
+      document.getElementById("placeName").textContent = PLACE_NAMES[next];
+      // 選難度畫面上寫出營地名字
     }
 
     function chooseLevel(min, max) {
@@ -2706,6 +2902,13 @@
         later(650, function () {
           pit.setAttribute("class", "pit lit");
           // 這堆火點起來
+          if (me === 0) {
+            scene.classList.add("litL");
+            // 告訴場景「左邊的火點著了」（湖邊營地的湖面會映出火光）
+          } else {
+            scene.classList.add("litR");
+            // 右邊的火點著了
+          }
           soundRoar();
           message.innerHTML = face(meAnimal) + meAnimal.name + "生火成功！";
           message.className = "win";
