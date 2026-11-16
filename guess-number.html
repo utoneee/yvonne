@@ -204,9 +204,60 @@
     }
 
     .face {
-      /* 大大的表情符號（動物、人） */
+      /* 大大的動物圖（抽籤卡片、出題前蓋住的畫面） */
       font-size: 44px;                        /* 很大 */
       line-height: 1.1;                       /* 行高 */
+    }
+
+    .btnArt {
+      /* 按鈕上的帳篷、營火圖 */
+      width: 96px;                            /* 寬 96 像素 */
+      height: 60px;                           /* 高 60 像素 */
+    }
+
+    .ring {
+      /* 圓形的動物頭像：淡色底、動物顏色外框（--a 是動物顏色、--tint 是淡色） */
+      display: inline-grid;                   /* 讓裡面的圖置中 */
+      place-items: center;                    /* 置中 */
+      width: 60px;                            /* 寬 60 像素 */
+      height: 60px;                           /* 高 60 像素 */
+      border-radius: 50%;                     /* 變成圓形 */
+      border: 3px solid var(--a);             /* 動物顏色的外框 */
+      background: var(--tint);                /* 很淡的底色 */
+      overflow: hidden;                       /* 超出圓形的部分藏起來 */
+    }
+
+    .ring svg {
+      /* 圓形裡的動物 */
+      width: 88%;                             /* 比圓形小一點 */
+      height: 88%;
+      margin-top: 8%;                         /* 往下一點，看起來比較置中 */
+    }
+
+    .ring.big {
+      /* 抽籤卡片、出題前畫面用的大頭像 */
+      width: 76px;
+      height: 76px;
+    }
+
+    .mini {
+      /* 文字裡的小頭像：跟字一樣大 */
+      display: inline-grid;
+      place-items: center;
+      width: 1.2em;                           /* em 是「一個字的大小」 */
+      height: 1.2em;
+      border-radius: 50%;
+      border: 0.1em solid var(--a);
+      background: var(--tint);
+      overflow: hidden;
+      vertical-align: -0.25em;                /* 跟文字對齊 */
+      margin: 0 0.12em;                       /* 左右留一點空 */
+    }
+
+    .mini svg {
+      width: 92%;
+      height: 92%;
+      margin-top: 10%;
     }
 
     .modes small,
@@ -706,6 +757,114 @@
 <body>
   <!-- ===== 這裡開始是 HTML：負責「畫面上有什麼東西」 ===== -->
 
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <!-- 這個 SVG 看不到，只用來放「圖示零件」，給整個網頁用 <use> 拿出來 -->
+    <defs>
+      <!-- 零件：小熊的臉（扁平風） -->
+      <symbol id="i-bear" viewBox="0 0 100 100">
+      <circle cx="26" cy="32" r="12" fill="#b5763c"/><circle cx="26" cy="32" r="6.5" fill="#8a5428"/>
+      <circle cx="74" cy="32" r="12" fill="#a0672f"/><circle cx="74" cy="32" r="6.5" fill="#7a4822"/>
+      <circle cx="50" cy="56" r="31" fill="#b5763c"/>
+      <path d="M50 25 A31 31 0 0 1 50 87 Z" fill="#a0672f"/>
+      <ellipse cx="50" cy="68" rx="15" ry="12" fill="#ecc89c"/>
+      <path d="M50 56 A15 12 0 0 1 50 80 Z" fill="#dcb589"/>
+      <ellipse cx="50" cy="62" rx="5.5" ry="4" fill="#3a2414"/>
+      <circle cx="38" cy="50" r="3.4" fill="#2a1a10"/><circle cx="62" cy="50" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="31" cy="62" rx="5" ry="3.5" fill="#ff9fb6" opacity=".55"/><ellipse cx="69" cy="62" rx="5" ry="3.5" fill="#ff9fb6" opacity=".55"/>
+      <path d="M45 71 Q50 75 55 71" stroke="#3a2414" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </symbol>
+      <!-- 零件：小兔的臉（扁平風） -->
+      <symbol id="i-rabbit" viewBox="0 0 100 100">
+      <ellipse cx="38" cy="26" rx="9" ry="23" fill="#f6f1ea"/><ellipse cx="38" cy="27" rx="4.5" ry="16" fill="#ffb3c8"/>
+      <ellipse cx="62" cy="26" rx="9" ry="23" fill="#e6ddd2"/><ellipse cx="62" cy="27" rx="4.5" ry="16" fill="#f59ab4"/>
+      <ellipse cx="50" cy="62" rx="28" ry="26" fill="#f6f1ea"/>
+      <path d="M50 36 A28 26 0 0 1 50 88 Z" fill="#e6ddd2"/>
+      <circle cx="39" cy="56" r="3.4" fill="#2a1a10"/><circle cx="61" cy="56" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="65" rx="4" ry="3" fill="#ff7aa2"/>
+      <path d="M50 68 L50 72 M50 72 Q46 76 43 73 M50 72 Q54 76 57 73" stroke="#8a5a50" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="31" cy="67" rx="5" ry="3.5" fill="#ff9fb6" opacity=".6"/><ellipse cx="69" cy="67" rx="5" ry="3.5" fill="#ff9fb6" opacity=".6"/>
+    </symbol>
+      <!-- 零件：狐狸的臉（扁平風） -->
+      <symbol id="i-fox" viewBox="0 0 100 100">
+      <polygon points="18,44 24,12 46,34" fill="#f08a3c"/><polygon points="24,40 27,20 40,34" fill="#5a3a2a"/>
+      <polygon points="82,44 76,12 54,34" fill="#d9722a"/><polygon points="76,40 73,20 60,34" fill="#4a2e20"/>
+      <path d="M16 42 Q50 26 84 42 L76 70 Q50 92 24 70 Z" fill="#f08a3c"/>
+      <path d="M50 30 Q67 33 84 42 L76 70 Q64 83 50 86 Z" fill="#d9722a"/>
+      <path d="M22 58 Q36 70 50 66 Q64 70 78 58 Q72 82 50 88 Q28 82 22 58 Z" fill="#fff5ea"/>
+      <path d="M50 66 Q64 70 78 58 Q72 82 50 88 Z" fill="#efe2d2"/>
+      <circle cx="39" cy="52" r="3.4" fill="#2a1a10"/><circle cx="61" cy="52" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="72" rx="5" ry="3.6" fill="#2a1a10"/>
+      <ellipse cx="30" cy="64" rx="4.5" ry="3" fill="#ff9fb6" opacity=".55"/><ellipse cx="70" cy="64" rx="4.5" ry="3" fill="#ff9fb6" opacity=".55"/>
+    </symbol>
+      <!-- 零件：松鼠的臉（扁平風） -->
+      <symbol id="i-squirrel" viewBox="0 0 100 100">
+      <path d="M70 92 C 100 86 104 50 88 30 C 80 18 66 20 68 32 C 80 34 86 52 78 70 Z" fill="#a8693a"/>
+      <path d="M72 30 C 80 32 88 46 84 62 C 82 50 78 40 70 36 Z" fill="#c98a52"/>
+      <polygon points="28,38 32,14 46,32" fill="#c98a52"/><polygon points="31,34 33,20 41,31" fill="#8a5428"/>
+      <polygon points="72,38 68,14 54,32" fill="#b57946"/><polygon points="69,34 67,20 59,31" fill="#7a4822"/>
+      <circle cx="50" cy="58" r="27" fill="#c98a52"/>
+      <path d="M50 31 A27 27 0 0 1 50 85 Z" fill="#b57946"/>
+      <ellipse cx="37" cy="68" rx="11" ry="9" fill="#f3d9b5"/><ellipse cx="63" cy="68" rx="11" ry="9" fill="#e6c9a2"/>
+      <circle cx="39" cy="53" r="3.4" fill="#2a1a10"/><circle cx="61" cy="53" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="63" rx="4" ry="3" fill="#3a2414"/>
+      <rect x="47" y="69" width="6" height="7" rx="1.5" fill="#fff"/><line x1="50" y1="69" x2="50" y2="76" stroke="#d9cbb8" stroke-width="1"/>
+    </symbol>
+      <!-- 零件：小熊的漁夫帽 -->
+      <symbol id="i-bearHat" viewBox="0 0 100 100">
+      <path d="M26 30 Q28 8 50 8 Q72 8 74 30 Z" fill="#7fa66a"/>
+      <path d="M50 8 Q72 8 74 30 L50 30 Z" fill="#6b9258"/>
+      <rect x="27" y="24" width="46" height="6" fill="#f2c14e"/>
+      <ellipse cx="50" cy="31" rx="34" ry="6" fill="#5f8a4f"/>
+    </symbol>
+      <!-- 零件：小兔的提燈 -->
+      <symbol id="i-rabbitLantern" viewBox="0 0 100 100">
+      <circle cx="86" cy="76" r="16" fill="#ffd23f" opacity=".25"/>
+      <path d="M80 62 Q86 54 92 62" stroke="#3a2a1f" stroke-width="2.4" fill="none"/>
+      <rect x="78" y="62" width="16" height="4" rx="2" fill="#5f8a4f"/>
+      <rect x="80" y="66" width="12" height="16" rx="3" fill="#ffd23f"/>
+      <rect x="86" y="66" width="6" height="16" rx="3" fill="#f2b62e"/>
+      <rect x="78" y="82" width="16" height="4" rx="2" fill="#5f8a4f"/>
+      <circle cx="78" cy="68" r="5" fill="#f6f1ea"/>
+    </symbol>
+      <!-- 零件：狐狸的領巾 -->
+      <symbol id="i-foxScarf" viewBox="0 0 100 100">
+      <path d="M24 80 Q50 94 76 80 L78 88 Q50 102 22 88 Z" fill="#e8608a"/>
+      <path d="M50 87 Q64 86 76 80 L78 88 Q64 95 50 96 Z" fill="#cf4a74"/>
+      <rect x="62" y="88" width="10" height="12" rx="3" fill="#e8608a"/>
+      <rect x="63" y="96" width="8" height="2" fill="#fff" opacity=".6"/>
+    </symbol>
+      <!-- 零件：松鼠的橡實 -->
+      <symbol id="i-squirrelAcorn" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="88" rx="9" ry="10" fill="#a0652f"/>
+      <path d="M50 78 A9 10 0 0 1 50 98 Z" fill="#8a5428"/>
+      <path d="M40 82 Q50 72 60 82 Z" fill="#5e3a17"/>
+      <rect x="49" y="72" width="2.4" height="5" fill="#5e3a17"/>
+      <ellipse cx="40" cy="86" rx="5" ry="4" fill="#c98a52"/><ellipse cx="60" cy="86" rx="5" ry="4" fill="#b57946"/>
+    </symbol>
+      <!-- 零件：綠色帳篷（雙人按鈕用） -->
+      <symbol id="i-tentGreen" viewBox="0 0 140 100">
+      <line x1="70" y1="6" x2="138" y2="98" stroke="#2a2f3a" stroke-width="2"/>
+      <line x1="47" y1="10" x2="2" y2="96" stroke="#2a2f3a" stroke-width="2"/>
+      <polygon points="0,100 47,12 70,8 30,100" fill="#4f8a5c"/>
+      <polygon points="30,100 70,8 122,100" fill="#6fb37a"/>
+      <polygon points="70,8 122,100 104,100" fill="#5fa06b"/>
+      <polygon points="70,8 55,100 86,100" fill="#2f4a3a"/>
+      <polygon points="70,8 86,100 79,100" fill="#45634f"/>
+      <rect x="68.5" y="0" width="3" height="10" fill="#3a2a1f"/><rect x="45.5" y="3" width="3" height="10" fill="#3a2a1f"/>
+    </symbol>
+      <!-- 零件：扁平風營火（一起猜／互相出題按鈕用） -->
+      <symbol id="i-campfire" viewBox="-40 -80 80 100">
+      <ellipse cx="0" cy="8" rx="36" ry="7" fill="#000" opacity=".18"/>
+      <rect x="-30" y="-6" width="60" height="11" rx="5.5" fill="#8a5a2b" transform="rotate(14)"/>
+      <rect x="-30" y="-6" width="60" height="11" rx="5.5" fill="#9c6833" transform="rotate(-14)"/>
+      <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L -27 0 C -42 -10 -42 -32 -29 -46 C -27 -36 -23 -30 -19 -26 C -23 -46 -12 -62 0 -76Z" fill="#f2711c"/>
+      <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L 0 0 Z" fill="#e0611a"/>
+      <path d="M0 -44 C 7 -33 17 -28 15 -13 C 19 -17 21 -22 20 -26 C 27 -15 23 -3 15 1 L -15 1 C -25 -5 -25 -17 -17 -25 C -16 -19 -13 -15 -10 -13 C -13 -28 -6 -36 0 -44Z" fill="#ffd23f"/>
+    </symbol>
+    </defs>
+  </svg>
+
+
   <main>
     <!-- main：主要內容 -->
 
@@ -729,9 +888,9 @@
         <p class="info">今晚要怎麼玩？</p>
         <!-- 說明文字 -->
         <div class="modes">
-          <button class="wood" onclick="chooseMode('single')"><span class="face">🙂</span>單人<small>自己挑戰</small></button>
+          <button class="wood" onclick="chooseMode('single')"><svg class="btnArt" viewBox="0 0 160 100" aria-hidden="true"><use href="#tent" x="20" y="4" width="120" height="86"/></svg>單人<small>自己挑戰</small></button>
           <!-- 單人按鈕；span 和 small 是按鈕裡的小區塊 -->
-          <button class="wood" onclick="chooseMode('double')"><span class="face">🙂🙂</span>雙人<small>兩個人輪流猜</small></button>
+          <button class="wood" onclick="chooseMode('double')"><svg class="btnArt" viewBox="0 0 160 100" aria-hidden="true"><use href="#i-tentGreen" x="72" y="24" width="88" height="64"/><use href="#tent" x="0" y="8" width="104" height="80"/></svg>雙人<small>兩個人輪流猜</small></button>
           <!-- 雙人按鈕 -->
         </div>
       </div>
@@ -741,9 +900,9 @@
         <p class="info">兩個人要怎麼玩？</p>
         <!-- 說明文字 -->
         <div class="modes">
-          <button class="wood" onclick="choosePlay('shared')"><span class="face">🔥</span>一起猜<small>猜電腦的數字</small></button>
+          <button class="wood" onclick="choosePlay('shared')"><svg class="btnArt" viewBox="0 0 160 100" aria-hidden="true"><use href="#i-campfire" x="45" y="2" width="70" height="88"/></svg>一起猜<small>猜電腦的數字</small></button>
           <!-- 一起猜電腦出的數字（一堆火） -->
-          <button class="wood" onclick="choosePlay('mutual')"><span class="face">🔥🔥</span>互相出題<small>出數字給對方猜</small></button>
+          <button class="wood" onclick="choosePlay('mutual')"><svg class="btnArt" viewBox="0 0 160 100" aria-hidden="true"><use href="#i-campfire" x="6" y="14" width="64" height="80"/><use href="#i-campfire" x="90" y="14" width="64" height="80"/></svg>互相出題<small>出數字給對方猜</small></button>
           <!-- 互相出題（兩堆火） -->
         </div>
       </div>
@@ -753,14 +912,14 @@
         <p class="info" id="animalTitle">玩家 1 選一隻動物</p>
         <!-- 說明是誰在選 -->
         <div class="animals">
-          <!-- 四隻動物；style="--a:…" 是每隻動物自己的顏色 -->
-          <button class="wood animal" id="animal0" style="--a:#e3b07a" onclick="pickAnimal(0)"><span class="face">🐻</span>小熊<small></small></button>
+          <!-- 四隻動物；style="--a:…" 是每隻動物自己的顏色；ring 是圓形頭像，--tint 是很淡的底色；use 是拿出上面做好的動物零件 -->
+          <button class="wood animal" id="animal0" style="--a:#e3b07a" onclick="pickAnimal(0)"><span class="ring" style="--tint:#fff1d6"><svg viewBox="0 0 100 100"><use href="#i-bear"/><use href="#i-bearHat"/></svg></span>小熊<small></small></button>
           <!-- 小熊 -->
-          <button class="wood animal" id="animal1" style="--a:#ff9ec4" onclick="pickAnimal(1)"><span class="face">🐰</span>小兔<small></small></button>
+          <button class="wood animal" id="animal1" style="--a:#ff9ec4" onclick="pickAnimal(1)"><span class="ring" style="--tint:#ffe6ef"><svg viewBox="0 0 100 100"><use href="#i-rabbit"/><use href="#i-rabbitLantern"/></svg></span>小兔<small></small></button>
           <!-- 小兔 -->
-          <button class="wood animal" id="animal2" style="--a:#ff9248" onclick="pickAnimal(2)"><span class="face">🦊</span>狐狸<small></small></button>
+          <button class="wood animal" id="animal2" style="--a:#ff9248" onclick="pickAnimal(2)"><span class="ring" style="--tint:#ffe8d6"><svg viewBox="0 0 100 100"><use href="#i-fox"/><use href="#i-foxScarf"/></svg></span>狐狸<small></small></button>
           <!-- 狐狸 -->
-          <button class="wood animal" id="animal3" style="--a:#9fd98a" onclick="pickAnimal(3)"><span class="face">🐿️</span>松鼠<small></small></button>
+          <button class="wood animal" id="animal3" style="--a:#9fd98a" onclick="pickAnimal(3)"><span class="ring" style="--tint:#e8f6df"><svg viewBox="0 0 100 100"><use href="#i-squirrel"/><use href="#i-squirrelAcorn"/></svg></span>松鼠<small></small></button>
           <!-- 松鼠 -->
         </div>
       </div>
@@ -1170,10 +1329,10 @@
 
               <g transform="translate(142 270)">
                 <!-- 火堆左前方的動物圓章 -->
-                <circle class="badgeCircle" id="badge0" r="15" fill="#888" stroke="#fff" stroke-width="2"/>
-                <!-- 圓章底色（JavaScript 會換成動物的顏色） -->
-                <text id="badgeFace0" y="6" text-anchor="middle" font-size="17"></text>
-                <!-- 動物的表情符號 -->
+                <circle class="badgeCircle" id="badge0" r="15" fill="#fff" stroke="#fff" stroke-width="2"/>
+                <!-- 圓章：淡色底、動物顏色外框（JavaScript 會換顏色） -->
+                <use id="badgeFace0" href="#i-bear" x="-13" y="-11" width="26" height="26"/>
+                <!-- 動物的臉（JavaScript 會換成對的動物） -->
               </g>
               <text id="countLabel0" x="258" y="276" text-anchor="middle" font-size="13" fill="#f6f1e3" stroke="#10233d" stroke-width="3" paint-order="stroke">0 次</text>
               <!-- 火堆右前方：猜了幾次 -->
@@ -1238,10 +1397,10 @@
 
               <g transform="translate(142 270)">
                 <!-- 火堆左前方的動物圓章 -->
-                <circle class="badgeCircle" id="badge1" r="15" fill="#888" stroke="#fff" stroke-width="2"/>
-                <!-- 圓章底色（JavaScript 會換成動物的顏色） -->
-                <text id="badgeFace1" y="6" text-anchor="middle" font-size="17"></text>
-                <!-- 動物的表情符號 -->
+                <circle class="badgeCircle" id="badge1" r="15" fill="#fff" stroke="#fff" stroke-width="2"/>
+                <!-- 圓章：淡色底、動物顏色外框（JavaScript 會換顏色） -->
+                <use id="badgeFace1" href="#i-bear" x="-13" y="-11" width="26" height="26"/>
+                <!-- 動物的臉（JavaScript 會換成對的動物） -->
               </g>
               <text id="countLabel1" x="258" y="276" text-anchor="middle" font-size="13" fill="#f6f1e3" stroke="#10233d" stroke-width="3" paint-order="stroke">0 次</text>
               <!-- 火堆右前方：猜了幾次 -->
@@ -1395,12 +1554,25 @@
     // 記住所有「等一下再做」的計時器，重新開始時可以一次取消
 
     let ANIMALS = [
-      // 四隻動物的資料：表情符號、名字、顏色（[] 是「清單」，{} 是「一包資料」）
-      { face: "🐻", name: "小熊", color: "#e3b07a" },
-      { face: "🐰", name: "小兔", color: "#ff9ec4" },
-      { face: "🦊", name: "狐狸", color: "#ff9248" },
-      { face: "🐿️", name: "松鼠", color: "#9fd98a" }
+      // 四隻動物的資料（[] 是「清單」，{} 是「一包資料」）
+      // key：圖示零件的名字；prop：露營小道具；color：動物的顏色；tint：很淡的底色
+      { key: "bear",     prop: "bearHat",       name: "小熊", color: "#e3b07a", tint: "#fff1d6" },
+      { key: "rabbit",   prop: "rabbitLantern", name: "小兔", color: "#ff9ec4", tint: "#ffe6ef" },
+      { key: "fox",      prop: "foxScarf",      name: "狐狸", color: "#ff9248", tint: "#ffe8d6" },
+      { key: "squirrel", prop: "squirrelAcorn", name: "松鼠", color: "#9fd98a", tint: "#e8f6df" }
     ];
+
+    function face(animal) {
+      // 做出「文字裡的小頭像」（只有臉），回傳一段 HTML 文字
+      return '<span class="mini" style="--a:' + animal.color + ';--tint:' + animal.tint + '">' +
+             '<svg viewBox="0 0 100 100"><use href="#i-' + animal.key + '"/></svg></span>';
+    }
+
+    function bigFace(animal) {
+      // 做出「大頭像」（有露營小道具），抽籤卡片和出題前的畫面用
+      return '<span class="ring big" style="--a:' + animal.color + ';--tint:' + animal.tint + '">' +
+             '<svg viewBox="0 0 100 100"><use href="#i-' + animal.key + '"/><use href="#i-' + animal.prop + '"/></svg></span>';
+    }
 
     let mode = "single";
     // 現在是 "single"（單人）還是 "double"（雙人）
@@ -1503,7 +1675,7 @@
       // 記住平常要顯示的字
       if (peeking === false) {
         // 如果沒有在偷看
-        countText.textContent = text;
+        countText.innerHTML = text;
         // 就直接顯示
       }
     }
@@ -1870,9 +2042,9 @@
       // 出題的動物
       let them = ANIMALS[players[1 - setter]];
       // 另一位（要轉過頭的）
-      document.getElementById("coverFace").textContent = me.face;
+      document.getElementById("coverFace").innerHTML = bigFace(me);
       // 大大的動物
-      document.getElementById("coverText").innerHTML = me.name + "要出題了！<br>" + them.face + " " + them.name + "請轉過頭，不要偷看 👀";
+      document.getElementById("coverText").innerHTML = me.name + "要出題了！<br>" + face(them) + them.name + "請轉過頭，不要偷看 👀";
       // 說明（innerHTML 可以放 <br> 換行）
       document.body.classList.add("playing");
       // 藏起大標題，讓畫面放得下
@@ -1890,7 +2062,7 @@
       // 清空
       document.getElementById("setErr").textContent = "";
       // 清空提醒
-      document.getElementById("setTitle").textContent = me.face + " " + me.name + "出一個 " + minNumber + "～" + maxNumber + " 的數字給" + them.name + "猜";
+      document.getElementById("setTitle").innerHTML = face(me) + me.name + "出一個 " + minNumber + "～" + maxNumber + " 的數字給" + them.name + "猜";
       // 說明
       drawSetDisplay();
       // 更新石板
@@ -1973,7 +2145,7 @@
       secrets[setter] = n;
       // 記住這位玩家出的數字
       let them = ANIMALS[players[1 - setter]];
-      document.getElementById("hintTitle").textContent = "選一個提示給 " + them.face + " " + them.name;
+      document.getElementById("hintTitle").innerHTML = "選一個提示給 " + face(them) + them.name;
       // 說明
       let box = document.getElementById("hintButtons");
       box.innerHTML = "";
@@ -2024,7 +2196,7 @@
         // 兩張卡片……
         let animal = ANIMALS[players[i]];
         // 這位玩家的動物資料
-        document.getElementById("drawFace" + i).textContent = animal.face;
+        document.getElementById("drawFace" + i).innerHTML = bigFace(animal);
         // 放上表情符號
         document.getElementById("drawName" + i).textContent = "玩家 " + (i + 1) + "\n" + animal.name;
         // 放上名字（\n 是換行：上面「玩家 1」、下面動物名字）
@@ -2055,7 +2227,7 @@
           // 已經夠慢了，而且剛好停在抽中的人 → 結束
           let animal = ANIMALS[players[winner]];
           // 抽中的動物
-          document.getElementById("drawText").textContent = animal.face + " " + animal.name + "先猜！";
+          document.getElementById("drawText").innerHTML = face(animal) + animal.name + "先猜！";
           // 顯示誰先猜
           playTone(1320, 0.4, 0.2);
           // 「叮！」
@@ -2098,7 +2270,7 @@
         let animal = ANIMALS[players[turn]];
         // 現在輪到的動物
         if (play === "mutual") {
-          infoText.textContent = "輪到 " + animal.face + " " + animal.name;
+          infoText.innerHTML = "輪到 " + face(animal) + animal.name;
           // 互相出題：只顯示輪到誰
           let hint = hintsGiven[1 - turn];
           // 要猜的題目是另一個人出的，提示也是他給的
@@ -2108,7 +2280,7 @@
             hintText.textContent = "💡 提示：" + hint;
           }
         } else {
-          infoText.textContent = "輪到 " + animal.face + " " + animal.name + "　（" + minNumber + "～" + maxNumber + "）";
+          infoText.innerHTML = "輪到 " + face(animal) + animal.name + "　（" + minNumber + "～" + maxNumber + "）";
           // 一起猜：顯示「輪到誰」和範圍
         }
         infoText.style.color = animal.color;
@@ -2193,10 +2365,12 @@
         // 兩個人的次數、火、範圍都歸零
         for (let i = 0; i < 2; i = i + 1) {
           let animal = ANIMALS[players[i]];
-          document.getElementById("badge" + i).setAttribute("fill", animal.color);
-          // 圓章底色換成動物的顏色
-          document.getElementById("badgeFace" + i).textContent = animal.face;
-          // 圓章上放動物
+          document.getElementById("badge" + i).setAttribute("fill", animal.tint);
+          // 圓章底色換成淡色
+          document.getElementById("badge" + i).setAttribute("stroke", animal.color);
+          // 圓章外框換成動物的顏色
+          document.getElementById("badgeFace" + i).setAttribute("href", "#i-" + animal.key);
+          // 圓章上放這隻動物的臉
           document.getElementById("countLabel" + i).textContent = "0 次";
           // 次數歸零
         }
@@ -2393,7 +2567,7 @@
             // 雙人
             let animal = ANIMALS[players[turn]];
             // 猜中的動物
-            message.textContent = animal.face + " " + animal.name + "生火成功！答案是 " + answer + "！";
+            message.innerHTML = face(animal) + animal.name + "生火成功！答案是 " + answer + "！";
             // 顯示誰猜中
             setCount(animal.name + "贏了！兩人一共猜了 " + guessCount + " 次");
             // 誰贏了、一共猜了幾次
@@ -2533,14 +2707,14 @@
           pit.setAttribute("class", "pit lit");
           // 這堆火點起來
           soundRoar();
-          message.textContent = meAnimal.face + " " + meAnimal.name + "生火成功！";
+          message.innerHTML = face(meAnimal) + meAnimal.name + "生火成功！";
           message.className = "win";
           if (litPits[other]) {
             // 兩堆火都點著了 → 結束
             finishMutual();
             return;
           }
-          setCount(meAnimal.face + " " + meAnimal.name + "用了 " + counts[me] + " 次，" + otherAnimal.face + " " + otherAnimal.name + "加油！");
+          setCount(face(meAnimal) + meAnimal.name + "用了 " + counts[me] + " 次，" + face(otherAnimal) + otherAnimal.name + "加油！");
           // 幫另一位加油
           later(1300, function () {
             setDuoTurn(other);
@@ -2610,7 +2784,7 @@
       // 換人的時候，牌子上的結果那行改成「換 某某 猜囉！」（用那隻動物的顏色）
       let animal = ANIMALS[players[turn]];
       // 現在輪到的動物
-      message.textContent = "換 " + animal.face + " " + animal.name + "猜囉！";
+      message.innerHTML = "換 " + face(animal) + animal.name + "猜囉！";
       message.className = "";
       // 拿掉紅橘、淺藍等顏色
       message.style.color = animal.color;
@@ -2627,7 +2801,7 @@
       }
       let a0 = ANIMALS[players[0]];
       let a1 = ANIMALS[players[1]];
-      infoText.textContent = "答案：" + a0.face + " 出 " + secrets[0] + "　" + a1.face + " 出 " + secrets[1];
+      infoText.innerHTML = "答案：" + face(a0) + "出 " + secrets[0] + "　" + face(a1) + "出 " + secrets[1];
       // 公布兩題的答案（誰出的題目）
       infoText.style.color = "";
       hintText.hidden = true;
@@ -2635,10 +2809,10 @@
       if (counts[0] === counts[1]) {
         message.textContent = "平手！兩個人都用 " + counts[0] + " 次";
       } else if (counts[0] < counts[1]) {
-        message.textContent = a0.face + " " + a0.name + "贏了！";
+        message.innerHTML = face(a0) + a0.name + "贏了！";
         // 次數少的贏
       } else {
-        message.textContent = a1.face + " " + a1.name + "贏了！";
+        message.innerHTML = face(a1) + a1.name + "贏了！";
       }
       message.className = "win";
       endPeek();
@@ -2700,7 +2874,7 @@
       // 沒有按著
       peeking = false;
       // 沒有在偷看
-      countText.textContent = countLine;
+      countText.innerHTML = countLine;
       // 換回平常的字
       countText.classList.remove("peek");
       // 拿掉金黃色
