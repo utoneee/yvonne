@@ -88,6 +88,13 @@
       <rect x="10" y="37" width="30" height="21" rx="7" fill="#79a957"/>
       <rect x="14" y="8" width="5" height="34" rx="2" fill="#7a4a22"/><rect x="31" y="8" width="5" height="34" rx="2" fill="#7a4a22"/>
     </symbol>
+    <linearGradient id="duskSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b1f4f"/><stop offset=".55" stop-color="#5a3a78"/><stop offset="1" stop-color="#e58a7c"/>
+    </linearGradient>
+    <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5cf2b0" stop-opacity="0"/><stop offset=".25" stop-color="#5cf2b0" stop-opacity=".6"/>
+      <stop offset=".6" stop-color="#3ad1e0" stop-opacity=".5"/><stop offset="1" stop-color="#8a7bff" stop-opacity="0"/>
+    </linearGradient>
     <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="200" cy="240" r="230">
       <stop offset="0" stop-color="#ffb15c" stop-opacity=".55"/><stop offset=".35" stop-color="#ff9a3c" stop-opacity=".22"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
     </radialGradient>
@@ -97,7 +104,7 @@
 <main>
   <header>
     <h1>三個營地設計稿</h1>
-    <p class="lead">每一局開始時，電腦隨機抽一個營地：森林營地、湖邊營地、岩石營地。每個營地都有「一堆火」（單人、一起猜）和「兩堆火」（互相出題）兩種樣子。圖裡的火是點著的樣子，方便看火光；真正遊戲一開始都是沒點火的。</p>
+    <p class="lead">第二版：三個營地換成不同的色調（森林是藍綠色夜晚、湖邊是紫粉色黃昏、岩石是極光夜晚），一眼就分得出來。每一局開始時，電腦隨機抽一個營地：森林營地、湖邊營地、岩石營地。每個營地都有「一堆火」（單人、一起猜）和「兩堆火」（互相出題）兩種樣子。圖裡的火是點著的樣子，方便看火光；真正遊戲一開始都是沒點火的。</p>
   </header>
   <div id="rows"></div>
 
@@ -134,46 +141,48 @@
     '<ellipse cx="200" cy="258" rx="180" ry="36" fill="#25563f"/>' +
     '<use href="#pine" x="-14" y="84" width="76" height="152"/><use href="#pine" x="342" y="78" width="80" height="160"/>';
 
-  var SKY_B = '<rect y="-50" width="400" height="350" fill="#1b3556"/>' +
-    '<circle cx="200" cy="160" r="135" fill="#22446c"/>' +
-    '<g fill="#6aa5d6"><circle cx="120" cy="140" r="34"/><circle cx="165" cy="112" r="40"/><circle cx="225" cy="106" r="42"/><circle cx="278" cy="128" r="36"/><circle cx="318" cy="150" r="26"/><rect x="80" y="130" width="250" height="60"/></g>' +
-    '<g fill="#2f5a86"><circle cx="300" cy="66" r="12"/><circle cx="316" cy="58" r="16"/><circle cx="332" cy="66" r="11"/><rect x="286" y="64" width="62" height="13" rx="6"/></g>' +
+  var SKY_B = '<rect y="-50" width="400" height="350" fill="url(#duskSky)"/>' +
+    '<circle cx="200" cy="200" r="120" fill="#ffb38a" opacity=".35"/>' +
+    '<g fill="#c98bb4"><circle cx="120" cy="140" r="34"/><circle cx="165" cy="112" r="40"/><circle cx="225" cy="106" r="42"/><circle cx="278" cy="128" r="36"/><circle cx="318" cy="150" r="26"/><rect x="80" y="130" width="250" height="60"/></g>' +
+    '<g fill="#7a5a9a"><circle cx="300" cy="66" r="12"/><circle cx="316" cy="58" r="16"/><circle cx="332" cy="66" r="11"/><rect x="286" y="64" width="62" height="13" rx="6"/></g>' +
     '<path d="M70 52 a 15 15 0 1 0 14 22 a 12 12 0 1 1 -14 -22Z" fill="#f4f1e1"/>' +
     '<use href="#star" x="40" y="104" width="7" height="7"/><use href="#star" x="168" y="34" width="8" height="8"/><use href="#star" x="236" y="40" width="8" height="8"/><use href="#star" x="370" y="70" width="7" height="7"/><use href="#star" x="356" y="140" width="6" height="6"/>' +
-    '<polygon points="60,200 130,128 165,150 200,96 240,140 270,118 340,200" fill="#1d3d6b"/>' +
-    '<polygon points="200,96 186,200 150,200 165,150 160,146" fill="#26507f"/><polygon points="130,128 118,200 90,200" fill="#26507f"/>' +
-    '<path d="M0 175 L 70 160 L 120 178 L 400 165 V 205 H 0Z" fill="#0e2442"/>' +
-    '<g fill="#0e2442"><polygon points="150,200 160,168 170,200"/><polygon points="166,200 178,160 190,200"/><polygon points="186,200 196,172 206,200"/><polygon points="214,200 226,158 238,200"/><polygon points="234,200 244,170 254,200"/><polygon points="252,200 264,162 276,200"/></g>' +
-    '<rect y="198" width="400" height="44" fill="#7fb6e0"/>' +
-    '<g fill="#5b93c4"><rect x="30" y="206" width="70" height="7" rx="3.5"/><rect x="120" y="214" width="46" height="6" rx="3"/><rect x="246" y="208" width="80" height="7" rx="3.5"/><rect x="300" y="222" width="60" height="6" rx="3"/><rect x="60" y="226" width="54" height="6" rx="3"/></g>';
-  var SHORE_B = '<path d="M0 238 Q 200 226 400 238 V 300 H 0Z" fill="#10284a"/>' +
-    '<ellipse cx="200" cy="264" rx="180" ry="30" fill="#163360"/>' +
+    '<polygon points="60,200 130,128 165,150 200,96 240,140 270,118 340,200" fill="#4a2f66"/>' +
+    '<polygon points="200,96 186,200 150,200 165,150 160,146" fill="#5b3d7a"/><polygon points="130,128 118,200 90,200" fill="#5b3d7a"/>' +
+    '<path d="M0 175 L 70 160 L 120 178 L 400 165 V 205 H 0Z" fill="#2a1a3e"/>' +
+    '<g fill="#2a1a3e"><polygon points="150,200 160,168 170,200"/><polygon points="166,200 178,160 190,200"/><polygon points="186,200 196,172 206,200"/><polygon points="214,200 226,158 238,200"/><polygon points="234,200 244,170 254,200"/><polygon points="252,200 264,162 276,200"/></g>' +
+    '<rect y="198" width="400" height="44" fill="#d99bb0"/>' +
+    '<g fill="#b97a9a"><rect x="30" y="206" width="70" height="7" rx="3.5"/><rect x="120" y="214" width="46" height="6" rx="3"/><rect x="246" y="208" width="80" height="7" rx="3.5"/><rect x="300" y="222" width="60" height="6" rx="3"/><rect x="60" y="226" width="54" height="6" rx="3"/></g>';
+  var SHORE_B = '<path d="M0 238 Q 200 226 400 238 V 300 H 0Z" fill="#2a1d3a"/>' +
+    '<ellipse cx="200" cy="264" rx="180" ry="30" fill="#3a2a4e"/>' +
     '<use href="#pine" x="-18" y="70" width="84" height="168"/><use href="#pine" x="338" y="76" width="80" height="160"/>';
 
-  var SKY_C = '<rect y="-50" width="400" height="350" fill="#142b4a"/>' +
-    '<circle cx="74" cy="56" r="15" fill="#f4f1e1"/><circle cx="82" cy="51" r="13" fill="#142b4a"/>' +
+  var SKY_C = '<rect y="-50" width="400" height="350" fill="#071a24"/>' +
+    '<path d="M-20 70 C 60 20 140 90 220 40 S 360 10 420 50 L 420 80 C 340 50 280 90 210 70 S 60 60 -20 100Z" fill="url(#aurora)"/>' +
+    '<path d="M-20 110 C 80 70 160 120 240 90 S 360 70 420 100 L 420 118 C 340 96 260 130 200 112 S 60 104 -20 128Z" fill="url(#aurora)" opacity=".6"/>' +
+    '<circle cx="74" cy="56" r="15" fill="#f4f1e1"/><circle cx="82" cy="51" r="13" fill="#071a24"/>' +
     '<use href="#star" x="130" y="22" width="9" height="9"/><use href="#star" x="180" y="56" width="6" height="6"/><use href="#star" x="220" y="20" width="8" height="8"/><use href="#star" x="262" y="50" width="7" height="7"/><use href="#star" x="300" y="18" width="9" height="9"/><use href="#star" x="350" y="44" width="7" height="7"/><use href="#star" x="380" y="88" width="6" height="6"/><use href="#star" x="24" y="96" width="6" height="6"/><use href="#star" x="160" y="96" width="5" height="5"/>' +
-    '<polygon points="0,150 55,104 95,128 160,70 220,124 280,82 340,120 400,96 400,220 0,220" fill="#2a4b78"/>' +
+    '<polygon points="0,150 55,104 95,128 160,70 220,124 280,82 340,120 400,96 400,220 0,220" fill="#1f4a52"/>' +
     '<polygon points="160,70 146,82 152,84 160,78 168,86 174,82" fill="#dbe8f5"/><polygon points="280,82 268,92 274,94 280,88 286,95 292,92" fill="#dbe8f5"/><polygon points="55,104 46,112 52,113 56,109 62,114 66,111" fill="#dbe8f5"/>' +
-    '<polygon points="0,180 60,140 120,166 190,124 250,160 320,132 400,156 400,230 0,230" fill="#1d3a63"/>' +
-    '<polygon points="190,124 176,230 140,230 160,152" fill="#24477a"/><polygon points="320,132 300,230 270,230 296,150" fill="#24477a"/>' +
-    '<path d="M0 218 Q 200 200 400 216 V 300 H 0Z" fill="#3b4a5e"/>' +
-    '<ellipse cx="200" cy="260" rx="180" ry="32" fill="#44556c"/>' +
-    '<path d="M296 226 C 290 192 312 168 348 166 C 384 164 404 190 402 228Z" fill="#6b7787"/>' +
-    '<path d="M296 226 C 290 192 312 168 348 166 C 330 176 320 200 324 226Z" fill="#8a96a6"/>' +
-    '<ellipse cx="60" cy="278" rx="12" ry="5" fill="#56677f"/><ellipse cx="340" cy="288" rx="16" ry="5" fill="#56677f"/>' +
+    '<polygon points="0,180 60,140 120,166 190,124 250,160 320,132 400,156 400,230 0,230" fill="#163a40"/>' +
+    '<polygon points="190,124 176,230 140,230 160,152" fill="#1d4a50"/><polygon points="320,132 300,230 270,230 296,150" fill="#1d4a50"/>' +
+    '<path d="M0 218 Q 200 200 400 216 V 300 H 0Z" fill="#3e4a48"/>' +
+    '<ellipse cx="200" cy="260" rx="180" ry="32" fill="#4a5856"/>' +
+    '<path d="M296 226 C 290 192 312 168 348 166 C 384 164 404 190 402 228Z" fill="#6f7a74"/>' +
+    '<path d="M296 226 C 290 192 312 168 348 166 C 330 176 320 200 324 226Z" fill="#8f9a92"/>' +
+    '<ellipse cx="60" cy="278" rx="12" ry="5" fill="#5d6a66"/><ellipse cx="340" cy="288" rx="16" ry="5" fill="#5d6a66"/>' +
     '<use href="#pine" x="-10" y="120" width="56" height="112"/>';
 
   var PLACES = [
-    { name: "森林營地", note: "森林裡的一片空地，後面一整排松樹。",
+    { name: "森林營地", note: "藍綠色的夜晚：森林裡的一片空地，後面一整排松樹。",
       solo: SKY_A + '<use href="#tent" x="22" y="152" width="140" height="100"/><use href="#chair" x="258" y="204" width="44" height="55"/><use href="#pack" x="318" y="206" width="42" height="54"/>',
       duo:  SKY_A + '<use href="#tent" x="142" y="128" width="120" height="86"/><use href="#chair" x="6" y="208" width="36" height="45"/><use href="#pack" x="362" y="212" width="32" height="41"/>',
       duoNote: "跟現在遊戲裡的一樣：帳篷在中間後面。" },
-    { name: "湖邊營地", note: "火堆在湖邊，後面是雲和山；點火後湖面映出橘色火光。",
+    { name: "湖邊營地", note: "紫粉色的黃昏：太陽剛下山，天邊還有一點橘粉色，湖面也被染成粉紫色。",
       solo: SKY_B + reflect([200]) + SHORE_B + '<use href="#tent" x="24" y="156" width="140" height="100"/><use href="#chair" x="258" y="208" width="44" height="55"/><use href="#pack" x="318" y="210" width="42" height="54"/>',
       duo:  SKY_B + '<use href="#tent" x="170" y="155" width="60" height="43"/>' + reflect([110, 290]) + SHORE_B + '<use href="#chair" x="4" y="214" width="34" height="42"/><use href="#pack" x="364" y="216" width="30" height="39"/>',
       duoNote: "中間後面是湖，所以帳篷縮小放到「湖的對岸」；兩堆火各自在湖面映出火光。" },
-    { name: "岩石營地", note: "山頂上，遠方一層層雪山和滿天星星，右邊一顆大岩石。",
+    { name: "岩石營地", note: "極光的夜晚：深青色的天空飄著綠色和藍色的極光，遠方是雪山，右邊一顆大岩石。",
       solo: SKY_C + '<use href="#tent" x="30" y="156" width="140" height="100"/><use href="#chair" x="256" y="208" width="44" height="55"/><use href="#pack" x="314" y="210" width="42" height="54"/>',
       duo:  SKY_C + '<use href="#tent" x="142" y="130" width="120" height="86"/><use href="#chair" x="6" y="210" width="36" height="45"/><use href="#pack" x="352" y="214" width="32" height="41"/>',
       duoNote: "帳篷在中間後面，背包靠在大岩石前面。" }
