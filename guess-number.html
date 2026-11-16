@@ -276,6 +276,63 @@
       opacity: 1;                             /* 不要變淡 */
     }
 
+    .cover {
+      /* 出題前蓋住畫面的那張卡片 */
+      background: #1a2c48;                    /* 深藍色 */
+      border: 3px dashed #4b6a95;             /* 虛線框 */
+      border-radius: 22px;                    /* 圓角 */
+      padding: 24px 14px;                     /* 內部空間 */
+      display: flex;                          /* 彈性排版 */
+      flex-direction: column;                 /* 由上往下排 */
+      align-items: center;                    /* 置中 */
+      gap: 14px;                              /* 間隔 */
+    }
+
+    .cover p {
+      /* 蓋住畫面上的字 */
+      margin: 0;                              /* 拿掉預設空白 */
+      font-size: 20px;                        /* 字大小 */
+      line-height: 1.5;                       /* 行高 */
+    }
+
+    #setDisplay {
+      /* 出題時的數字石板：跟遊戲裡的一樣 */
+      flex: 1;                                /* 佔掉旁邊按鈕以外的寬度 */
+      font-size: 32px;                        /* 大字 */
+      letter-spacing: 6px;                    /* 字距 */
+      min-height: 52px;                       /* 高度 */
+      line-height: 46px;                      /* 上下置中 */
+      background: var(--slate);               /* 深色石板 */
+      border: 3px solid var(--rock-dark);     /* 邊框 */
+      border-radius: 14px;                    /* 圓角 */
+    }
+
+    #setDisplay.empty { opacity: 0.4; }      /* 還沒打：淡淡的問號 */
+
+    #setPeek {
+      /* 出題時的「看一下」按鈕 */
+      font-size: 14px;                        /* 字小一點 */
+      line-height: 1.2;                       /* 行高 */
+      padding: 0 10px;                        /* 左右內距 */
+      -webkit-touch-callout: none;            /* iPhone 長按不要跳出選單 */
+      touch-action: none;                     /* 按著時不要捲動畫面 */
+    }
+
+    #setErr {
+      /* 打錯時的提醒 */
+      color: var(--big);                      /* 紅橘色 */
+      min-height: 22px;                       /* 先佔好位置 */
+      margin: 6px 0;                          /* 上下留一點空 */
+      font-size: 15px;                        /* 字大小 */
+    }
+
+    .hintButtons {
+      /* 提示按鈕：由上往下排 */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     #drawText {
       /* 「🐰 小兔先猜！」 */
       font-size: 26px;                        /* 大字 */
@@ -368,6 +425,14 @@
     .big   { color: var(--big); }    /* 太大了：紅橘色 */
     .small { color: var(--small); }  /* 太小了：淺藍色 */
     .win   { color: var(--win); }    /* 答對了：金黃色 */
+
+    #hintText {
+      /* 互相出題時的「💡 提示」那一行 */
+      font-size: 14px;                /* 舊瀏覽器用 */
+      font-size: min(15px, 4.4cqw);   /* 跟著牌子寬度縮放 */
+      color: #ffe7a3;                 /* 淡黃色 */
+      margin: 0;                      /* 拿掉預設空白 */
+    }
 
     #countText {
       /* 猜了幾次（偷看時會暫時變成範圍） */
@@ -465,6 +530,29 @@
     }
 
     .striker { transition: opacity 0.6s; }   /* 打火棒消失時慢慢淡出 */
+
+    .strikerPos {
+      /* 打火棒的位置：換位置時花 0.7 秒滑過去 */
+      transition: transform 0.7s ease-in-out, opacity 0.5s;
+    }
+    .strikerPos.solo  { transform: translate(292px, 128px) rotate(-25deg); }
+    /* 一堆火：在右上方，尖端朝向中間的火 */
+    .strikerPos.sideL { transform: translate(202px, 128px) rotate(-25deg); }
+    /* 兩堆火、輪到左邊：尖端朝向左邊的火 */
+    .strikerPos.sideR { transform: translate(198px, 128px) scale(-1, 1) rotate(-25deg); }
+    /* 兩堆火、輪到右邊：scale(-1, 1) 是左右翻過來，從左上方伸向右邊的火 */
+    .strikerPos.gone  { opacity: 0; }
+    /* 兩堆火都點著了：打火棒收起來 */
+
+    .scene:not(.duo) .duoOnly { display: none; }
+    /* 一堆火的時候，藏起「兩堆火才有的東西」（:not 是「不是」） */
+    .scene.duo .soloOnly { display: none; }
+    /* 兩堆火的時候，藏起「一堆火才有的東西」 */
+
+    .badgeCircle { transition: stroke-width 0.3s; }
+    /* 火堆旁的動物圓章 */
+    .badgeCircle.active { stroke-width: 4; }
+    /* 輪到的人：圓章的白框變粗 */
     .lit .striker { opacity: 0; }            /* 點著後就收起來 */
 
     .scraper { transform-origin: 50% 100%; } /* 刮刀以底部為中心轉動 */
@@ -648,6 +736,18 @@
         </div>
       </div>
 
+      <div id="stepPlay" hidden>
+        <!-- 步驟 1.5（雙人才有）：選玩法 -->
+        <p class="info">兩個人要怎麼玩？</p>
+        <!-- 說明文字 -->
+        <div class="modes">
+          <button class="wood" onclick="choosePlay('shared')"><span class="face">🔥</span>一起猜<small>猜電腦的數字</small></button>
+          <!-- 一起猜電腦出的數字（一堆火） -->
+          <button class="wood" onclick="choosePlay('mutual')"><span class="face">🔥🔥</span>互相出題<small>出數字給對方猜</small></button>
+          <!-- 互相出題（兩堆火） -->
+        </div>
+      </div>
+
       <div id="stepAnimal" hidden>
         <!-- 步驟 2（雙人才有）：選動物 -->
         <p class="info" id="animalTitle">玩家 1 選一隻動物</p>
@@ -689,6 +789,58 @@
         <button class="wood" onclick="chooseLevel(1000, 10000)">1000～10000 <small>超級難</small></button>
         <!-- 點了就用 1000 到 10000 開始遊戲 -->
       </div>
+      </div>
+
+      <div id="stepSet" hidden>
+        <!-- 步驟 3.5（互相出題才有）：出題 -->
+
+        <div id="setCover" class="cover">
+          <!-- 出題前先蓋住畫面 -->
+          <div class="face" id="coverFace"></div>
+          <!-- 要出題的動物 -->
+          <p id="coverText"></p>
+          <!-- 「小兔要出題了！狐狸請轉過頭」 -->
+          <button class="wood key go" onclick="setReady()">我準備好了</button>
+          <!-- 出題的人自己按 -->
+        </div>
+
+        <div id="setEnter" hidden>
+          <!-- 打數字 -->
+          <p class="info" id="setTitle"></p>
+          <!-- 「小兔出一個 1～100 的數字給狐狸猜」 -->
+          <div class="screenRow">
+            <div id="setDisplay" class="empty">?</div>
+            <!-- 數字石板（只顯示 ●） -->
+            <button class="wood" id="setPeek">👁<br>看一下</button>
+            <!-- 按住才看得到自己打的數字 -->
+          </div>
+          <p id="setErr"></p>
+          <!-- 打錯時的提醒 -->
+          <div class="keys">
+            <!-- 出題用的數字鍵盤 -->
+            <button class="wood key" onclick="setDigit(7)">7</button>
+            <button class="wood key" onclick="setDigit(8)">8</button>
+            <button class="wood key" onclick="setDigit(9)">9</button>
+            <button class="wood key" onclick="setDigit(4)">4</button>
+            <button class="wood key" onclick="setDigit(5)">5</button>
+            <button class="wood key" onclick="setDigit(6)">6</button>
+            <button class="wood key" onclick="setDigit(1)">1</button>
+            <button class="wood key" onclick="setDigit(2)">2</button>
+            <button class="wood key" onclick="setDigit(3)">3</button>
+            <button class="wood key" onclick="setDelete()" aria-label="刪除">⌫</button>
+            <button class="wood key" onclick="setDigit(0)">0</button>
+            <button class="wood key go" onclick="setDone()">出好了</button>
+            <!-- 數字 0～9、刪除、出好了 -->
+          </div>
+        </div>
+
+        <div id="setHint" hidden>
+          <!-- 選提示 -->
+          <p class="info" id="hintTitle"></p>
+          <!-- 「選一個提示給狐狸」 -->
+          <div class="hintButtons" id="hintButtons"></div>
+          <!-- 提示按鈕由 JavaScript 依照數字做出來 -->
+        </div>
       </div>
 
       <div id="stepDraw" hidden>
@@ -877,13 +1029,27 @@
             <!-- 左邊的大松樹 -->
             <use href="#pine" x="342" y="78" width="80" height="160"/>
             <!-- 右邊的大松樹 -->
-            <use href="#tent" x="22" y="152" width="140" height="100"/>
-            <!-- 帳篷 -->
-            <use href="#chair" x="258" y="204" width="44" height="55"/>
-            <!-- 露營椅 -->
-            <use href="#pack" x="318" y="206" width="42" height="54"/>
-            <!-- 背包 -->
+            <g class="soloOnly">
+              <!-- 一堆火的時候：帳篷在左、椅子和背包在右 -->
+              <use href="#tent" x="22" y="152" width="140" height="100"/>
+              <!-- 帳篷 -->
+              <use href="#chair" x="258" y="204" width="44" height="55"/>
+              <!-- 露營椅 -->
+              <use href="#pack" x="318" y="206" width="42" height="54"/>
+              <!-- 背包 -->
+            </g>
+            <g class="duoOnly">
+              <!-- 兩堆火的時候：帳篷移到正中間後面，椅子和背包縮小放在角落 -->
+              <use href="#tent" x="142" y="128" width="120" height="86"/>
+              <!-- 帳篷 -->
+              <use href="#chair" x="6" y="208" width="36" height="45"/>
+              <!-- 露營椅 -->
+              <use href="#pack" x="362" y="212" width="32" height="41"/>
+              <!-- 背包 -->
+            </g>
 
+            <g class="soloOnly">
+            <!-- ===== 一堆火（單人、雙人一起猜） ===== -->
             <!-- ===== 火光（點著後整個場景變亮） ===== -->
             <rect class="light" y="-50" width="400" height="350" fill="url(#glow)"/>
 
@@ -940,12 +1106,154 @@
               <ellipse cx="238" cy="254" rx="11" ry="7"/>
             </g>
 
+            </g>
+
+            <g class="duoOnly">
+            <!-- ===== 兩堆火（互相出題） ===== -->
+              <g id="pit0" class="pit" transform="translate(-90 0)">
+              <!-- 左邊的火堆（玩家 1 的）：跟上面一模一樣，只是整組往左移 90 -->
+            <!-- ===== 火光（點著後整個場景變亮） ===== -->
+            <rect class="light" x="-100" y="-50" width="600" height="350" fill="url(#glow)"/>
+
+            <!-- ===== 火堆 ===== -->
+            <g fill="#8d96a1">
+              <!-- 後排石頭（比較暗，因為在後面） -->
+              <ellipse cx="170" cy="242" rx="9" ry="6"/><ellipse cx="186" cy="238" rx="9" ry="6"/>
+              <ellipse cx="200" cy="237" rx="9" ry="6"/><ellipse cx="214" cy="238" rx="9" ry="6"/>
+              <ellipse cx="230" cy="242" rx="9" ry="6"/>
+            </g>
+            <rect class="logrect" x="168" y="243" width="64" height="11" rx="5.5" fill="#8a5a2b" transform="rotate(14 200 248)"/>
+            <!-- 木柴（一），轉 14 度 -->
+            <rect class="logrect" x="168" y="243" width="64" height="11" rx="5.5" fill="#9c6833" transform="rotate(-14 200 248)"/>
+            <!-- 木柴（二），轉 -14 度，跟第一根交叉 -->
+            <circle class="ember" cx="188" cy="246" r="2.6" fill="#ff6a2a"/>
+            <!-- 木柴上的紅點（一） -->
+            <circle class="ember" cx="200" cy="243" r="2.6" fill="#ff8a2a"/>
+            <!-- 紅點（二） -->
+            <circle class="ember" cx="212" cy="247" r="2.6" fill="#ff6a2a"/>
+            <!-- 紅點（三） -->
+            <circle class="ember" cx="196" cy="251" r="2.2" fill="#ffb03a"/>
+            <!-- 紅點（四） -->
+
+            <g transform="translate(200 249)">
+              <!-- 把火的「原點」移到火堆中間 -->
+              <g class="fire">
+                <!-- 整團火（會慢慢長大） -->
+                <g class="outer">
+                  <!-- 外層橘色火舌 -->
+                  <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L -27 0 C -42 -10 -42 -32 -29 -46 C -27 -36 -23 -30 -19 -26 C -23 -46 -12 -62 0 -76Z" fill="#f2711c"/>
+                  <!-- C 是彎曲的線，連起來就變成有好幾個尖角的火焰形狀 -->
+                </g>
+                <g class="inner">
+                  <!-- 內層黃色火舌 -->
+                  <path d="M0 -44 C 7 -33 17 -28 15 -13 C 19 -17 21 -22 20 -26 C 27 -15 23 -3 15 1 L -15 1 C -25 -5 -25 -17 -17 -25 C -16 -19 -13 -15 -10 -13 C -13 -28 -6 -36 0 -44Z" fill="#ffd23f"/>
+                </g>
+              </g>
+            </g>
+
+            <g transform="translate(200 238)">
+              <!-- 白煙：6 團圓圓的煙，--sx 是往左或往右飄多少，animation-delay 是晚多久才冒 -->
+              <circle class="puff" r="15" fill="#cfd8e3" style="--sx:-16px;animation-delay:0s"/>
+              <circle class="puff" r="14" fill="#b9c4d1" style="--sx:12px;animation-delay:.22s"/>
+              <circle class="puff" r="16" fill="#cfd8e3" style="--sx:-4px;animation-delay:.44s"/>
+              <circle class="puff" r="14" fill="#b9c4d1" style="--sx:20px;animation-delay:.66s"/>
+              <circle class="puff" r="15" fill="#cfd8e3" style="--sx:-22px;animation-delay:.88s"/>
+              <circle class="puff" r="13" fill="#b9c4d1" style="--sx:6px;animation-delay:1.1s"/>
+            </g>
+
+            <g fill="#a9b2bd">
+              <!-- 前排石頭（比較亮，因為在前面） -->
+              <ellipse cx="162" cy="254" rx="11" ry="7"/><ellipse cx="179" cy="260" rx="11" ry="7"/>
+              <ellipse cx="200" cy="263" rx="11" ry="7"/><ellipse cx="221" cy="260" rx="11" ry="7"/>
+              <ellipse cx="238" cy="254" rx="11" ry="7"/>
+            </g>
+
+              <g transform="translate(142 270)">
+                <!-- 火堆左前方的動物圓章 -->
+                <circle class="badgeCircle" id="badge0" r="15" fill="#888" stroke="#fff" stroke-width="2"/>
+                <!-- 圓章底色（JavaScript 會換成動物的顏色） -->
+                <text id="badgeFace0" y="6" text-anchor="middle" font-size="17"></text>
+                <!-- 動物的表情符號 -->
+              </g>
+              <text id="countLabel0" x="258" y="276" text-anchor="middle" font-size="13" fill="#f6f1e3" stroke="#10233d" stroke-width="3" paint-order="stroke">0 次</text>
+              <!-- 火堆右前方：猜了幾次 -->
+              </g>
+              <g id="pit1" class="pit" transform="translate(90 0)">
+              <!-- 右邊的火堆（玩家 2 的）：跟上面一模一樣，只是整組往右移 90 -->
+            <!-- ===== 火光（點著後整個場景變亮） ===== -->
+            <rect class="light" x="-100" y="-50" width="600" height="350" fill="url(#glow)"/>
+
+            <!-- ===== 火堆 ===== -->
+            <g fill="#8d96a1">
+              <!-- 後排石頭（比較暗，因為在後面） -->
+              <ellipse cx="170" cy="242" rx="9" ry="6"/><ellipse cx="186" cy="238" rx="9" ry="6"/>
+              <ellipse cx="200" cy="237" rx="9" ry="6"/><ellipse cx="214" cy="238" rx="9" ry="6"/>
+              <ellipse cx="230" cy="242" rx="9" ry="6"/>
+            </g>
+            <rect class="logrect" x="168" y="243" width="64" height="11" rx="5.5" fill="#8a5a2b" transform="rotate(14 200 248)"/>
+            <!-- 木柴（一），轉 14 度 -->
+            <rect class="logrect" x="168" y="243" width="64" height="11" rx="5.5" fill="#9c6833" transform="rotate(-14 200 248)"/>
+            <!-- 木柴（二），轉 -14 度，跟第一根交叉 -->
+            <circle class="ember" cx="188" cy="246" r="2.6" fill="#ff6a2a"/>
+            <!-- 木柴上的紅點（一） -->
+            <circle class="ember" cx="200" cy="243" r="2.6" fill="#ff8a2a"/>
+            <!-- 紅點（二） -->
+            <circle class="ember" cx="212" cy="247" r="2.6" fill="#ff6a2a"/>
+            <!-- 紅點（三） -->
+            <circle class="ember" cx="196" cy="251" r="2.2" fill="#ffb03a"/>
+            <!-- 紅點（四） -->
+
+            <g transform="translate(200 249)">
+              <!-- 把火的「原點」移到火堆中間 -->
+              <g class="fire">
+                <!-- 整團火（會慢慢長大） -->
+                <g class="outer">
+                  <!-- 外層橘色火舌 -->
+                  <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L -27 0 C -42 -10 -42 -32 -29 -46 C -27 -36 -23 -30 -19 -26 C -23 -46 -12 -62 0 -76Z" fill="#f2711c"/>
+                  <!-- C 是彎曲的線，連起來就變成有好幾個尖角的火焰形狀 -->
+                </g>
+                <g class="inner">
+                  <!-- 內層黃色火舌 -->
+                  <path d="M0 -44 C 7 -33 17 -28 15 -13 C 19 -17 21 -22 20 -26 C 27 -15 23 -3 15 1 L -15 1 C -25 -5 -25 -17 -17 -25 C -16 -19 -13 -15 -10 -13 C -13 -28 -6 -36 0 -44Z" fill="#ffd23f"/>
+                </g>
+              </g>
+            </g>
+
+            <g transform="translate(200 238)">
+              <!-- 白煙：6 團圓圓的煙，--sx 是往左或往右飄多少，animation-delay 是晚多久才冒 -->
+              <circle class="puff" r="15" fill="#cfd8e3" style="--sx:-16px;animation-delay:0s"/>
+              <circle class="puff" r="14" fill="#b9c4d1" style="--sx:12px;animation-delay:.22s"/>
+              <circle class="puff" r="16" fill="#cfd8e3" style="--sx:-4px;animation-delay:.44s"/>
+              <circle class="puff" r="14" fill="#b9c4d1" style="--sx:20px;animation-delay:.66s"/>
+              <circle class="puff" r="15" fill="#cfd8e3" style="--sx:-22px;animation-delay:.88s"/>
+              <circle class="puff" r="13" fill="#b9c4d1" style="--sx:6px;animation-delay:1.1s"/>
+            </g>
+
+            <g fill="#a9b2bd">
+              <!-- 前排石頭（比較亮，因為在前面） -->
+              <ellipse cx="162" cy="254" rx="11" ry="7"/><ellipse cx="179" cy="260" rx="11" ry="7"/>
+              <ellipse cx="200" cy="263" rx="11" ry="7"/><ellipse cx="221" cy="260" rx="11" ry="7"/>
+              <ellipse cx="238" cy="254" rx="11" ry="7"/>
+            </g>
+
+              <g transform="translate(142 270)">
+                <!-- 火堆左前方的動物圓章 -->
+                <circle class="badgeCircle" id="badge1" r="15" fill="#888" stroke="#fff" stroke-width="2"/>
+                <!-- 圓章底色（JavaScript 會換成動物的顏色） -->
+                <text id="badgeFace1" y="6" text-anchor="middle" font-size="17"></text>
+                <!-- 動物的表情符號 -->
+              </g>
+              <text id="countLabel1" x="258" y="276" text-anchor="middle" font-size="13" fill="#f6f1e3" stroke="#10233d" stroke-width="3" paint-order="stroke">0 次</text>
+              <!-- 火堆右前方：猜了幾次 -->
+              </g>
+            </g>
+
             <text id="fireText" x="322" y="192" text-anchor="middle" font-size="15" fill="#e6edf5" stroke="#10233d" stroke-width="3" paint-order="stroke"></text>
             <!-- 「沒點著…」的小字（paint-order 讓深色描邊在字的後面，字比較清楚） -->
 
-            <!-- ===== 鎂棒打火石（尖端約在 x=201, y=170） ===== -->
-            <g transform="translate(292 128) rotate(-25)">
-              <!-- 整組移到右上方，再轉 -25 度，讓尖端朝向木柴 -->
+            <!-- ===== 鎂棒打火石（一堆火時尖端約在 x=201, y=170） ===== -->
+            <g id="strikerPos" class="strikerPos solo">
+              <!-- 位置由 CSS 的 solo／sideL／sideR 決定：移到右上方再轉 -25 度，讓尖端朝向木柴 -->
               <g class="striker">
                 <rect x="-100" y="-5" width="104" height="10" rx="5" fill="#4a5160"/>
                 <!-- 金屬棒 -->
@@ -970,8 +1278,8 @@
             <g id="sparks" transform="translate(201 170)"></g>
             <!-- 火星會由 JavaScript 放進這裡 -->
 
-            <g transform="translate(201 170)">
-              <!-- 尖端的閃光 -->
+            <g id="flashPos" transform="translate(201 170)">
+              <!-- 尖端的閃光（兩堆火時 JavaScript 會把它移到另一邊） -->
               <g class="flash">
                 <circle r="7" fill="#fffbe6"/>
                 <!-- 白色圓點 -->
@@ -985,6 +1293,8 @@
             <!-- 疊在夜空上的半透明牌子 -->
             <p id="infoText"></p>
             <!-- 範圍說明 -->
+            <p id="hintText" hidden></p>
+            <!-- 互相出題時的「💡 提示」 -->
             <p id="message"></p>
             <!-- 太大了／太小了／答對了 -->
             <p id="countText">已經猜了 0 次</p>
@@ -1101,6 +1411,39 @@
     let turn = 0;
     // 雙人時，現在輪到第幾位玩家（0 是玩家 1，1 是玩家 2）
 
+    let play = "shared";
+    // 雙人的玩法："shared"（一起猜電腦的數字）或 "mutual"（互相出題）
+
+    let secrets = [0, 0];
+    // 互相出題：secrets[0] 是玩家 1 出的數字（給玩家 2 猜），secrets[1] 是玩家 2 出的
+
+    let hintsGiven = ["", ""];
+    // 互相出題：兩位玩家各給了什麼提示（"" 表示不給提示）
+
+    let setter = 0;
+    // 現在輪到誰出題
+
+    let setTyped = "";
+    // 出題時打的數字
+
+    let counts = [0, 0];
+    // 互相出題：兩位玩家各猜了幾次
+
+    let litPits = [false, false];
+    // 互相出題：兩堆火有沒有點著
+
+    let lows = [1, 1];
+    // 互相出題：兩位玩家各自那一題，答案可能的最小值
+
+    let highs = [100, 100];
+    // 互相出題：兩位玩家各自那一題，答案可能的最大值
+
+    let pendingMin = 1;
+    // 選好的範圍（最小），等出題、抽籤完才開始遊戲
+
+    let pendingMax = 100;
+    // 選好的範圍（最大）
+
     let countLine = "已經猜了 0 次";
     // 牌子最下面那一行「平常」要顯示的字（偷看結束後要換回來）
 
@@ -1141,6 +1484,18 @@
     // 顯示數字的石板
     let keys = document.getElementById("keys");
     // 12 個按鍵
+    let hintText = document.getElementById("hintText");
+    // 互相出題時的「💡 提示」
+    let strikerPos = document.getElementById("strikerPos");
+    // 打火棒（決定它在哪一邊）
+    let flashPos = document.getElementById("flashPos");
+    // 尖端的閃光
+    let setDisplay = document.getElementById("setDisplay");
+    // 出題時的數字石板
+    let setPeekButton = document.getElementById("setPeek");
+    // 出題時的「看一下」
+    let setPeeking = false;
+    // 出題的人是不是正按著「看一下」
 
     function setCount(text) {
       // 更新「猜了幾次」那一行
@@ -1315,19 +1670,46 @@
       cancelTimers();
       // 取消還沒做完的動畫步驟
       scene.setAttribute("class", "scene");
-      // 只留下 scene 這個名字（拿掉 strike、smoke、lit 等）
+      // 只留下 scene 這個名字（拿掉 strike、smoke、lit、duo 等）
+      document.getElementById("pit0").setAttribute("class", "pit");
+      // 左邊火堆熄掉
+      document.getElementById("pit1").setAttribute("class", "pit");
+      // 右邊火堆熄掉
+      aimStriker("solo");
+      // 打火棒回到一堆火的位置
       sparks.innerHTML = "";
       // 清掉所有火星
       fireText.textContent = "";
       // 清掉「沒點著…」
     }
 
-    function shootSparks() {
-      // 做出 18 顆火星，放在鎂棒尖端
+    function aimStriker(where) {
+      // 把打火棒、火星、閃光移到指定的火堆："solo"（一堆火）、0（左邊）、1（右邊）
+      let tipX = 201;
+      // 尖端的 x 座標（一堆火）
+      if (where === "solo") {
+        strikerPos.setAttribute("class", "strikerPos solo");
+      } else if (where === 0) {
+        strikerPos.setAttribute("class", "strikerPos sideL");
+        tipX = 111;
+        // 左邊火堆的上方
+      } else {
+        strikerPos.setAttribute("class", "strikerPos sideR");
+        tipX = 289;
+        // 右邊火堆的上方
+      }
+      sparks.setAttribute("transform", "translate(" + tipX + " 170)");
+      // 火星從尖端噴出
+      flashPos.setAttribute("transform", "translate(" + tipX + " 170)");
+      // 閃光也在尖端
+    }
+
+    function shootSparks(side) {
+      // 做出 18 顆火星，放在鎂棒尖端；side 是 1（往左下噴）或 -1（往右下噴）
       for (let i = 0; i < 18; i = i + 1) {
         // 重複 18 次
-        let dx = -50 + Math.random() * 90;
-        // 往左右飛多遠（-50 到 40 之間隨機）
+        let dx = (-50 + Math.random() * 90) * side;
+        // 往左右飛多遠（-50 到 40 之間隨機，side 是 -1 時左右相反）
         let dy = 60 + Math.random() * 18;
         // 往下掉多遠（60 到 78 之間隨機）
         let length = Math.sqrt(dx * dx + dy * dy);
@@ -1375,8 +1757,8 @@
     // ---------- 5. 開始前的步驟：選模式 → 選動物 → 選難度 → 抽籤 ----------
     function showStep(stepId) {
       // 只顯示其中一個步驟，其他藏起來
-      let steps = ["stepMode", "stepAnimal", "stepLevel", "stepDraw"];
-      // 四個步驟的名字
+      let steps = ["stepMode", "stepPlay", "stepAnimal", "stepLevel", "stepSet", "stepDraw"];
+      // 所有步驟的名字
       for (let i = 0; i < steps.length; i = i + 1) {
         // 每一個步驟……
         document.getElementById(steps[i]).hidden = (steps[i] !== stepId);
@@ -1395,7 +1777,18 @@
         showStep("stepLevel");
         // 直接去選難度
       } else {
-        // 雙人
+        // 雙人：先選玩法
+        showStep("stepPlay");
+      }
+    }
+
+    function choosePlay(pickedPlay) {
+      // 按下「一起猜」或「互相出題」時執行
+      play = pickedPlay;
+      // 記住選了哪種玩法
+      soundKey();
+      // 響一聲
+      {
         players = [];
         // 清空之前選的動物
         for (let i = 0; i < 4; i = i + 1) {
@@ -1442,12 +1835,184 @@
 
     function chooseLevel(min, max) {
       // 按下難度按鈕時執行
+      minNumber = min;
+      // 先記住範圍（出題時要用）
+      maxNumber = max;
+      maxDigits = String(max).length;
+      // 最多能打幾位數
+      pendingMin = min;
+      pendingMax = max;
       if (mode === "single") {
         // 單人：直接開始
         startGame(min, max);
-      } else {
-        // 雙人：先抽籤
+      } else if (play === "shared") {
+        // 雙人一起猜：先抽籤
         drawLots(min, max);
+      } else {
+        // 互相出題：玩家 1 先出題
+        setter = 0;
+        startSetting();
+      }
+    }
+
+    // ---------- 5.5 互相出題：蓋住畫面 → 打數字 → 選提示 ----------
+    function showSetPart(partId) {
+      // 出題的三個小畫面，一次只顯示一個
+      let parts = ["setCover", "setEnter", "setHint"];
+      for (let i = 0; i < parts.length; i = i + 1) {
+        document.getElementById(parts[i]).hidden = (parts[i] !== partId);
+      }
+    }
+
+    function startSetting() {
+      // 開始讓某位玩家出題：先蓋住畫面
+      let me = ANIMALS[players[setter]];
+      // 出題的動物
+      let them = ANIMALS[players[1 - setter]];
+      // 另一位（要轉過頭的）
+      document.getElementById("coverFace").textContent = me.face;
+      // 大大的動物
+      document.getElementById("coverText").innerHTML = me.name + "要出題了！<br>" + them.face + " " + them.name + "請轉過頭，不要偷看 👀";
+      // 說明（innerHTML 可以放 <br> 換行）
+      document.body.classList.add("playing");
+      // 藏起大標題，讓畫面放得下
+      showStep("stepSet");
+      // 顯示出題步驟
+      showSetPart("setCover");
+      // 先顯示蓋住的畫面
+    }
+
+    function setReady() {
+      // 出題的人按「我準備好了」
+      let me = ANIMALS[players[setter]];
+      let them = ANIMALS[players[1 - setter]];
+      setTyped = "";
+      // 清空
+      document.getElementById("setErr").textContent = "";
+      // 清空提醒
+      document.getElementById("setTitle").textContent = me.face + " " + me.name + "出一個 " + minNumber + "～" + maxNumber + " 的數字給" + them.name + "猜";
+      // 說明
+      drawSetDisplay();
+      // 更新石板
+      soundKey();
+      showSetPart("setEnter");
+      // 顯示打數字的畫面
+    }
+
+    function drawSetDisplay() {
+      // 把出題的數字畫在石板上：平常只顯示 ●，按住「看一下」才顯示數字
+      if (setTyped === "") {
+        setDisplay.textContent = "?";
+        setDisplay.classList.add("empty");
+      } else {
+        setDisplay.classList.remove("empty");
+        if (setPeeking) {
+          setDisplay.textContent = setTyped;
+          // 按著「看一下」：顯示真正的數字
+        } else {
+          setDisplay.textContent = "●".repeat(setTyped.length);
+          // repeat：● 重複「位數」那麼多次
+        }
+      }
+    }
+
+    function setDigit(digit) {
+      // 出題時按數字
+      if (setTyped.length >= maxDigits) return;
+      // 打滿位數就不能再打
+      if (setTyped === "" && digit === 0) return;
+      // 第一個數字不能是 0
+      setTyped = setTyped + digit;
+      document.getElementById("setErr").textContent = "";
+      soundKey();
+      drawSetDisplay();
+    }
+
+    function setDelete() {
+      // 出題時按 ⌫
+      setTyped = setTyped.slice(0, -1);
+      soundKey();
+      drawSetDisplay();
+    }
+
+    function makeHints(n) {
+      // 依照出的數字，做出「一定是對的」提示清單
+      let list = [];
+      // 空清單
+      if (n % 2 === 1) {
+        list.push("是單數");
+        // 除以 2 餘 1 → 單數
+      } else {
+        list.push("是雙數");
+      }
+      list.push("個位數是 " + (n % 10));
+      // n % 10 是除以 10 的餘數，就是個位數
+      let middle = Math.floor((minNumber + maxNumber) / 2);
+      // 範圍的中間數（例如 1～100 是 50）
+      if (n < middle) {
+        list.push("比 " + middle + " 小");
+      } else if (n > middle) {
+        list.push("比 " + middle + " 大");
+      }
+      // 剛好等於中間數就不給這個提示
+      return list;
+    }
+
+    function setDone() {
+      // 出題的人按「出好了」
+      let errBox = document.getElementById("setErr");
+      if (setTyped === "") {
+        errBox.textContent = "先打一個數字喔！";
+        return;
+      }
+      let n = Number(setTyped);
+      if (n < minNumber || n > maxNumber) {
+        errBox.textContent = "要在 " + minNumber + "～" + maxNumber + " 之間喔！";
+        return;
+      }
+      secrets[setter] = n;
+      // 記住這位玩家出的數字
+      let them = ANIMALS[players[1 - setter]];
+      document.getElementById("hintTitle").textContent = "選一個提示給 " + them.face + " " + them.name;
+      // 說明
+      let box = document.getElementById("hintButtons");
+      box.innerHTML = "";
+      // 清空之前的提示按鈕
+      let list = makeHints(n);
+      list.push("");
+      // 最後加一個「不給提示」（用 "" 代表）
+      for (let i = 0; i < list.length; i = i + 1) {
+        let button = document.createElement("button");
+        // 做一個新按鈕
+        button.className = "wood";
+        if (list[i] === "") {
+          button.textContent = "不給提示";
+        } else {
+          button.textContent = "💡 " + list[i];
+        }
+        let hint = list[i];
+        // 把這個提示記在 hint 裡，按下去時才拿得到
+        button.addEventListener("click", function () {
+          pickHint(hint);
+        });
+        box.appendChild(button);
+        // 放進畫面
+      }
+      soundKey();
+      showSetPart("setHint");
+    }
+
+    function pickHint(hint) {
+      // 選好提示
+      hintsGiven[setter] = hint;
+      soundKey();
+      if (setter === 0) {
+        // 玩家 1 出完了 → 換玩家 2 出題
+        setter = 1;
+        startSetting();
+      } else {
+        // 兩個人都出好了 → 抽籤
+        drawLots(pendingMin, pendingMax);
       }
     }
 
@@ -1532,8 +2097,20 @@
         // 用比較大的字
         let animal = ANIMALS[players[turn]];
         // 現在輪到的動物
-        infoText.textContent = "輪到 " + animal.face + " " + animal.name + "　（" + minNumber + "～" + maxNumber + "）";
-        // 顯示「輪到誰」和範圍
+        if (play === "mutual") {
+          infoText.textContent = "輪到 " + animal.face + " " + animal.name;
+          // 互相出題：只顯示輪到誰
+          let hint = hintsGiven[1 - turn];
+          // 要猜的題目是另一個人出的，提示也是他給的
+          if (hint === "") {
+            hintText.textContent = "💡 沒有提示";
+          } else {
+            hintText.textContent = "💡 提示：" + hint;
+          }
+        } else {
+          infoText.textContent = "輪到 " + animal.face + " " + animal.name + "　（" + minNumber + "～" + maxNumber + "）";
+          // 一起猜：顯示「輪到誰」和範圍
+        }
         infoText.style.color = animal.color;
         // 用那隻動物的顏色
       }
@@ -1541,6 +2118,10 @@
 
     function countWords(times) {
       // 「猜了幾次」那行要怎麼寫
+      if (mode === "double" && play === "mutual") {
+        return "";
+        // 互相出題：次數顯示在火堆旁邊，牌子上不重複
+      }
       if (mode === "double") {
         // 雙人
         return "兩人一共猜了 " + times + " 次";
@@ -1576,6 +2157,8 @@
       gameOver = false;
       // 遊戲還沒結束
 
+      hintText.hidden = true;
+      // 先藏起提示那一行
       updateTurnLine();
       // 更新牌子最上面一行（單人：範圍；雙人：輪到誰）
       message.textContent = "猜一個數字，刷打火石生火！";
@@ -1596,6 +2179,30 @@
       // 營火場景回到還沒點火
       updateDisplay();
       // 更新數字石板
+
+      if (mode === "double" && play === "mutual") {
+        // 互相出題：換成兩堆火
+        scene.classList.add("duo");
+        // 加上 duo → 顯示兩堆火的場景
+        counts = [0, 0];
+        litPits = [false, false];
+        lows = [min, min];
+        highs = [max, max];
+        // 兩個人的次數、火、範圍都歸零
+        for (let i = 0; i < 2; i = i + 1) {
+          let animal = ANIMALS[players[i]];
+          document.getElementById("badge" + i).setAttribute("fill", animal.color);
+          // 圓章底色換成動物的顏色
+          document.getElementById("badgeFace" + i).textContent = animal.face;
+          // 圓章上放動物
+          document.getElementById("countLabel" + i).textContent = "0 次";
+          // 次數歸零
+        }
+        hintText.hidden = false;
+        // 顯示提示那一行
+        setDuoTurn(turn);
+        // 輪到抽籤抽中的人，打火棒移過去
+      }
 
       startScreen.hidden = true;
       // 藏起選難度畫面
@@ -1691,13 +2298,37 @@
       message.className = "";
       // 不加顏色
 
-      resetScene();
-      // 先把上一次的白煙、火星清掉
+      let side = 1;
+      // 火星往左下噴
+      if (mode === "double" && play === "mutual") {
+        // 互相出題：不能整個重來（另一堆火可能已經點著了）
+        counts[turn] = counts[turn] + 1;
+        // 這位玩家的次數加 1
+        document.getElementById("countLabel" + turn).textContent = counts[turn] + " 次";
+        // 更新火堆旁的次數
+        if (litPits[turn] === false) {
+          document.getElementById("pit" + turn).setAttribute("class", "pit");
+          // 這堆火的白煙清掉
+        }
+        scene.classList.remove("strike");
+        // 先拿掉 strike
+        sparks.innerHTML = "";
+        // 清掉火星
+        fireText.textContent = "";
+        // 清掉「沒點著」
+        if (turn === 1) {
+          side = -1;
+          // 右邊的火：火星往右下噴
+        }
+      } else {
+        resetScene();
+        // 先把上一次的白煙、火星清掉
+      }
       scene.getBoundingClientRect();
       // 讓瀏覽器「重新看一次」場景，下一行加上 strike 時動畫才會從頭播
       scene.classList.add("strike");
       // 加上 strike → 刮刀刷過去、尖端閃光
-      shootSparks();
+      shootSparks(side);
       // 做出火星（0.82 秒後才噴出來）
 
       later(820, function () {
@@ -1710,8 +2341,13 @@
 
       later(1750, function () {
         // 1.75 秒後：火星落到木柴上了
-        showResult(guess);
-        // 揭曉結果
+        if (mode === "double" && play === "mutual") {
+          showDuoResult(guess);
+          // 互相出題的結果
+        } else {
+          showResult(guess);
+          // 揭曉結果
+        }
       });
     }
 
@@ -1850,6 +2486,150 @@
       });
     }
 
+    // ---------- 8.5 互相出題：兩堆火的輪流和結果 ----------
+    function setDuoTurn(i) {
+      // 換成第 i 位玩家猜
+      turn = i;
+      aimStriker(i);
+      // 打火棒滑到這位玩家的火堆
+      for (let k = 0; k < 2; k = k + 1) {
+        document.getElementById("badge" + k).classList.toggle("active", k === i);
+        // 輪到的人圓章白框變粗
+      }
+      updateTurnLine();
+      // 牌子換成「輪到 某某」和他的提示
+    }
+
+    function showDuoResult(guess) {
+      // 互相出題：火星落下以後，看看有沒有點著
+      let me = turn;
+      // 現在猜的人
+      let other = 1 - me;
+      // 另一位
+      let pit = document.getElementById("pit" + me);
+      // 這位玩家的火堆
+      let target = secrets[other];
+      // 要猜的數字是另一位出的
+      let meAnimal = ANIMALS[players[me]];
+      let otherAnimal = ANIMALS[players[other]];
+      scene.classList.remove("strike");
+      sparks.innerHTML = "";
+      pit.setAttribute("class", "pit ember-on");
+      // 木柴閃一下紅點
+
+      if (guess === target) {
+        // 猜中了
+        litPits[me] = true;
+        message.textContent = "木柴發紅了……";
+        typed = "";
+        // 清空打的數字，下一位才能從頭打
+        updateDisplay();
+        // 更新石板
+        later(650, function () {
+          pit.setAttribute("class", "pit lit");
+          // 這堆火點起來
+          soundRoar();
+          message.textContent = meAnimal.face + " " + meAnimal.name + "生火成功！";
+          message.className = "win";
+          if (litPits[other]) {
+            // 兩堆火都點著了 → 結束
+            finishMutual();
+            return;
+          }
+          setCount(meAnimal.face + " " + meAnimal.name + "用了 " + counts[me] + " 次，" + otherAnimal.face + " " + otherAnimal.name + "加油！");
+          // 幫另一位加油
+          later(1300, function () {
+            setDuoTurn(other);
+            // 換另一位繼續猜
+            busy = false;
+          });
+        });
+        return;
+      }
+
+      // 猜錯了
+      if (guess > target) {
+        message.textContent = guess + " 太大了！";
+        message.className = "big";
+        if (guess - 1 < highs[me]) {
+          highs[me] = guess - 1;
+          // 這位玩家那一題的範圍縮小
+        }
+      } else {
+        message.textContent = guess + " 太小了！";
+        message.className = "small";
+        if (guess + 1 > lows[me]) {
+          lows[me] = guess + 1;
+        }
+      }
+      typed = "";
+      updateDisplay();
+
+      later(400, function () {
+        pit.setAttribute("class", "pit ember-on smoke");
+        // 這堆火冒白煙
+        fireText.setAttribute("x", me === 0 ? 110 : 290);
+        fireText.setAttribute("y", 205);
+        // 「沒點著…」放在這堆火上方
+        fireText.textContent = "沒點著…";
+        soundFizz();
+      });
+
+      later(1100, function () {
+        if (litPits[other] === false) {
+          // 另一位還沒點著 → 換他猜
+          setDuoTurn(other);
+          infoText.classList.remove("flash");
+          infoText.getBoundingClientRect();
+          infoText.classList.add("flash");
+          // 「輪到誰」跳一下
+          playTone(660, 0.08, 0.12);
+        }
+        // 另一位已經點著了 → 不換人，繼續猜
+        busy = false;
+      });
+
+      later(2900, function () {
+        if (litPits[me] === false) {
+          pit.setAttribute("class", "pit");
+          // 白煙飄完，恢復原狀
+        }
+        fireText.textContent = "";
+      });
+    }
+
+    function finishMutual() {
+      // 兩堆火都點著了：公布結果
+      gameOver = true;
+      strikerPos.classList.add("gone");
+      // 打火棒收起來
+      for (let k = 0; k < 2; k = k + 1) {
+        document.getElementById("badge" + k).classList.remove("active");
+      }
+      let a0 = ANIMALS[players[0]];
+      let a1 = ANIMALS[players[1]];
+      infoText.textContent = "答案：" + a0.face + " 出 " + secrets[0] + "　" + a1.face + " 出 " + secrets[1];
+      // 公布兩題的答案（誰出的題目）
+      infoText.style.color = "";
+      hintText.hidden = true;
+      // 藏起提示
+      if (counts[0] === counts[1]) {
+        message.textContent = "平手！兩個人都用 " + counts[0] + " 次";
+      } else if (counts[0] < counts[1]) {
+        message.textContent = a0.face + " " + a0.name + "贏了！";
+        // 次數少的贏
+      } else {
+        message.textContent = a1.face + " " + a1.name + "贏了！";
+      }
+      message.className = "win";
+      endPeek();
+      setCount("兩堆營火都點起來了 🎉");
+      peekButton.hidden = true;
+      keys.hidden = true;
+      playAgainButton.hidden = false;
+      busy = false;
+    }
+
     // ---------- 9. 偷看範圍（按住顯示；點一下顯示 2 秒） ----------
     function showRange() {
       // 手指或滑鼠按下去時執行
@@ -1861,7 +2641,16 @@
       // 記住按下去的時間（Date.now() 是現在的時間，單位是毫秒）
       peeking = true;
       // 記住：正在偷看
-      countText.textContent = "答案在 " + low + "～" + high + " 之間";
+      let showLow = low;
+      // 要顯示的最小值
+      let showHigh = high;
+      // 要顯示的最大值
+      if (mode === "double" && play === "mutual") {
+        showLow = lows[turn];
+        showHigh = highs[turn];
+        // 互相出題：只看得到自己那一題的範圍
+      }
+      countText.textContent = "答案在 " + showLow + "～" + showHigh + " 之間";
       // 牌子最下面那行換成範圍
       countText.classList.add("peek");
       // 變成金黃色
@@ -1934,8 +2723,38 @@
       // 把它擋掉（preventDefault = 不要做原本預設的事）
     });
 
+    setPeekButton.addEventListener("pointerdown", function () {
+      // 出題時按住「看一下」→ 顯示數字
+      setPeeking = true;
+      drawSetDisplay();
+    });
+    setPeekButton.addEventListener("pointerup", stopSetPeek);
+    setPeekButton.addEventListener("pointerleave", stopSetPeek);
+    setPeekButton.addEventListener("pointercancel", stopSetPeek);
+    setPeekButton.addEventListener("contextmenu", function (event) {
+      event.preventDefault();
+      // 擋掉長按選單
+    });
+    function stopSetPeek() {
+      // 放開「看一下」→ 又變回 ●
+      setPeeking = false;
+      drawSetDisplay();
+    }
+
     document.addEventListener("keydown", function (event) {
       // 電腦鍵盤按下任何鍵時執行；event.key 是按了哪個鍵
+      if (startScreen.hidden === false && document.getElementById("stepSet").hidden === false && document.getElementById("setEnter").hidden === false) {
+        // 正在出題（打數字的畫面）
+        if (event.key.length === 1 && event.key >= "0" && event.key <= "9") {
+          setDigit(Number(event.key));
+        } else if (event.key === "Backspace") {
+          setDelete();
+        } else if (event.key === "Enter") {
+          event.preventDefault();
+          setDone();
+        }
+        return;
+      }
       if (gameScreen.hidden) return;
       // 不在猜數字畫面就不理它
       if (event.key.length === 1 && event.key >= "0" && event.key <= "9") {
