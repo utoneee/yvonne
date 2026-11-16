@@ -54,12 +54,16 @@
   .rockCard .info { margin: 0 0 10px; text-align: center; font-size: 17px; color: var(--ink); }
   .picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .picker .wood { border-color: var(--a); }
-  .picker svg { width: 56px; height: 56px; }
+  .picker .circle { width: 62px; height: 62px; }
+  .circle { border-radius: 50%; border: 3px solid var(--a); background: var(--tint); display: grid; place-items: center; overflow: hidden; }
+  .circle svg { width: 88%; height: 88%; margin-top: 6%; }
+  .bigRow .circle { width: min(88px, 100%); height: auto; aspect-ratio: 1; margin: 0 auto 4px; }
+  .modes2 svg { width: 110px; height: 70px; }
   .picker small { font-size: 13px; opacity: .85; min-height: 16px; }
   .picker .taken { filter: grayscale(1); opacity: .45; }
 
   .badges { display: flex; gap: 14px; align-items: center; justify-content: center; background: #1f4a3a; border-radius: 14px; padding: 12px; }
-  .badge { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; display: grid; place-items: center; overflow: hidden; }
+  .badge { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; background: var(--tint); display: grid; place-items: center; overflow: hidden; }
   .badge svg { width: 30px; height: 30px; margin-top: 2px; }
   .badge.active { border-width: 4px; }
   .badgeNote { font-size: 13px; color: var(--soft); text-align: center; margin-top: -6px; }
@@ -176,76 +180,44 @@
       <polygon points="70,8 86,100 79,100" fill="#45634f"/>
       <rect x="68.5" y="0" width="3" height="10" fill="#3a2a1f"/><rect x="45.5" y="3" width="3" height="10" fill="#3a2a1f"/>
     </symbol>
+    <!-- 扁平風營火（跟遊戲裡的火同樣形狀） -->
+    <symbol id="campfire" viewBox="-40 -80 80 100">
+      <ellipse cx="0" cy="8" rx="36" ry="7" fill="#000" opacity=".18"/>
+      <rect x="-30" y="-6" width="60" height="11" rx="5.5" fill="#8a5a2b" transform="rotate(14)"/>
+      <rect x="-30" y="-6" width="60" height="11" rx="5.5" fill="#9c6833" transform="rotate(-14)"/>
+      <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L -27 0 C -42 -10 -42 -32 -29 -46 C -27 -36 -23 -30 -19 -26 C -23 -46 -12 -62 0 -76Z" fill="#f2711c"/>
+      <path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L 0 0 Z" fill="#e0611a"/>
+      <path d="M0 -44 C 7 -33 17 -28 15 -13 C 19 -17 21 -22 20 -26 C 27 -15 23 -3 15 1 L -15 1 C -25 -5 -25 -17 -17 -25 C -16 -19 -13 -15 -10 -13 C -13 -28 -6 -36 0 -44Z" fill="#ffd23f"/>
+    </symbol>
   </defs>
 </svg>
 
 <main>
   <header>
     <h1>圖示設計稿</h1>
-    <p class="lead">這頁只是設計稿。上面比較兩種動物圖示（A 只有動物、B 加上露營小道具），下面是「單人／雙人」的帳篷圖示。每一種都放了「在遊戲裡的樣子」，方便想像。</p>
+    <p class="lead">第二版：動物用你選的 B（加上露營小道具）並放進圓形裡；單人／雙人是帳篷；雙人的下一步改成扁平風營火。這頁只是設計稿，還沒放進遊戲。</p>
   </header>
 
   <section>
-    <h2>一、動物圖示</h2>
+    <h2>一、動物圖示（B 加上露營小道具）</h2>
+    <p class="note">每隻動物都放進圓形裡，圓形用很淡的底色、外框用動物自己的顏色。這樣咖啡色的小熊和松鼠，就不會跟木頭按鈕混在一起。</p>
+    <div class="bigRow" style="max-width:460px;width:100%;margin:0 auto"><div><div class="circle" style="--a:#e3b07a;--tint:#fff1d6"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg></div><span>小熊</span></div><div><div class="circle" style="--a:#ff9ec4;--tint:#ffe6ef"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg></div><span>小兔</span></div><div><div class="circle" style="--a:#ff9248;--tint:#ffe8d6"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg></div><span>狐狸</span></div><div><div class="circle" style="--a:#9fd98a;--tint:#e8f6df"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg></div><span>松鼠</span></div></div>
     <div class="compare">
-
       <div class="col">
-        <h3>A　扁平插畫風</h3>
-        <p>跟場景一樣：一塊一塊的顏色、沒有線條、右半邊比較暗。每台手機看起來都一樣。</p>
-        <div class="bigRow">
-          <div><svg viewBox="0 0 100 100"><use href="#bear"/></svg><span>小熊</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg><span>小兔</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#fox"/></svg><span>狐狸</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg><span>松鼠</span></div>
-        </div>
-        <p class="label">選動物的畫面</p>
+        <h3>選動物的畫面</h3>
         <div class="rockCard">
           <p class="info">玩家 2 選一隻動物</p>
-          <div class="picker">
-            <div class="wood" style="--a:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/></svg>小熊<small></small></div>
-            <div class="wood taken" style="--a:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg>小兔<small>玩家 1</small></div>
-            <div class="wood" style="--a:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/></svg>狐狸<small></small></div>
-            <div class="wood" style="--a:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg>松鼠<small></small></div>
-          </div>
-        </div>
-        <p class="label">火堆旁的小圓章（實際大小）</p>
-        <div class="badges">
-          <div class="badge active" style="background:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/></svg></div>
-          <div class="badge" style="background:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg></div>
-          <div class="badge" style="background:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/></svg></div>
-          <div class="badge" style="background:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg></div>
+          <div class="picker"><div class="wood" style="--a:#e3b07a;--tint:#fff1d6"><div class="circle"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg></div>小熊<small></small></div><div class="wood taken" style="--a:#ff9ec4;--tint:#ffe6ef"><div class="circle"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg></div>小兔<small>玩家 1</small></div><div class="wood" style="--a:#ff9248;--tint:#ffe8d6"><div class="circle"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg></div>狐狸<small></small></div><div class="wood" style="--a:#9fd98a;--tint:#e8f6df"><div class="circle"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg></div>松鼠<small></small></div></div>
         </div>
       </div>
-
       <div class="col">
-        <h3>B　加上露營小道具</h3>
-        <p>同樣的動物，再加一樣露營用品：小熊戴漁夫帽、小兔提著燈、狐狸圍領巾、松鼠抱著橡實。</p>
-        <div class="bigRow">
-          <div><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg><span>小熊</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg><span>小兔</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg><span>狐狸</span></div>
-          <div><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg><span>松鼠</span></div>
-        </div>
-        <p class="label">選動物的畫面</p>
-        <div class="rockCard">
-          <p class="info">玩家 2 選一隻動物</p>
-          <div class="picker">
-            <div class="wood" style="--a:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg>小熊<small></small></div>
-            <div class="wood taken" style="--a:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg>小兔<small>玩家 1</small></div>
-            <div class="wood" style="--a:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg>狐狸<small></small></div>
-            <div class="wood" style="--a:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg>松鼠<small></small></div>
-          </div>
-        </div>
-        <p class="label">火堆旁的小圓章（實際大小）</p>
-        <div class="badges">
-          <div class="badge active" style="background:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg></div>
-          <div class="badge" style="background:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg></div>
-          <div class="badge" style="background:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg></div>
-          <div class="badge" style="background:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg></div>
-        </div>
-        <p class="badgeNote">小圓章很小，道具會擠在邊邊；如果選 B，可以「選動物時有道具、小圓章只放臉」。</p>
+        <h3>火堆旁的小圓章（實際大小）</h3>
+        <p class="label">有道具</p>
+        <div class="badges"><div class="badge active" style="--tint:#fff1d6"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg></div><div class="badge" style="--tint:#ffe6ef"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg></div><div class="badge" style="--tint:#ffe8d6"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg></div><div class="badge" style="--tint:#e8f6df"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg></div></div>
+        <p class="label">只放臉</p>
+        <div class="badges"><div class="badge active" style="--tint:#fff1d6"><svg viewBox="0 0 100 100"><use href="#bear"/></svg></div><div class="badge" style="--tint:#ffe6ef"><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg></div><div class="badge" style="--tint:#ffe8d6"><svg viewBox="0 0 100 100"><use href="#fox"/></svg></div><div class="badge" style="--tint:#e8f6df"><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg></div></div>
+        <p>小圓章只有 34 像素，道具會變得很小。兩種都放上來給你比較，選一種就好。</p>
       </div>
-
     </div>
   </section>
 
@@ -262,7 +234,18 @@
     <ol>
       <li><b>單人</b>：一頂橘色帳篷，就是遊戲場景裡那頂。</li>
       <li><b>雙人</b>：橘色帳篷在前、綠色帳篷在後，像兩個人一起來露營。</li>
-      <li>下一步「一起猜／互相出題」的按鈕，現在是 🔥 和 🔥🔥，這次先不動；想換也可以一起改成扁平風的小營火。</li>
     </ol>
+  </section>
+
+  <section>
+    <h2>三、一起猜／互相出題的營火圖示</h2>
+    <p class="note">選「雙人」之後的下一個畫面。用跟遊戲裡一樣的扁平風營火：一起猜是一堆火，互相出題是兩堆火。</p>
+    <div class="rockCard" style="max-width:460px;width:100%;margin:0 auto">
+      <p class="info">兩個人要怎麼玩？</p>
+      <div class="modes modes2">
+        <div class="wood"><svg viewBox="0 0 160 100"><use href="#campfire" x="45" y="2" width="70" height="88"/></svg>一起猜<small>猜電腦的數字</small></div>
+        <div class="wood"><svg viewBox="0 0 160 100"><use href="#campfire" x="6" y="14" width="64" height="80"/><use href="#campfire" x="90" y="14" width="64" height="80"/></svg>互相出題<small>出數字給對方猜</small></div>
+      </div>
+    </div>
   </section>
 </main>
