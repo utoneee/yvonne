@@ -2163,6 +2163,8 @@
       // 更新牌子最上面一行（單人：範圍；雙人：輪到誰）
       message.textContent = "猜一個數字，刷打火石生火！";
       // 開場提示
+      message.style.color = "";
+      // 拿掉之前的動物顏色
       message.className = "";
       // 拿掉顏色
       endPeek();
@@ -2297,6 +2299,8 @@
       // 顯示刷打火石的聲音
       message.className = "";
       // 不加顏色
+      message.style.color = "";
+      // 拿掉「換人」時用的動物顏色
 
       let side = 1;
       // 火星往左下噴
@@ -2541,6 +2545,8 @@
           later(1300, function () {
             setDuoTurn(other);
             // 換另一位繼續猜
+            sayNextTurn();
+            // 牌子顯示「換 某某 猜囉！」
             busy = false;
           });
         });
@@ -2579,6 +2585,8 @@
         if (litPits[other] === false) {
           // 另一位還沒點著 → 換他猜
           setDuoTurn(other);
+          sayNextTurn();
+          // 清掉上一位的「太大了／太小了」，換成「換 某某 猜囉！」
           infoText.classList.remove("flash");
           infoText.getBoundingClientRect();
           infoText.classList.add("flash");
@@ -2596,6 +2604,17 @@
         }
         fireText.textContent = "";
       });
+    }
+
+    function sayNextTurn() {
+      // 換人的時候，牌子上的結果那行改成「換 某某 猜囉！」（用那隻動物的顏色）
+      let animal = ANIMALS[players[turn]];
+      // 現在輪到的動物
+      message.textContent = "換 " + animal.face + " " + animal.name + "猜囉！";
+      message.className = "";
+      // 拿掉紅橘、淺藍等顏色
+      message.style.color = animal.color;
+      // 改用動物的顏色
     }
 
     function finishMutual() {
