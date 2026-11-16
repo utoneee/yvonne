@@ -253,7 +253,7 @@
           <li><b>兩堆營火</b>：左邊是小兔的、右邊是狐狸的，火堆旁有主人的動物圓章和「猜了幾次」。</li>
           <li><b>帳篷</b>移到正中間後面，露營椅和背包縮小放在兩邊角落。</li>
           <li><b>打火棒</b>會滑到輪到的人那一堆火上面，輪到的人的圓章會變粗框。</li>
-          <li><b>牌子</b>四行：輪到誰猜誰的題、💡 提示、太大／太小、次數。</li>
+          <li><b>牌子</b>四行：輪到誰、💡 提示、太大／太小、次數。</li>
         </ol>
       </div>
       <div>
@@ -382,8 +382,8 @@
     sparks.setAttribute("transform", "translate(" + TIPS[i][0] + " " + TIPS[i][1] + ")");
     flashPos.setAttribute("transform", "translate(" + TIPS[i][0] + " " + TIPS[i][1] + ")");
     for (var k = 0; k < 2; k++) document.getElementById("badge" + k).classList.toggle("active", k === i);
-    var me = P[i], them = P[other(i)];
-    sTurn.textContent = "輪到 " + me.face + " " + me.name + "：猜 " + them.face + " " + them.name + "的題目";
+    var me = P[i];
+    sTurn.textContent = "輪到 " + me.face + " " + me.name;
     sTurn.style.color = me.color;
     sHint.textContent = "💡 提示：" + me.hint;
   }
