@@ -59,7 +59,7 @@
   }
   .sign p { margin: 0; }
   #sTurn { font-size: min(19px, 5.2cqw); }
-  #sHint { font-size: min(15px, 4.4cqw); color: #ffe7a3; min-height: 1.3em; }
+  #sHint { font-size: min(15px, 4.4cqw); color: #ffe7a3; }
   #sMsg { font-size: min(24px, 6cqw); min-height: 1.35em; }
   #sCount { font-size: min(15px, 4.4cqw); opacity: .92; }
   .big { color: var(--big); } .small { color: var(--small); } .win { color: var(--gold); }
@@ -253,7 +253,7 @@
           <li><b>兩堆營火</b>：左邊是小兔的、右邊是狐狸的，火堆旁有主人的動物圓章和「猜了幾次」。</li>
           <li><b>帳篷</b>移到正中間後面，露營椅和背包縮小放在兩邊角落。</li>
           <li><b>打火棒</b>會滑到輪到的人那一堆火上面，輪到的人的圓章會變粗框。</li>
-          <li><b>牌子</b>四行：輪到誰、💡 提示、太大／太小、次數。</li>
+          <li><b>牌子</b>：輪到誰、💡 提示、太大／太小。猜的次數只顯示在營火旁邊，牌子不重複。</li>
         </ol>
       </div>
       <div>
@@ -396,7 +396,7 @@
     sparks.innerHTML = "";
     setTurn(0);
     sMsg.textContent = "猜一個數字，刷打火石生火！"; sMsg.className = "";
-    sCount.textContent = "🐰 0 次　🦊 0 次";
+    sCount.textContent = "";
     bWrong.disabled = false; bRight.disabled = false;
   }
 
@@ -420,7 +420,6 @@
 
   function updateCounts() {
     for (var k = 0; k < 2; k++) document.getElementById("cnt" + k).textContent = counts[k] + " 次";
-    if (!lit[0] && !lit[1]) sCount.textContent = "🐰 " + counts[0] + " 次　🦊 " + counts[1] + " 次";
   }
 
   function strike(hit) {
@@ -465,7 +464,7 @@
     var a = counts[0], b = counts[1];
     sTurn.style.color = "";
     sTurn.textContent = "答案：🐰 出 " + P[1].answer + "　🦊 出 " + P[0].answer;
-    sHint.textContent = "🐰 " + a + " 次　🦊 " + b + " 次";
+    sHint.textContent = "";
     if (a === b) { sMsg.textContent = "平手！兩個人都用 " + a + " 次"; }
     else { var w = a < b ? 0 : 1; sMsg.textContent = P[w].face + " " + P[w].name + "贏了！"; }
     sMsg.className = "win";
