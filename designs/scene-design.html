@@ -1,0 +1,213 @@
+<title>三個營地設計稿</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
+<style>
+  /* 版面：三個營地各一列，左邊一堆火、右邊兩堆火；最下面是「今晚的營地」名稱放在選難度畫面的樣子 */
+  :root {
+    --bg: #10233d;
+    --panel: #173052;
+    --ink: #f6f1e3;
+    --soft: #b8c7da;
+    --line: #2a4a73;
+    --gold: #ffd23f;
+    --wood: #8a5a2b;
+    --wood-dark: #5e3a17;
+    --rock: #6f7378;
+    --rock-dark: #4c5056;
+    --font: "Huninn", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+    padding-block: 28px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+  h1 { font-size: 34px; margin: 0; color: var(--gold); }
+  h2 { font-size: 22px; margin: 0; }
+  .lead, .note { color: var(--soft); margin: 6px 0 0; line-height: 1.6; max-width: 65ch; }
+  section { display: flex; flex-direction: column; gap: 12px; }
+  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { padding: 10px 14px 12px; color: var(--soft); font-size: 15px; line-height: 1.5; }
+  figcaption b { color: var(--ink); font-weight: 400; }
+  .rockCard {
+    background: linear-gradient(160deg, var(--rock), var(--rock-dark));
+    border-radius: 34px 24px 38px 22px / 24px 36px 22px 32px; padding: 16px;
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,.2); max-width: 440px; width: 100%; margin: 0 auto; text-align: center;
+  }
+  .place { display: inline-flex; align-items: center; gap: 8px; background: rgba(8,18,36,.45); border-radius: 999px; padding: 4px 14px 4px 6px; font-size: 17px; margin-bottom: 10px; }
+  .place svg { width: 34px; height: 24px; }
+  .place b { color: var(--gold); font-weight: 400; }
+  .info { margin: 0 0 12px; font-size: 19px; }
+  .lv {
+    font-family: inherit; font-size: 20px; color: var(--ink); width: 100%; margin-bottom: 10px;
+    background-color: var(--wood); background-image: repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,.12) 7px 9px);
+    border: 3px solid var(--wood-dark); border-radius: 10px; box-shadow: 0 5px 0 var(--wood-dark);
+    padding: 8px 16px; display: flex; justify-content: space-between;
+  }
+  .lv small { font-size: 15px; opacity: .85; }
+  ol { margin: 0; padding-left: 1.4em; color: var(--soft); line-height: 1.8; }
+  ol b { color: var(--ink); font-weight: 400; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pine" viewBox="0 0 60 120">
+      <rect x="26" y="84" width="8" height="36" fill="#7a4a22"/>
+      <polygon points="30,34 60,86 0,86" fill="#5fbf8f"/><polygon points="30,34 60,86 30,86" fill="#3f9d7a"/>
+      <polygon points="30,14 54,56 6,56" fill="#5fbf8f"/><polygon points="30,14 54,56 30,56" fill="#3f9d7a"/>
+      <polygon points="30,0 47,30 13,30" fill="#5fbf8f"/><polygon points="30,0 47,30 30,30" fill="#3f9d7a"/>
+    </symbol>
+    <symbol id="star" viewBox="-5 -5 10 10"><path d="M0 -5 L1.1 -1.1 L5 0 L1.1 1.1 L0 5 L-1.1 1.1 L-5 0 L-1.1 -1.1Z" fill="#fff"/></symbol>
+    <symbol id="tent" viewBox="0 0 140 100">
+      <line x1="70" y1="6" x2="138" y2="98" stroke="#2a2f3a" stroke-width="1.4"/>
+      <line x1="47" y1="10" x2="2" y2="96" stroke="#2a2f3a" stroke-width="1.4"/>
+      <polygon points="0,100 47,12 70,8 30,100" fill="#c9622f"/>
+      <polygon points="30,100 70,8 122,100" fill="#f08a4b"/>
+      <polygon points="70,8 122,100 104,100" fill="#de763c"/>
+      <polygon points="70,8 55,100 86,100" fill="#5c4636"/>
+      <polygon points="70,8 86,100 79,100" fill="#7a5c45"/>
+      <rect x="68.5" y="0" width="3" height="10" fill="#3a2a1f"/><rect x="45.5" y="3" width="3" height="10" fill="#3a2a1f"/>
+    </symbol>
+    <symbol id="chair" viewBox="0 0 50 62">
+      <line x1="14" y1="4" x2="10" y2="40" stroke="#1f2e3d" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="6" x2="40" y2="40" stroke="#1f2e3d" stroke-width="3" stroke-linecap="round"/>
+      <polygon points="14,4 40,7 39,32 11,30" fill="#7fa66a"/>
+      <polygon points="7,34 44,34 42,41 9,41" fill="#5f8a4f"/>
+      <line x1="10" y1="40" x2="40" y2="60" stroke="#1f2e3d" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="40" x2="10" y2="60" stroke="#1f2e3d" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="pack" viewBox="0 0 50 64">
+      <rect x="5" y="0" width="40" height="14" rx="7" fill="#f2c14e"/>
+      <rect x="3" y="10" width="44" height="54" rx="13" fill="#8fbf6a"/>
+      <rect x="25" y="10" width="22" height="54" rx="11" fill="#7fae5c"/>
+      <rect x="10" y="37" width="30" height="21" rx="7" fill="#79a957"/>
+      <rect x="14" y="8" width="5" height="34" rx="2" fill="#7a4a22"/><rect x="31" y="8" width="5" height="34" rx="2" fill="#7a4a22"/>
+    </symbol>
+    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="200" cy="240" r="230">
+      <stop offset="0" stop-color="#ffb15c" stop-opacity=".55"/><stop offset=".35" stop-color="#ff9a3c" stop-opacity=".22"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<main>
+  <header>
+    <h1>三個營地設計稿</h1>
+    <p class="lead">每一局開始時，電腦隨機抽一個營地：森林營地、湖邊營地、岩石營地。每個營地都有「一堆火」（單人、一起猜）和「兩堆火」（互相出題）兩種樣子。圖裡的火是點著的樣子，方便看火光；真正遊戲一開始都是沒點火的。</p>
+  </header>
+  <div id="rows"></div>
+
+  <section>
+    <h2>營地名稱放在哪裡</h2>
+    <p class="note">每一局選難度的畫面最上面，多一個小牌子告訴大家今晚在哪裡露營。「再玩一次」回來時，會換一個新的營地。</p>
+    <div class="rockCard">
+      <div class="place"><svg viewBox="0 0 140 100"><use href="#tent"/></svg>今晚的營地：<b>湖邊營地</b></div>
+      <p class="info">今晚要挑戰哪一個難度？</p>
+      <div class="lv">1～20 <small>超簡單</small></div>
+      <div class="lv">1～50 <small>簡單</small></div>
+      <div class="lv">1～100 <small>普通</small></div>
+    </div>
+    <ol>
+      <li><b>每一局都換</b>：按「再玩一次」開新的一局，就會重新抽營地。</li>
+      <li><b>不會連續兩局抽到同一個</b>：這樣每次都真的「換地方」。</li>
+      <li>單人、一起猜、互相出題三種玩法都會換營地。</li>
+    </ol>
+  </section>
+</main>
+
+<script>
+  /* ---------- 三個營地的背景 ---------- */
+  var SKY_A = '<rect y="-50" width="400" height="350" fill="#1b3556"/>' +
+    '<circle cx="200" cy="150" r="125" fill="#22446c"/>' +
+    '<g fill="#2f5a86"><circle cx="78" cy="72" r="13"/><circle cx="96" cy="62" r="17"/><circle cx="114" cy="72" r="12"/><rect x="62" y="70" width="66" height="14" rx="7"/></g>' +
+    '<g fill="#2f5a86"><circle cx="290" cy="96" r="11"/><circle cx="306" cy="88" r="15"/><circle cx="322" cy="96" r="10"/><rect x="276" y="94" width="58" height="12" rx="6"/></g>' +
+    '<circle cx="372" cy="62" r="14" fill="#f4f1e1"/><circle cx="379" cy="57" r="12" fill="#1b3556"/>' +
+    '<use href="#star" x="22" y="40" width="8" height="8"/><use href="#star" x="150" y="40" width="9" height="9"/><use href="#star" x="250" y="48" width="7" height="7"/><use href="#star" x="384" y="100" width="8" height="8"/><use href="#star" x="20" y="120" width="6" height="6"/>' +
+    '<path d="M0 185 Q 100 150 200 172 T 400 160 V 300 H 0Z" fill="#17375c"/>' +
+    '<g fill="#102a47"><polygon points="40,200 58,140 76,200"/><polygon points="70,200 92,128 114,200"/><polygon points="108,200 126,150 144,200"/><polygon points="250,200 270,140 290,200"/><polygon points="282,200 304,124 326,200"/><polygon points="318,200 338,146 358,200"/></g>' +
+    '<use href="#pine" x="128" y="118" width="50" height="100"/><use href="#pine" x="222" y="126" width="44" height="88"/>' +
+    '<path d="M0 212 Q 200 196 400 212 V 300 H 0Z" fill="#1f4a3a"/>' +
+    '<ellipse cx="200" cy="258" rx="180" ry="36" fill="#25563f"/>' +
+    '<use href="#pine" x="-14" y="84" width="76" height="152"/><use href="#pine" x="342" y="78" width="80" height="160"/>';
+
+  var SKY_B = '<rect y="-50" width="400" height="350" fill="#1b3556"/>' +
+    '<circle cx="200" cy="160" r="135" fill="#22446c"/>' +
+    '<g fill="#6aa5d6"><circle cx="120" cy="140" r="34"/><circle cx="165" cy="112" r="40"/><circle cx="225" cy="106" r="42"/><circle cx="278" cy="128" r="36"/><circle cx="318" cy="150" r="26"/><rect x="80" y="130" width="250" height="60"/></g>' +
+    '<g fill="#2f5a86"><circle cx="300" cy="66" r="12"/><circle cx="316" cy="58" r="16"/><circle cx="332" cy="66" r="11"/><rect x="286" y="64" width="62" height="13" rx="6"/></g>' +
+    '<path d="M70 52 a 15 15 0 1 0 14 22 a 12 12 0 1 1 -14 -22Z" fill="#f4f1e1"/>' +
+    '<use href="#star" x="40" y="104" width="7" height="7"/><use href="#star" x="168" y="34" width="8" height="8"/><use href="#star" x="236" y="40" width="8" height="8"/><use href="#star" x="370" y="70" width="7" height="7"/><use href="#star" x="356" y="140" width="6" height="6"/>' +
+    '<polygon points="60,200 130,128 165,150 200,96 240,140 270,118 340,200" fill="#1d3d6b"/>' +
+    '<polygon points="200,96 186,200 150,200 165,150 160,146" fill="#26507f"/><polygon points="130,128 118,200 90,200" fill="#26507f"/>' +
+    '<path d="M0 175 L 70 160 L 120 178 L 400 165 V 205 H 0Z" fill="#0e2442"/>' +
+    '<g fill="#0e2442"><polygon points="150,200 160,168 170,200"/><polygon points="166,200 178,160 190,200"/><polygon points="186,200 196,172 206,200"/><polygon points="214,200 226,158 238,200"/><polygon points="234,200 244,170 254,200"/><polygon points="252,200 264,162 276,200"/></g>' +
+    '<rect y="198" width="400" height="44" fill="#7fb6e0"/>' +
+    '<g fill="#5b93c4"><rect x="30" y="206" width="70" height="7" rx="3.5"/><rect x="120" y="214" width="46" height="6" rx="3"/><rect x="246" y="208" width="80" height="7" rx="3.5"/><rect x="300" y="222" width="60" height="6" rx="3"/><rect x="60" y="226" width="54" height="6" rx="3"/></g>';
+  var SHORE_B = '<path d="M0 238 Q 200 226 400 238 V 300 H 0Z" fill="#10284a"/>' +
+    '<ellipse cx="200" cy="264" rx="180" ry="30" fill="#163360"/>' +
+    '<use href="#pine" x="-18" y="70" width="84" height="168"/><use href="#pine" x="338" y="76" width="80" height="160"/>';
+
+  var SKY_C = '<rect y="-50" width="400" height="350" fill="#142b4a"/>' +
+    '<circle cx="74" cy="56" r="15" fill="#f4f1e1"/><circle cx="82" cy="51" r="13" fill="#142b4a"/>' +
+    '<use href="#star" x="130" y="22" width="9" height="9"/><use href="#star" x="180" y="56" width="6" height="6"/><use href="#star" x="220" y="20" width="8" height="8"/><use href="#star" x="262" y="50" width="7" height="7"/><use href="#star" x="300" y="18" width="9" height="9"/><use href="#star" x="350" y="44" width="7" height="7"/><use href="#star" x="380" y="88" width="6" height="6"/><use href="#star" x="24" y="96" width="6" height="6"/><use href="#star" x="160" y="96" width="5" height="5"/>' +
+    '<polygon points="0,150 55,104 95,128 160,70 220,124 280,82 340,120 400,96 400,220 0,220" fill="#2a4b78"/>' +
+    '<polygon points="160,70 146,82 152,84 160,78 168,86 174,82" fill="#dbe8f5"/><polygon points="280,82 268,92 274,94 280,88 286,95 292,92" fill="#dbe8f5"/><polygon points="55,104 46,112 52,113 56,109 62,114 66,111" fill="#dbe8f5"/>' +
+    '<polygon points="0,180 60,140 120,166 190,124 250,160 320,132 400,156 400,230 0,230" fill="#1d3a63"/>' +
+    '<polygon points="190,124 176,230 140,230 160,152" fill="#24477a"/><polygon points="320,132 300,230 270,230 296,150" fill="#24477a"/>' +
+    '<path d="M0 218 Q 200 200 400 216 V 300 H 0Z" fill="#3b4a5e"/>' +
+    '<ellipse cx="200" cy="260" rx="180" ry="32" fill="#44556c"/>' +
+    '<path d="M296 226 C 290 192 312 168 348 166 C 384 164 404 190 402 228Z" fill="#6b7787"/>' +
+    '<path d="M296 226 C 290 192 312 168 348 166 C 330 176 320 200 324 226Z" fill="#8a96a6"/>' +
+    '<ellipse cx="60" cy="278" rx="12" ry="5" fill="#56677f"/><ellipse cx="340" cy="288" rx="16" ry="5" fill="#56677f"/>' +
+    '<use href="#pine" x="-10" y="120" width="56" height="112"/>';
+
+  var PLACES = [
+    { name: "森林營地", note: "森林裡的一片空地，後面一整排松樹。",
+      solo: SKY_A + '<use href="#tent" x="22" y="152" width="140" height="100"/><use href="#chair" x="258" y="204" width="44" height="55"/><use href="#pack" x="318" y="206" width="42" height="54"/>',
+      duo:  SKY_A + '<use href="#tent" x="142" y="128" width="120" height="86"/><use href="#chair" x="6" y="208" width="36" height="45"/><use href="#pack" x="362" y="212" width="32" height="41"/>',
+      duoNote: "跟現在遊戲裡的一樣：帳篷在中間後面。" },
+    { name: "湖邊營地", note: "火堆在湖邊，後面是雲和山；點火後湖面映出橘色火光。",
+      solo: SKY_B + reflect([200]) + SHORE_B + '<use href="#tent" x="24" y="156" width="140" height="100"/><use href="#chair" x="258" y="208" width="44" height="55"/><use href="#pack" x="318" y="210" width="42" height="54"/>',
+      duo:  SKY_B + '<use href="#tent" x="170" y="155" width="60" height="43"/>' + reflect([110, 290]) + SHORE_B + '<use href="#chair" x="4" y="214" width="34" height="42"/><use href="#pack" x="364" y="216" width="30" height="39"/>',
+      duoNote: "中間後面是湖，所以帳篷縮小放到「湖的對岸」；兩堆火各自在湖面映出火光。" },
+    { name: "岩石營地", note: "山頂上，遠方一層層雪山和滿天星星，右邊一顆大岩石。",
+      solo: SKY_C + '<use href="#tent" x="30" y="156" width="140" height="100"/><use href="#chair" x="256" y="208" width="44" height="55"/><use href="#pack" x="314" y="210" width="42" height="54"/>',
+      duo:  SKY_C + '<use href="#tent" x="142" y="130" width="120" height="86"/><use href="#chair" x="6" y="210" width="36" height="45"/><use href="#pack" x="352" y="214" width="32" height="41"/>',
+      duoNote: "帳篷在中間後面，背包靠在大岩石前面。" }
+  ];
+
+  function reflect(xs) {
+    return xs.map(function (x) {
+      return '<g fill="#ffb15c" opacity=".8"><rect x="' + (x - 34) + '" y="206" width="68" height="5" rx="2.5"/><rect x="' + (x - 22) + '" y="216" width="44" height="4" rx="2"/><rect x="' + (x - 40) + '" y="226" width="80" height="5" rx="2.5"/></g>';
+    }).join("");
+  }
+
+  function pit(cx) {
+    var o = cx - 200;
+    function X(x) { return x + o; }
+    return '<g fill="#8d96a1">' + [170,186,200,214,230].map(function (x, k) { return '<ellipse cx="' + X(x) + '" cy="' + [242,238,237,238,242][k] + '" rx="9" ry="6"/>'; }).join("") + '</g>' +
+      '<rect x="' + X(168) + '" y="243" width="64" height="11" rx="5.5" fill="#5a2f12" transform="rotate(14 ' + cx + ' 248)"/>' +
+      '<rect x="' + X(168) + '" y="243" width="64" height="11" rx="5.5" fill="#6a3a18" transform="rotate(-14 ' + cx + ' 248)"/>' +
+      '<g transform="translate(' + cx + ' 249)">' +
+        '<path d="M0 -76 C 10 -56 28 -48 25 -24 C 31 -32 33 -42 31 -51 C 44 -36 42 -10 27 0 L -27 0 C -42 -10 -42 -32 -29 -46 C -27 -36 -23 -30 -19 -26 C -23 -46 -12 -62 0 -76Z" fill="#f2711c"/>' +
+        '<path d="M0 -44 C 7 -33 17 -28 15 -13 C 19 -17 21 -22 20 -26 C 27 -15 23 -3 15 1 L -15 1 C -25 -5 -25 -17 -17 -25 C -16 -19 -13 -15 -10 -13 C -13 -28 -6 -36 0 -44Z" fill="#ffd23f"/>' +
+      '</g>' +
+      '<g fill="#a9b2bd">' + [162,179,200,221,238].map(function (x, k) { return '<ellipse cx="' + X(x) + '" cy="' + [254,260,263,260,254][k] + '" rx="11" ry="7"/>'; }).join("") + '</g>';
+  }
+  function glow(cx) { return '<rect x="-100" y="-50" width="600" height="350" fill="url(#glow)" transform="translate(' + (cx - 200) + ' 0)"/>'; }
+  function sign() { return '<rect x="34" y="-42" width="332" height="80" rx="14" fill="rgba(8,18,36,.55)"/><text x="200" y="-14" text-anchor="middle" font-size="14" fill="#cdd7e4">（這裡是遊戲的文字牌子）</text>'; }
+
+  var html = "";
+  PLACES.forEach(function (p) {
+    html += '<section><h2>' + p.name + '</h2><p class="note">' + p.note + '</p><div class="pair">' +
+      '<figure><svg viewBox="0 -50 400 350" role="img" aria-label="' + p.name + '，一堆火">' + p.solo + glow(200) + pit(200) + sign() + '</svg>' +
+      '<figcaption><b>一堆火</b>：單人、雙人一起猜</figcaption></figure>' +
+      '<figure><svg viewBox="0 -50 400 350" role="img" aria-label="' + p.name + '，兩堆火">' + p.duo + glow(110) + glow(290) + pit(110) + pit(290) + sign() + '</svg>' +
+      '<figcaption><b>兩堆火</b>：互相出題。' + p.duoNote + '</figcaption></figure>' +
+      '</div></section>';
+  });
+  document.getElementById("rows").innerHTML = html;
+</script>
