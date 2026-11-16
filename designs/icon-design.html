@@ -1,0 +1,268 @@
+<title>動物與帳篷圖示設計稿</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
+<style>
+  /* 版面：兩種動物圖示風格並排比較（大圖＋放進遊戲的樣子），下面是單人／雙人帳篷按鈕。夜晚露營扁平風，單一深色配色 */
+  :root {
+    --bg: #10233d;
+    --panel: #173052;
+    --ink: #f6f1e3;
+    --soft: #b8c7da;
+    --line: #2a4a73;
+    --gold: #ffd23f;
+    --wood: #8a5a2b;
+    --wood-dark: #5e3a17;
+    --rock: #6f7378;
+    --rock-dark: #4c5056;
+    --font: "Huninn", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+    padding-block: 28px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: 34px; margin: 0; color: var(--gold); }
+  h2 { font-size: 22px; margin: 0 0 4px; }
+  h3 { font-size: 19px; margin: 0; color: var(--gold); }
+  .lead, .note { color: var(--soft); margin: 6px 0 0; line-height: 1.6; max-width: 65ch; }
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .col { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .col p { margin: 0; color: var(--soft); line-height: 1.6; font-size: 15px; }
+  .label { font-size: 14px; color: var(--soft); margin: 4px 0 -4px; }
+
+  .bigRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+  .bigRow svg { width: 100%; max-width: 92px; height: auto; display: block; margin: 0 auto; }
+  .bigRow span { font-size: 15px; }
+
+  .wood {
+    font-family: inherit; font-size: 20px; color: var(--ink);
+    background-color: var(--wood);
+    background-image: repeating-linear-gradient(0deg, transparent 0 7px, rgba(0,0,0,.12) 7px 9px);
+    border: 3px solid var(--wood-dark); border-radius: 10px; box-shadow: 0 5px 0 var(--wood-dark);
+    padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .rockCard {
+    background: linear-gradient(160deg, var(--rock), var(--rock-dark));
+    border-radius: 34px 24px 38px 22px / 24px 36px 22px 32px; padding: 14px;
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,.2);
+  }
+  .rockCard .info { margin: 0 0 10px; text-align: center; font-size: 17px; color: var(--ink); }
+  .picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .picker .wood { border-color: var(--a); }
+  .picker svg { width: 56px; height: 56px; }
+  .picker small { font-size: 13px; opacity: .85; min-height: 16px; }
+  .picker .taken { filter: grayscale(1); opacity: .45; }
+
+  .badges { display: flex; gap: 14px; align-items: center; justify-content: center; background: #1f4a3a; border-radius: 14px; padding: 12px; }
+  .badge { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; display: grid; place-items: center; overflow: hidden; }
+  .badge svg { width: 30px; height: 30px; margin-top: 2px; }
+  .badge.active { border-width: 4px; }
+  .badgeNote { font-size: 13px; color: var(--soft); text-align: center; margin-top: -6px; }
+
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 460px; width: 100%; margin: 0 auto; }
+  .modes .wood { font-size: 24px; padding: 14px 8px; }
+  .modes svg { width: 110px; height: 70px; }
+  .modes small { font-size: 15px; opacity: .85; }
+  ol { margin: 0; padding-left: 1.4em; color: var(--soft); line-height: 1.8; }
+  ol b { color: var(--ink); font-weight: 400; }
+</style>
+
+<!-- 所有圖示的「零件」 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 小熊 -->
+    <symbol id="bear" viewBox="0 0 100 100">
+      <circle cx="26" cy="32" r="12" fill="#b5763c"/><circle cx="26" cy="32" r="6.5" fill="#8a5428"/>
+      <circle cx="74" cy="32" r="12" fill="#a0672f"/><circle cx="74" cy="32" r="6.5" fill="#7a4822"/>
+      <circle cx="50" cy="56" r="31" fill="#b5763c"/>
+      <path d="M50 25 A31 31 0 0 1 50 87 Z" fill="#a0672f"/>
+      <ellipse cx="50" cy="68" rx="15" ry="12" fill="#ecc89c"/>
+      <path d="M50 56 A15 12 0 0 1 50 80 Z" fill="#dcb589"/>
+      <ellipse cx="50" cy="62" rx="5.5" ry="4" fill="#3a2414"/>
+      <circle cx="38" cy="50" r="3.4" fill="#2a1a10"/><circle cx="62" cy="50" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="31" cy="62" rx="5" ry="3.5" fill="#ff9fb6" opacity=".55"/><ellipse cx="69" cy="62" rx="5" ry="3.5" fill="#ff9fb6" opacity=".55"/>
+      <path d="M45 71 Q50 75 55 71" stroke="#3a2414" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <!-- 小兔 -->
+    <symbol id="rabbit" viewBox="0 0 100 100">
+      <ellipse cx="38" cy="26" rx="9" ry="23" fill="#f6f1ea"/><ellipse cx="38" cy="27" rx="4.5" ry="16" fill="#ffb3c8"/>
+      <ellipse cx="62" cy="26" rx="9" ry="23" fill="#e6ddd2"/><ellipse cx="62" cy="27" rx="4.5" ry="16" fill="#f59ab4"/>
+      <ellipse cx="50" cy="62" rx="28" ry="26" fill="#f6f1ea"/>
+      <path d="M50 36 A28 26 0 0 1 50 88 Z" fill="#e6ddd2"/>
+      <circle cx="39" cy="56" r="3.4" fill="#2a1a10"/><circle cx="61" cy="56" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="65" rx="4" ry="3" fill="#ff7aa2"/>
+      <path d="M50 68 L50 72 M50 72 Q46 76 43 73 M50 72 Q54 76 57 73" stroke="#8a5a50" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="31" cy="67" rx="5" ry="3.5" fill="#ff9fb6" opacity=".6"/><ellipse cx="69" cy="67" rx="5" ry="3.5" fill="#ff9fb6" opacity=".6"/>
+    </symbol>
+    <!-- 狐狸 -->
+    <symbol id="fox" viewBox="0 0 100 100">
+      <polygon points="18,44 24,12 46,34" fill="#f08a3c"/><polygon points="24,40 27,20 40,34" fill="#5a3a2a"/>
+      <polygon points="82,44 76,12 54,34" fill="#d9722a"/><polygon points="76,40 73,20 60,34" fill="#4a2e20"/>
+      <path d="M16 42 Q50 26 84 42 L76 70 Q50 92 24 70 Z" fill="#f08a3c"/>
+      <path d="M50 30 Q67 33 84 42 L76 70 Q64 83 50 86 Z" fill="#d9722a"/>
+      <path d="M22 58 Q36 70 50 66 Q64 70 78 58 Q72 82 50 88 Q28 82 22 58 Z" fill="#fff5ea"/>
+      <path d="M50 66 Q64 70 78 58 Q72 82 50 88 Z" fill="#efe2d2"/>
+      <circle cx="39" cy="52" r="3.4" fill="#2a1a10"/><circle cx="61" cy="52" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="72" rx="5" ry="3.6" fill="#2a1a10"/>
+      <ellipse cx="30" cy="64" rx="4.5" ry="3" fill="#ff9fb6" opacity=".55"/><ellipse cx="70" cy="64" rx="4.5" ry="3" fill="#ff9fb6" opacity=".55"/>
+    </symbol>
+    <!-- 松鼠 -->
+    <symbol id="squirrel" viewBox="0 0 100 100">
+      <path d="M70 92 C 100 86 104 50 88 30 C 80 18 66 20 68 32 C 80 34 86 52 78 70 Z" fill="#a8693a"/>
+      <path d="M72 30 C 80 32 88 46 84 62 C 82 50 78 40 70 36 Z" fill="#c98a52"/>
+      <polygon points="28,38 32,14 46,32" fill="#c98a52"/><polygon points="31,34 33,20 41,31" fill="#8a5428"/>
+      <polygon points="72,38 68,14 54,32" fill="#b57946"/><polygon points="69,34 67,20 59,31" fill="#7a4822"/>
+      <circle cx="50" cy="58" r="27" fill="#c98a52"/>
+      <path d="M50 31 A27 27 0 0 1 50 85 Z" fill="#b57946"/>
+      <ellipse cx="37" cy="68" rx="11" ry="9" fill="#f3d9b5"/><ellipse cx="63" cy="68" rx="11" ry="9" fill="#e6c9a2"/>
+      <circle cx="39" cy="53" r="3.4" fill="#2a1a10"/><circle cx="61" cy="53" r="3.4" fill="#2a1a10"/>
+      <ellipse cx="50" cy="63" rx="4" ry="3" fill="#3a2414"/>
+      <rect x="47" y="69" width="6" height="7" rx="1.5" fill="#fff"/><line x1="50" y1="69" x2="50" y2="76" stroke="#d9cbb8" stroke-width="1"/>
+    </symbol>
+
+    <!-- 露營小道具 -->
+    <symbol id="bearHat" viewBox="0 0 100 100">
+      <path d="M26 30 Q28 8 50 8 Q72 8 74 30 Z" fill="#7fa66a"/>
+      <path d="M50 8 Q72 8 74 30 L50 30 Z" fill="#6b9258"/>
+      <rect x="27" y="24" width="46" height="6" fill="#f2c14e"/>
+      <ellipse cx="50" cy="31" rx="34" ry="6" fill="#5f8a4f"/>
+    </symbol>
+    <symbol id="rabbitLantern" viewBox="0 0 100 100">
+      <circle cx="86" cy="76" r="16" fill="#ffd23f" opacity=".25"/>
+      <path d="M80 62 Q86 54 92 62" stroke="#3a2a1f" stroke-width="2.4" fill="none"/>
+      <rect x="78" y="62" width="16" height="4" rx="2" fill="#5f8a4f"/>
+      <rect x="80" y="66" width="12" height="16" rx="3" fill="#ffd23f"/>
+      <rect x="86" y="66" width="6" height="16" rx="3" fill="#f2b62e"/>
+      <rect x="78" y="82" width="16" height="4" rx="2" fill="#5f8a4f"/>
+      <circle cx="78" cy="68" r="5" fill="#f6f1ea"/>
+    </symbol>
+    <symbol id="foxScarf" viewBox="0 0 100 100">
+      <path d="M24 80 Q50 94 76 80 L78 88 Q50 102 22 88 Z" fill="#e8608a"/>
+      <path d="M50 87 Q64 86 76 80 L78 88 Q64 95 50 96 Z" fill="#cf4a74"/>
+      <rect x="62" y="88" width="10" height="12" rx="3" fill="#e8608a"/>
+      <rect x="63" y="96" width="8" height="2" fill="#fff" opacity=".6"/>
+    </symbol>
+    <symbol id="squirrelAcorn" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="88" rx="9" ry="10" fill="#a0652f"/>
+      <path d="M50 78 A9 10 0 0 1 50 98 Z" fill="#8a5428"/>
+      <path d="M40 82 Q50 72 60 82 Z" fill="#5e3a17"/>
+      <rect x="49" y="72" width="2.4" height="5" fill="#5e3a17"/>
+      <ellipse cx="40" cy="86" rx="5" ry="4" fill="#c98a52"/><ellipse cx="60" cy="86" rx="5" ry="4" fill="#b57946"/>
+    </symbol>
+
+    <!-- 帳篷（跟遊戲場景同一個） -->
+    <symbol id="tent" viewBox="0 0 140 100">
+      <line x1="70" y1="6" x2="138" y2="98" stroke="#2a2f3a" stroke-width="2"/>
+      <line x1="47" y1="10" x2="2" y2="96" stroke="#2a2f3a" stroke-width="2"/>
+      <polygon points="0,100 47,12 70,8 30,100" fill="#c9622f"/>
+      <polygon points="30,100 70,8 122,100" fill="#f08a4b"/>
+      <polygon points="70,8 122,100 104,100" fill="#de763c"/>
+      <polygon points="70,8 55,100 86,100" fill="#5c4636"/>
+      <polygon points="70,8 86,100 79,100" fill="#7a5c45"/>
+      <rect x="68.5" y="0" width="3" height="10" fill="#3a2a1f"/><rect x="45.5" y="3" width="3" height="10" fill="#3a2a1f"/>
+    </symbol>
+    <symbol id="tentGreen" viewBox="0 0 140 100">
+      <line x1="70" y1="6" x2="138" y2="98" stroke="#2a2f3a" stroke-width="2"/>
+      <line x1="47" y1="10" x2="2" y2="96" stroke="#2a2f3a" stroke-width="2"/>
+      <polygon points="0,100 47,12 70,8 30,100" fill="#4f8a5c"/>
+      <polygon points="30,100 70,8 122,100" fill="#6fb37a"/>
+      <polygon points="70,8 122,100 104,100" fill="#5fa06b"/>
+      <polygon points="70,8 55,100 86,100" fill="#2f4a3a"/>
+      <polygon points="70,8 86,100 79,100" fill="#45634f"/>
+      <rect x="68.5" y="0" width="3" height="10" fill="#3a2a1f"/><rect x="45.5" y="3" width="3" height="10" fill="#3a2a1f"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main>
+  <header>
+    <h1>圖示設計稿</h1>
+    <p class="lead">這頁只是設計稿。上面比較兩種動物圖示（A 只有動物、B 加上露營小道具），下面是「單人／雙人」的帳篷圖示。每一種都放了「在遊戲裡的樣子」，方便想像。</p>
+  </header>
+
+  <section>
+    <h2>一、動物圖示</h2>
+    <div class="compare">
+
+      <div class="col">
+        <h3>A　扁平插畫風</h3>
+        <p>跟場景一樣：一塊一塊的顏色、沒有線條、右半邊比較暗。每台手機看起來都一樣。</p>
+        <div class="bigRow">
+          <div><svg viewBox="0 0 100 100"><use href="#bear"/></svg><span>小熊</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg><span>小兔</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#fox"/></svg><span>狐狸</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg><span>松鼠</span></div>
+        </div>
+        <p class="label">選動物的畫面</p>
+        <div class="rockCard">
+          <p class="info">玩家 2 選一隻動物</p>
+          <div class="picker">
+            <div class="wood" style="--a:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/></svg>小熊<small></small></div>
+            <div class="wood taken" style="--a:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg>小兔<small>玩家 1</small></div>
+            <div class="wood" style="--a:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/></svg>狐狸<small></small></div>
+            <div class="wood" style="--a:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg>松鼠<small></small></div>
+          </div>
+        </div>
+        <p class="label">火堆旁的小圓章（實際大小）</p>
+        <div class="badges">
+          <div class="badge active" style="background:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/></svg></div>
+          <div class="badge" style="background:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/></svg></div>
+          <div class="badge" style="background:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/></svg></div>
+          <div class="badge" style="background:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/></svg></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <h3>B　加上露營小道具</h3>
+        <p>同樣的動物，再加一樣露營用品：小熊戴漁夫帽、小兔提著燈、狐狸圍領巾、松鼠抱著橡實。</p>
+        <div class="bigRow">
+          <div><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg><span>小熊</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg><span>小兔</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg><span>狐狸</span></div>
+          <div><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg><span>松鼠</span></div>
+        </div>
+        <p class="label">選動物的畫面</p>
+        <div class="rockCard">
+          <p class="info">玩家 2 選一隻動物</p>
+          <div class="picker">
+            <div class="wood" style="--a:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg>小熊<small></small></div>
+            <div class="wood taken" style="--a:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg>小兔<small>玩家 1</small></div>
+            <div class="wood" style="--a:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg>狐狸<small></small></div>
+            <div class="wood" style="--a:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg>松鼠<small></small></div>
+          </div>
+        </div>
+        <p class="label">火堆旁的小圓章（實際大小）</p>
+        <div class="badges">
+          <div class="badge active" style="background:#e3b07a"><svg viewBox="0 0 100 100"><use href="#bear"/><use href="#bearHat"/></svg></div>
+          <div class="badge" style="background:#ff9ec4"><svg viewBox="0 0 100 100"><use href="#rabbit"/><use href="#rabbitLantern"/></svg></div>
+          <div class="badge" style="background:#ff9248"><svg viewBox="0 0 100 100"><use href="#fox"/><use href="#foxScarf"/></svg></div>
+          <div class="badge" style="background:#9fd98a"><svg viewBox="0 0 100 100"><use href="#squirrel"/><use href="#squirrelAcorn"/></svg></div>
+        </div>
+        <p class="badgeNote">小圓章很小，道具會擠在邊邊；如果選 B，可以「選動物時有道具、小圓章只放臉」。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>二、單人／雙人的帳篷圖示</h2>
+    <p class="note">用遊戲場景裡同一頂橘色帳篷。單人是一頂；雙人是橘色加一頂綠色，一大一小站在一起。</p>
+    <div class="rockCard" style="max-width:460px;width:100%;margin:0 auto">
+      <p class="info">今晚要怎麼玩？</p>
+      <div class="modes">
+        <div class="wood"><svg viewBox="0 0 160 100"><use href="#tent" x="20" y="4" width="120" height="86"/></svg>單人<small>自己挑戰</small></div>
+        <div class="wood"><svg viewBox="0 0 160 100"><use href="#tentGreen" x="72" y="24" width="88" height="64"/><use href="#tent" x="0" y="8" width="104" height="80"/></svg>雙人<small>兩個人輪流猜</small></div>
+      </div>
+    </div>
+    <ol>
+      <li><b>單人</b>：一頂橘色帳篷，就是遊戲場景裡那頂。</li>
+      <li><b>雙人</b>：橘色帳篷在前、綠色帳篷在後，像兩個人一起來露營。</li>
+      <li>下一步「一起猜／互相出題」的按鈕，現在是 🔥 和 🔥🔥，這次先不動；想換也可以一起改成扁平風的小營火。</li>
+    </ol>
+  </section>
+</main>
