@@ -290,6 +290,16 @@
     const CONNECT_LIMIT = 80;
     // 小朋友寫的兩筆，距離超過這個數字，就算「沒有接好」。越大越寬鬆
 
+    const MIN_SIZE_RATIO = 0.65;
+    // 整個字至少要有標準字 65% 的大小，太小扣一顆星。越小越寬鬆
+
+    const MAX_SIZE_RATIO = 1.35;
+    // 整個字最多是標準字的 1.35 倍，太大扣一顆星。越大越寬鬆
+
+    const CENTER_LIMIT = 150;
+    // 整個字的中心點，最多可以離標準位置多遠，太遠扣一顆星。越大越寬鬆
+    // （整個格子寬大約是 1024 × 1.1，150 大約是格子的 1/7）
+
     const MIN_STROKE_LENGTH = 30;
     // 比這個還短的線當作「不小心點到」，不算一筆
 
@@ -759,6 +769,62 @@
     //   (2) 不像的話，像不像「其他還沒寫到的筆畫」？ → 像：筆畫本身對，但順序錯 → 筆順錯 🟠
     //   (3) 都不像 → 位置錯 🔴（我們當作他「想寫下一筆，但寫歪了」）
 
+    function checkLayout() {
+      // 【整體檢查】一筆一筆比對之前，我們把字搬到中間、調成標準大小了，
+      // 所以那些檢查「看不出」整個字寫太小或寫歪到角落。這裡另外檢查。
+      // 用的是小朋友「原本」寫的位置（沒有搬移、沒有縮放）
+      const problems = [];
+      // 用來放問題說明的清單
+      const userBox = getBounds(userStrokes);
+      // 小朋友的字的方框（原本的位置）
+      const standardBox = getBounds(getStandardStrokes());
+      // 標準字的方框
+
+      // ----- 1. 大小 -----
+      const widthRatio = (userBox.maxX - userBox.minX) / (standardBox.maxX - standardBox.minX);
+      // 小朋友的字寬 ÷ 標準字寬（1 代表一樣寬，0.5 代表只有一半寬）
+      const heightRatio = (userBox.maxY - userBox.minY) / (standardBox.maxY - standardBox.minY);
+      // 小朋友的字高 ÷ 標準字高
+      let sizeRatio = (widthRatio + heightRatio) / 2;
+      // 寬、高取平均，代表「整個字是標準的幾倍大」
+      if (standardBox.maxY - standardBox.minY < 100) {
+        sizeRatio = widthRatio;
+        // 像「一」這種扁扁的字，高度幾乎是 0，只看寬度
+      } else if (standardBox.maxX - standardBox.minX < 100) {
+        sizeRatio = heightRatio;
+        // 像「丨」這種細細的字，寬度幾乎是 0，只看高度
+      }
+      if (sizeRatio < MIN_SIZE_RATIO) {
+        problems.push('字寫太小了，要寫大一點喔');
+      } else if (sizeRatio > MAX_SIZE_RATIO) {
+        problems.push('字寫太大了，要寫小一點喔');
+      }
+
+      // ----- 2. 位置 -----
+      const dx = (userBox.minX + userBox.maxX) / 2 - (standardBox.minX + standardBox.maxX) / 2;
+      // 中心點左右差多少（正數 = 偏右，負數 = 偏左）
+      const dy = (userBox.minY + userBox.maxY) / 2 - (standardBox.minY + standardBox.maxY) / 2;
+      // 中心點上下差多少（字的座標「往上」是正數，所以正數 = 偏上，負數 = 偏下）
+      if (distance({ x: dx, y: dy }, { x: 0, y: 0 }) > CENTER_LIMIT) {
+        // 中心點離太遠
+        let direction = '';
+        // 用來組出「偏右上」這種文字
+        if (dx > CENTER_LIMIT / 2) {
+          direction = direction + '右';
+        } else if (dx < -CENTER_LIMIT / 2) {
+          direction = direction + '左';
+        }
+        if (dy > CENTER_LIMIT / 2) {
+          direction = direction + '上';
+        } else if (dy < -CENTER_LIMIT / 2) {
+          direction = direction + '下';
+        }
+        problems.push('字偏' + direction + '了，要寫在格子中間喔');
+      }
+      return problems;
+      // 回傳所有問題
+    }
+
     function laterStrokeFitsBetter(strokes, i, median, myDistance) {
       // 檢查：小朋友第 i 筆「之後」寫的筆畫裡，有沒有哪一筆比第 i 筆更像這個標準筆畫
       const standardPoints = makeDensePoints(median);
@@ -952,6 +1018,15 @@
         stars = 1;
       }
 
+      const layoutProblems = checkLayout();
+      // 檢查整個字的大小和位置，回傳一串「問題說明」（沒問題就是空的清單）
+      stars = stars - layoutProblems.length;
+      // 每有一個整體問題，就扣一顆星
+      if (stars < 0) {
+        stars = 0;
+        // 星星最少是 0
+      }
+
       let text = '';
       // 要顯示的文字
       if (stars === 0) {
@@ -973,6 +1048,10 @@
       if (notConnectedCount > 0) {
         text = text + '<br>有 ' + notConnectedCount + ' 個地方沒有接好喔';
         // 有沒接好的地方才顯示
+      }
+      for (let k = 0; k < layoutProblems.length; k++) {
+        text = text + '<br>' + layoutProblems[k];
+        // 把每一個整體問題都顯示出來，例如「字寫太小了」
       }
       showMessage(text);
       redraw();
