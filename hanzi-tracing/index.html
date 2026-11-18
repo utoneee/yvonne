@@ -1,0 +1,967 @@
+<!doctype html>
+<!-- 上面這行告訴瀏覽器：這是一份標準的 HTML 網頁 -->
+<html lang="zh-Hant">
+<!-- lang="zh-Hant" 表示這個網頁的語言是「繁體中文」 -->
+<head>
+  <!-- head 裡面放的是「網頁的設定」，不會直接顯示在畫面上 -->
+
+  <meta charset="utf-8">
+  <!-- 使用 utf-8 編碼，中文字才不會變成亂碼 -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <!-- 讓網頁在手機上用「手機的寬度」顯示，並且禁止用兩指放大縮小（避免小朋友寫字時不小心縮放） -->
+
+  <title>國字描紅測試</title>
+  <!-- 瀏覽器分頁上顯示的標題 -->
+
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.3/dist/hanzi-writer.min.js"></script>
+  <!-- 從網路上載入開源工具 Hanzi Writer（3.7.3 版）。它會幫我們畫出字形、播放筆順動畫，並提供每一筆的資料 -->
+
+  <style>
+    /* style 裡面放的是 CSS，用來決定畫面「長什麼樣子」 */
+
+    html, body {
+      /* 同時設定整個網頁（html）和內容區（body） */
+      margin: 0;
+      /* 拿掉瀏覽器預設的外邊距 */
+      padding: 0;
+      /* 拿掉瀏覽器預設的內邊距 */
+      background: #fff8e7;
+      /* 背景顏色：淡淡的米黃色 */
+      overscroll-behavior: none;
+      /* 手機上滑到底時，不要出現「彈一下」的效果 */
+    }
+
+    body {
+      font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      /* 字型：依序嘗試蘋果、微軟、Google 的繁體中文字型 */
+      text-align: center;
+      /* 文字和按鈕都置中 */
+      color: #333333;
+      /* 文字顏色：深灰色 */
+      -webkit-user-select: none;
+      /* （Safari 用）不讓手指長按時選取到文字 */
+      user-select: none;
+      /* （其他瀏覽器用）不讓手指長按時選取到文字 */
+      -webkit-touch-callout: none;
+      /* iPhone / iPad 長按時不要跳出「拷貝」選單 */
+    }
+
+    h1 {
+      /* 最上面的大標題 */
+      font-size: 28px;
+      /* 字的大小 */
+      margin: 12px 0 8px 0;
+      /* 上方 12px、下方 8px 的空間 */
+    }
+
+    #charButtons {
+      /* 放「山、口、人、日、大」切換按鈕的區域 */
+      margin-bottom: 12px;
+      /* 跟下面的田字格隔開一點 */
+    }
+
+    .char-button {
+      /* 每一個「選字按鈕」的樣子 */
+      width: 64px;
+      /* 寬 64px，小朋友手指按得到 */
+      height: 64px;
+      /* 高 64px */
+      font-size: 36px;
+      /* 按鈕上的字很大 */
+      margin: 4px;
+      /* 按鈕之間留一點空隙，避免按錯 */
+      border: 3px solid #f0b429;
+      /* 黃色的邊框 */
+      border-radius: 14px;
+      /* 圓角 */
+      background: white;
+      /* 白色底 */
+      color: #333333;
+      /* 字是深灰色 */
+    }
+
+    .char-button.selected {
+      /* 「目前選到的字」的按鈕，換成另一種樣子 */
+      background: #f0b429;
+      /* 黃色底 */
+      color: white;
+      /* 白色字 */
+    }
+
+    #board {
+      /* 田字格的外框（真正的寬高等一下由 JavaScript 依螢幕大小決定） */
+      position: relative;
+      /* 讓裡面的東西可以用「疊在一起」的方式擺放 */
+      margin: 0 auto;
+      /* 左右自動留白 = 水平置中 */
+      background: white;
+      /* 白色的紙 */
+      border: 4px solid #e05252;
+      /* 紅色的外框，像作業簿的田字格 */
+      box-sizing: content-box;
+      /* 邊框畫在寬高的「外面」，這樣裡面的大小剛好等於我們設定的大小 */
+    }
+
+    .grid-line {
+      /* 田字格中間的虛線（共同設定） */
+      position: absolute;
+      /* 用絕對位置疊在格子上 */
+      border-color: #f2a5a5;
+      /* 淡紅色 */
+      border-style: dashed;
+      /* 虛線 */
+      border-width: 0;
+      /* 先把四邊的線都關掉，下面再各自打開需要的那一邊 */
+    }
+
+    .grid-line.horizontal {
+      /* 橫的那條虛線 */
+      left: 0;
+      /* 從最左邊開始 */
+      right: 0;
+      /* 拉到最右邊 */
+      top: 50%;
+      /* 放在一半的高度 */
+      border-top-width: 2px;
+      /* 只顯示上邊的線，粗 2px */
+    }
+
+    .grid-line.vertical {
+      /* 直的那條虛線 */
+      top: 0;
+      /* 從最上面開始 */
+      bottom: 0;
+      /* 拉到最下面 */
+      left: 50%;
+      /* 放在一半的寬度 */
+      border-left-width: 2px;
+      /* 只顯示左邊的線，粗 2px */
+    }
+
+    #writerArea {
+      /* Hanzi Writer 畫淡灰色字的地方 */
+      position: absolute;
+      /* 疊在田字格上 */
+      left: 0;
+      /* 對齊左邊 */
+      top: 0;
+      /* 對齊上面 */
+    }
+
+    #drawCanvas {
+      /* 小朋友用手指寫字的「透明畫布」，疊在最上層 */
+      position: absolute;
+      /* 疊在田字格上 */
+      left: 0;
+      /* 對齊左邊 */
+      top: 0;
+      /* 對齊上面 */
+      touch-action: none;
+      /* 非常重要：在畫布上滑手指時，瀏覽器「不要」捲動或縮放畫面 */
+    }
+
+    #message {
+      /* 顯示提示、星星、正確率的文字區 */
+      font-size: 26px;
+      /* 字大一點，小朋友看得清楚 */
+      min-height: 72px;
+      /* 先保留固定高度，文字變長時畫面才不會跳動 */
+      margin: 10px 16px;
+      /* 上下 10px、左右 16px 的空間 */
+      line-height: 1.4;
+      /* 行距 */
+    }
+
+    .tool-row {
+      /* 一排按鈕 */
+      display: flex;
+      /* 讓按鈕左右並排 */
+      justify-content: center;
+      /* 並排後置中 */
+      gap: 12px;
+      /* 按鈕之間的距離 */
+      margin: 0 16px 12px 16px;
+      /* 左右各留 16px，下方留 12px */
+    }
+
+    .tool-button {
+      /* 下方四個功能按鈕的共同樣子 */
+      flex: 1;
+      /* 同一排的按鈕平分寬度 */
+      max-width: 260px;
+      /* 平板上不要拉得太寬 */
+      min-height: 68px;
+      /* 高度至少 68px，小手指很好按 */
+      font-size: 24px;
+      /* 按鈕文字大小 */
+      border: none;
+      /* 不要邊框 */
+      border-radius: 16px;
+      /* 圓角 */
+      color: white;
+      /* 白色字 */
+      touch-action: manipulation;
+      /* 手機上連點兩下時不要放大畫面 */
+    }
+
+    .tool-button:active {
+      /* 手指按下去的那一瞬間 */
+      transform: scale(0.95);
+      /* 按鈕縮小一點點，讓小朋友知道「有按到」 */
+    }
+
+    #undoButton  { background: #f59f00; }
+    /* 「擦掉上一筆」：橘色 */
+    #clearButton { background: #868e96; }
+    /* 「全部重寫」：灰色 */
+    #demoButton  { background: #339af0; }
+    /* 「示範筆順」：藍色 */
+    #checkButton { background: #37b24d; }
+    /* 「確定」：綠色 */
+  </style>
+</head>
+
+<body>
+  <!-- body 裡面放的是「真正會顯示在畫面上」的東西 -->
+
+  <h1>描紅練習</h1>
+  <!-- 標題 -->
+
+  <div id="charButtons"></div>
+  <!-- 選字按鈕會由 JavaScript 自動放進這裡 -->
+
+  <div id="board">
+    <!-- 田字格：裡面有四層，從下到上疊起來 -->
+    <div class="grid-line horizontal"></div>
+    <!-- 第 1 層：橫虛線 -->
+    <div class="grid-line vertical"></div>
+    <!-- 第 2 層：直虛線 -->
+    <div id="writerArea"></div>
+    <!-- 第 3 層：Hanzi Writer 畫的淡灰色字 -->
+    <canvas id="drawCanvas"></canvas>
+    <!-- 第 4 層（最上面）：小朋友寫字的透明畫布 -->
+  </div>
+
+  <div id="message">字載入中，請稍等…</div>
+  <!-- 提示文字、評分結果會顯示在這裡 -->
+
+  <div class="tool-row">
+    <!-- 第一排按鈕 -->
+    <button id="undoButton" class="tool-button">↩ 擦掉上一筆</button>
+    <button id="clearButton" class="tool-button">🗑 全部重寫</button>
+  </div>
+
+  <div class="tool-row">
+    <!-- 第二排按鈕 -->
+    <button id="demoButton" class="tool-button">▶ 示範筆順</button>
+    <button id="checkButton" class="tool-button">✔ 確定</button>
+  </div>
+
+  <script>
+    // ==========================================================
+    // 這裡開始是 JavaScript：負責「動作」和「判斷」
+    // 兩條斜線 // 後面的文字是註解，電腦會忽略，是寫給人看的
+    // ==========================================================
+
+
+    // ---------- 1. 可以自己調整的設定 ----------
+
+    const TEST_CHARACTERS = ['山', '口', '人', '日', '大'];
+    // 要練習的字，放在一個「清單」（陣列）裡。想加字就加在這裡
+
+    const START_END_LIMIT = 200;
+    // 起點、終點最多可以偏離多遠（單位：字的座標，整個字的寬度是 1024）
+    // 200 大約是格子寬度的 1/5。數字越大越寬鬆
+
+    const AVERAGE_LIMIT = 100;
+    // 整條線「平均」最多可以偏離標準線多遠。數字越大越寬鬆
+
+    const MIN_STROKE_LENGTH = 30;
+    // 比這個還短的線，當作「不小心點到」，直接丟掉不算一筆
+
+
+    // ---------- 2. 從網頁上找出等一下要用到的元素 ----------
+
+    const board = document.getElementById('board');
+    // 田字格外框
+    const canvas = document.getElementById('drawCanvas');
+    // 寫字用的畫布
+    const ctx = canvas.getContext('2d');
+    // ctx 是「畫筆」，之後用它在畫布上畫線
+    const messageBox = document.getElementById('message');
+    // 顯示文字的區域
+    const charButtonsBox = document.getElementById('charButtons');
+    // 放選字按鈕的區域
+
+
+    // ---------- 3. 遊戲進行中會變動的資料（變數） ----------
+
+    let currentCharacter = TEST_CHARACTERS[0];
+    // 目前在練習哪個字，一開始是清單第一個字「山」
+
+    let characterData = null;
+    // 這個字的筆畫資料（從 Hanzi Writer 下載）。null 代表「還沒拿到」
+
+    let writer = null;
+    // Hanzi Writer 的「寫字器」，等一下才建立
+
+    let boardSize = 300;
+    // 田字格的邊長（像素），等一下會依螢幕大小重新計算
+
+    let padding = 15;
+    // 字和格子邊框之間要留多少空白（像素）
+
+    let userStrokes = [];
+    // 小朋友寫的所有筆畫。每一筆是一串點，每個點是 {x: 數字, y: 數字}
+
+    let currentStroke = null;
+    // 「正在寫」的那一筆。null 代表手指現在沒有在寫
+
+    let activePointerId = null;
+    // 正在寫字的那根手指的編號（用來忽略同時碰到螢幕的其他手指或手掌）
+
+    let strokeResults = null;
+    // 按下「確定」後，每一筆是對（true）還是錯（false）。null 代表還沒評分
+
+    let isAnimating = false;
+    // 是否正在播放筆順動畫（播放時先不給寫）
+
+
+    // ---------- 4. 決定田字格大小 ----------
+
+    function calculateBoardSize() {
+      // 這個「函式」負責算出田字格要多大
+      const widthLimit = window.innerWidth - 40;
+      // 螢幕寬度扣掉左右留白和邊框
+      const heightLimit = window.innerHeight - 430;
+      // 螢幕高度扣掉標題、選字按鈕、功能按鈕的空間
+      let size = Math.min(widthLimit, heightLimit, 520);
+      // 取三個數字中最小的，最大不超過 520 像素
+      if (size < 260) {
+        // 如果算出來太小（例如手機橫放）
+        size = 260;
+        // 至少保持 260 像素，免得格子太小寫不了
+      }
+      return Math.floor(size);
+      // 去掉小數點後回傳
+    }
+
+    function applyBoardSize() {
+      // 把算好的大小，套用到田字格、畫布和 Hanzi Writer 上
+      boardSize = calculateBoardSize();
+      // 算出新的邊長
+      padding = Math.round(boardSize * 0.05);
+      // 留白 = 邊長的 5%
+
+      board.style.width = boardSize + 'px';
+      // 設定田字格的寬
+      board.style.height = boardSize + 'px';
+      // 設定田字格的高
+
+      const ratio = window.devicePixelRatio || 1;
+      // 手機螢幕通常「1 個點 = 2~3 個實際像素」，這個數字就是那個倍數
+      canvas.style.width = boardSize + 'px';
+      // 畫布在畫面上「看起來」的寬
+      canvas.style.height = boardSize + 'px';
+      // 畫布在畫面上「看起來」的高
+      canvas.width = boardSize * ratio;
+      // 畫布「實際」的像素寬（乘上倍數，線條才不會糊糊的）
+      canvas.height = boardSize * ratio;
+      // 畫布「實際」的像素高
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      // 告訴畫筆：之後畫的東西自動放大這個倍數，這樣我們就可以照「看起來的大小」畫
+
+      if (writer !== null) {
+        // 如果寫字器已經建立過了（例如手機轉向時）
+        writer.updateDimensions({ width: boardSize, height: boardSize, padding: padding });
+        // 請 Hanzi Writer 換成新的大小
+      }
+      redraw();
+      // 用新大小把小朋友寫的字重畫一次
+    }
+
+
+    // ---------- 5. 座標換算 ----------
+    // 螢幕的座標：左上角是 (0,0)，往右 x 變大，往下 y 變大，單位是像素
+    // 字的座標：Hanzi Writer 的資料用的，整個字是 1024 x 1024，而且「往上」y 才變大
+    // 我們把小朋友寫的點「換成字的座標」再存起來，這樣才能跟標準筆畫比較
+
+    function screenToChar(screenX, screenY) {
+      // 把「螢幕上的點」換成「字的座標」
+      const t = HanziWriter.getScalingTransform(boardSize, boardSize, padding);
+      // 請 Hanzi Writer 告訴我們它是怎麼縮放的：t.scale 是縮放倍數，t.x、t.y 是位移
+      return {
+        x: (screenX - t.x) / t.scale,
+        // 先扣掉位移，再除以縮放倍數
+        y: (boardSize - t.y - screenY) / t.scale
+        // y 要上下顛倒，所以用「總高度」去減
+      };
+    }
+
+    function charToScreen(point) {
+      // 反過來：把「字的座標」換回「螢幕上的點」，畫線的時候用
+      const t = HanziWriter.getScalingTransform(boardSize, boardSize, padding);
+      // 一樣先拿到縮放資訊
+      return {
+        x: point.x * t.scale + t.x,
+        // 乘上縮放倍數，再加回位移
+        y: boardSize - t.y - point.y * t.scale
+        // y 一樣要上下顛倒回來
+      };
+    }
+
+    function getPointFromEvent(event) {
+      // 從「手指碰觸事件」拿到手指的位置，並換成字的座標
+      const rect = canvas.getBoundingClientRect();
+      // 取得畫布在螢幕上的位置（左上角在哪裡）
+      const screenX = event.clientX - rect.left;
+      // 手指的 x 減掉畫布左邊 = 手指在畫布裡的 x
+      const screenY = event.clientY - rect.top;
+      // 手指的 y 減掉畫布上邊 = 手指在畫布裡的 y
+      return screenToChar(screenX, screenY);
+      // 換成字的座標後回傳
+    }
+
+
+    // ---------- 6. 在畫布上畫出小朋友寫的線 ----------
+
+    function redraw() {
+      // 把畫布清乾淨，再把每一筆重新畫一次
+      ctx.clearRect(0, 0, boardSize, boardSize);
+      // 清空整個畫布
+
+      for (let i = 0; i < userStrokes.length; i++) {
+        // 一筆一筆處理（i 從 0 開始，代表第 1 筆）
+        let color = '#222222';
+        // 還沒評分時，線是黑色
+        if (strokeResults !== null) {
+          // 如果已經按過「確定」
+          if (strokeResults[i] === true) {
+            // 這一筆寫對了
+            color = '#2f9e44';
+            // 用綠色
+          } else {
+            // 這一筆寫錯了
+            color = '#e03131';
+            // 用紅色
+          }
+        }
+        drawOneStroke(userStrokes[i], color);
+        // 用決定好的顏色畫出這一筆
+      }
+    }
+
+    function drawOneStroke(points, color) {
+      // 畫出「一筆」：把這一筆的每個點用線連起來
+      ctx.strokeStyle = color;
+      // 線的顏色
+      ctx.lineWidth = boardSize * 0.045;
+      // 線的粗細：格子邊長的 4.5%，像粗粗的鉛筆
+      ctx.lineCap = 'round';
+      // 線的頭尾是圓的
+      ctx.lineJoin = 'round';
+      // 轉彎的地方也是圓的
+
+      ctx.beginPath();
+      // 開始一條新的線
+      const first = charToScreen(points[0]);
+      // 第一個點換成螢幕座標
+      ctx.moveTo(first.x, first.y);
+      // 把筆移到第一個點（還沒畫）
+      for (let i = 1; i < points.length; i++) {
+        // 從第二個點開始
+        const p = charToScreen(points[i]);
+        // 換成螢幕座標
+        ctx.lineTo(p.x, p.y);
+        // 從上一個點畫一條線到這個點
+      }
+      if (points.length === 1) {
+        // 如果這一筆只有一個點（手指剛放下去）
+        ctx.lineTo(first.x + 0.1, first.y);
+        // 畫一條很短的線，讓它看起來像一個圓點
+      }
+      ctx.stroke();
+      // 真正把線畫出來
+    }
+
+
+    // ---------- 7. 接收手指（或滑鼠）的動作 ----------
+    // pointer 事件同時支援手指、觸控筆和滑鼠，所以電腦上也能用滑鼠測試
+
+    canvas.addEventListener('pointerdown', function (event) {
+      // 手指「放到」畫布上時會執行這裡
+      if (isAnimating) {
+        // 正在播放筆順動畫
+        return;
+        // 先不給寫，直接結束
+      }
+      if (activePointerId !== null) {
+        // 已經有一根手指在寫了（可能是手掌碰到螢幕）
+        return;
+        // 忽略這根新的手指
+      }
+      event.preventDefault();
+      // 阻止瀏覽器原本的動作（例如捲動、選取）
+      activePointerId = event.pointerId;
+      // 記住是哪根手指在寫
+      canvas.setPointerCapture(event.pointerId);
+      // 就算手指滑出畫布外，也繼續收到這根手指的動作
+
+      if (strokeResults !== null) {
+        // 如果剛剛已經評分過，又開始寫
+        strokeResults = null;
+        // 把評分結果清掉，線恢復成黑色（寫的時候不顯示對錯）
+        showMessage('繼續寫寫看！');
+        // 更新提示文字
+      }
+
+      currentStroke = [getPointFromEvent(event)];
+      // 建立新的一筆，裡面先放第一個點
+      userStrokes.push(currentStroke);
+      // 把這一筆加到「所有筆畫」的清單最後面
+      redraw();
+      // 重畫畫面
+    });
+
+    canvas.addEventListener('pointermove', function (event) {
+      // 手指在畫布上「移動」時會一直執行這裡
+      if (currentStroke === null || event.pointerId !== activePointerId) {
+        // 如果現在沒有在寫，或是動的是別根手指
+        return;
+        // 不理它
+      }
+      event.preventDefault();
+      // 阻止瀏覽器捲動畫面
+      currentStroke.push(getPointFromEvent(event));
+      // 把手指目前的位置加到這一筆裡
+      redraw();
+      // 重畫，讓小朋友看到線跟著手指跑
+    });
+
+    function finishStroke(event) {
+      // 手指「離開」畫面時要做的事
+      if (currentStroke === null || event.pointerId !== activePointerId) {
+        // 如果現在沒有在寫，或是離開的是別根手指
+        return;
+        // 不理它
+      }
+      if (getStrokeLength(currentStroke) < MIN_STROKE_LENGTH) {
+        // 如果這一筆太短（只是點一下）
+        userStrokes.pop();
+        // 把它從清單最後面拿掉，不算一筆
+      }
+      currentStroke = null;
+      // 這一筆寫完了
+      activePointerId = null;
+      // 沒有手指在寫了
+      redraw();
+      // 重畫畫面
+    }
+
+    canvas.addEventListener('pointerup', finishStroke);
+    // 手指正常離開螢幕時，執行 finishStroke
+    canvas.addEventListener('pointercancel', finishStroke);
+    // 被系統打斷時（例如跳出通知），也執行 finishStroke
+
+    canvas.addEventListener('touchmove', function (event) {
+      // 額外保險：有些舊的 iPhone / iPad 只看 touch 事件
+      event.preventDefault();
+      // 在畫布上滑動時，阻止畫面上下捲動
+    }, { passive: false });
+    // passive: false 是告訴瀏覽器「我會阻止捲動」，不加的話 preventDefault 會沒效
+
+
+    // ---------- 8. 計算用的小工具 ----------
+
+    function distance(a, b) {
+      // 算兩個點之間的直線距離（國中學的畢氏定理）
+      const dx = a.x - b.x;
+      // 橫向差多少
+      const dy = a.y - b.y;
+      // 直向差多少
+      return Math.sqrt(dx * dx + dy * dy);
+      // 開根號（dx² + dy²）= 距離
+    }
+
+    function getStrokeLength(points) {
+      // 算一筆的總長度：把每兩個相鄰點的距離加起來
+      let total = 0;
+      // 從 0 開始累加
+      for (let i = 1; i < points.length; i++) {
+        // 從第二個點開始，跟前一個點比
+        total = total + distance(points[i - 1], points[i]);
+        // 加上這一小段的長度
+      }
+      return total;
+      // 回傳總長度
+    }
+
+    function makeDensePoints(median) {
+      // Hanzi Writer 給的標準筆畫只有幾個「轉折點」，點跟點之間距離很遠
+      // 這個函式在它們之間每隔 10 單位補一個點，變成密密麻麻的點，比較好比對
+      const result = [];
+      // 用來放結果的空清單
+      for (let i = 0; i < median.length - 1; i++) {
+        // 處理每一段（第 i 個點到第 i+1 個點）
+        const start = { x: median[i][0], y: median[i][1] };
+        // 這一段的起點（資料裡的格式是 [x, y]，換成 {x, y}）
+        const end = { x: median[i + 1][0], y: median[i + 1][1] };
+        // 這一段的終點
+        const steps = Math.max(1, Math.ceil(distance(start, end) / 10));
+        // 這一段要切成幾份（每份大約 10 單位，至少 1 份）
+        for (let s = 0; s < steps; s++) {
+          // 一份一份補點
+          const t = s / steps;
+          // t 是「走到這段的幾分之幾」，從 0 慢慢變大
+          result.push({
+            x: start.x + (end.x - start.x) * t,
+            // 起點往終點方向走 t 那麼多的 x
+            y: start.y + (end.y - start.y) * t
+            // 起點往終點方向走 t 那麼多的 y
+          });
+        }
+      }
+      const last = median[median.length - 1];
+      // 最後一個轉折點
+      result.push({ x: last[0], y: last[1] });
+      // 也加進去，才不會漏掉終點
+      return result;
+      // 回傳補好的點
+    }
+
+    function averageNearestDistance(fromPoints, toPoints) {
+      // 對 fromPoints 裡的每個點，找出 toPoints 裡「離它最近」的點有多遠，最後取平均
+      // 平均越小，代表兩條線越貼近
+      let total = 0;
+      // 累加用
+      for (let i = 0; i < fromPoints.length; i++) {
+        // 每個點都檢查
+        let nearest = Infinity;
+        // 先假設最近距離是「無限大」
+        for (let j = 0; j < toPoints.length; j++) {
+          // 跟另一條線的每個點比
+          const d = distance(fromPoints[i], toPoints[j]);
+          // 算距離
+          if (d < nearest) {
+            // 如果比目前找到的還近
+            nearest = d;
+            // 就記下來
+          }
+        }
+        total = total + nearest;
+        // 把這個點的最近距離加起來
+      }
+      return total / fromPoints.length;
+      // 除以點的數量 = 平均距離
+    }
+
+
+    // ---------- 9. 判斷「一筆」寫得對不對（整個程式最重要的地方） ----------
+
+    function isStrokeCorrect(userPoints, median) {
+      // userPoints：小朋友寫的那一筆
+      // median：Hanzi Writer 給的標準筆畫「中心線」
+      const standardPoints = makeDensePoints(median);
+      // 先把標準線補成密密的點
+
+      const userStart = userPoints[0];
+      // 小朋友這一筆的起點
+      const userEnd = userPoints[userPoints.length - 1];
+      // 小朋友這一筆的終點
+      const standardStart = standardPoints[0];
+      // 標準筆畫的起點
+      const standardEnd = standardPoints[standardPoints.length - 1];
+      // 標準筆畫的終點
+
+      // 檢查 1：起點有沒有在正確的位置附近？
+      if (distance(userStart, standardStart) > START_END_LIMIT) {
+        return false;
+        // 離太遠 → 這筆不對（也會抓到「方向寫反」，例如橫線從右寫到左）
+      }
+
+      // 檢查 2：終點有沒有在正確的位置附近？
+      if (distance(userEnd, standardEnd) > START_END_LIMIT) {
+        return false;
+        // 離太遠 → 這筆不對
+      }
+
+      // 檢查 3：小朋友的線，有沒有一直貼著標準線走？
+      if (averageNearestDistance(userPoints, standardPoints) > AVERAGE_LIMIT) {
+        return false;
+        // 平均偏太多 → 中間歪掉或亂畫
+      }
+
+      // 檢查 4：標準線的每個地方，有沒有都被小朋友描到？
+      if (averageNearestDistance(standardPoints, userPoints) > AVERAGE_LIMIT) {
+        return false;
+        // 有一大段沒描到 → 例如「豎折」只畫成一條斜線
+      }
+
+      return true;
+      // 四項都通過 → 這一筆寫對了
+    }
+
+
+    // ---------- 10. 按下「確定」：幫整個字評分 ----------
+
+    function checkAnswer() {
+      if (characterData === null) {
+        // 字的資料還沒下載好
+        showMessage('字還在載入，請稍等一下');
+        return;
+        // 先不評分
+      }
+      if (userStrokes.length === 0) {
+        // 一筆都還沒寫
+        showMessage('先用手指寫寫看喔！');
+        return;
+        // 先不評分
+      }
+
+      const medians = characterData.medians;
+      // 這個字所有標準筆畫的中心線，照教科書的筆順排好
+      const totalStrokes = medians.length;
+      // 這個字總共有幾筆
+      let correctCount = 0;
+      // 寫對幾筆，從 0 開始算
+      strokeResults = [];
+      // 準備記錄每一筆的對錯
+
+      for (let i = 0; i < userStrokes.length; i++) {
+        // 小朋友寫的每一筆都檢查
+        let correct = false;
+        // 先假設是錯的
+        if (i < totalStrokes) {
+          // 如果這個字有「第 i 筆」（寫太多筆的話，多出來的一定是錯的）
+          correct = isStrokeCorrect(userStrokes[i], medians[i]);
+          // 小朋友的第 i 筆，跟標準的第 i 筆比（所以筆順也要對）
+        }
+        strokeResults.push(correct);
+        // 記下這一筆的結果
+        if (correct) {
+          // 如果寫對了
+          correctCount = correctCount + 1;
+          // 寫對的數量加 1
+        }
+      }
+
+      const percent = correctCount / totalStrokes * 100;
+      // 正確率 = 寫對的筆畫數 ÷ 總筆畫數 × 100（變成百分比）
+      const percentText = Math.round(percent) + '%';
+      // 四捨五入成整數，加上 % 符號，顯示用
+
+      let stars = 0;
+      // 星星數，先設 0
+      if (percent >= 90) {
+        stars = 3;
+        // 90% 以上：三顆星
+      } else if (percent >= 75) {
+        stars = 2;
+        // 75～89%：兩顆星
+      } else if (percent >= 50) {
+        stars = 1;
+        // 50～74%：一顆星
+      }
+      // 都不符合的話，stars 維持 0，代表失敗
+
+      let text = '';
+      // 準備要顯示的文字
+      if (stars === 0) {
+        // 失敗
+        text = '再試一次！加油 💪<br>正確率 ' + percentText;
+      } else {
+        // 過關
+        text = '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '<br>';
+        // 拿到幾顆星就顯示幾個 ⭐，剩下的用 ☆ 補滿 3 個
+        text = text + '寫對 ' + correctCount + ' / ' + totalStrokes + ' 筆，正確率 ' + percentText;
+      }
+      showMessage(text);
+      // 顯示結果
+      redraw();
+      // 重畫：寫對的筆變綠色、寫錯的變紅色
+    }
+
+
+    // ---------- 11. 其他按鈕的功能 ----------
+
+    function undoLastStroke() {
+      // 「擦掉上一筆」
+      if (isAnimating) {
+        return;
+        // 動畫播放中先不處理
+      }
+      userStrokes.pop();
+      // 把清單最後一筆拿掉
+      strokeResults = null;
+      // 清掉評分結果
+      showMessage('擦掉一筆了');
+      redraw();
+      // 重畫
+    }
+
+    function clearAllStrokes() {
+      // 「全部重寫」
+      if (isAnimating) {
+        return;
+        // 動畫播放中先不處理
+      }
+      userStrokes = [];
+      // 清單變成空的
+      strokeResults = null;
+      // 清掉評分結果
+      showMessage('照著灰色的字寫寫看！');
+      redraw();
+      // 重畫（畫布會變乾淨）
+    }
+
+    function playDemo() {
+      // 「示範筆順」
+      if (isAnimating || characterData === null) {
+        return;
+        // 已經在播放，或字還沒載入，就不處理
+      }
+      isAnimating = true;
+      // 標記：正在播放
+      canvas.style.visibility = 'hidden';
+      // 先把小朋友寫的線藏起來，才看得清楚動畫
+      showMessage('看清楚，一筆一筆的順序喔！');
+      writer.animateCharacter({
+        // 請 Hanzi Writer 播放筆順動畫
+        onComplete: function () {
+          // 動畫播完後會執行這裡
+          writer.hideCharacter();
+          // 把動畫畫出來的字藏起來，只留下淡灰色的字
+          canvas.style.visibility = 'visible';
+          // 把小朋友寫的線顯示回來
+          isAnimating = false;
+          // 標記：播放結束
+          showMessage('換你寫寫看！');
+        }
+      });
+    }
+
+    function showMessage(text) {
+      // 在提示區顯示文字（text 裡可以有 <br> 換行）
+      messageBox.innerHTML = text;
+    }
+
+
+    // ---------- 12. 切換練習的字 ----------
+
+    function selectCharacter(character) {
+      currentCharacter = character;
+      // 記住現在練哪個字
+      characterData = null;
+      // 舊的資料不能用了，等新的下載
+      userStrokes = [];
+      // 清掉小朋友寫的線
+      strokeResults = null;
+      // 清掉評分結果
+      isAnimating = false;
+      // 如果動畫還在播，直接當作結束
+      canvas.style.visibility = 'visible';
+      // 確保畫布是看得到的
+      redraw();
+      // 重畫（變乾淨）
+      updateCharButtons();
+      // 更新選字按鈕的顏色
+      showMessage('字載入中，請稍等…');
+      writer.setCharacter(character);
+      // 請 Hanzi Writer 換成新的字（它會自動下載資料）
+    }
+
+    function updateCharButtons() {
+      // 讓目前選到的字按鈕變成黃色
+      const buttons = charButtonsBox.children;
+      // 拿到所有選字按鈕
+      for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].textContent === currentCharacter) {
+          // 如果按鈕上的字就是目前的字
+          buttons[i].classList.add('selected');
+          // 加上「選到了」的樣子
+        } else {
+          buttons[i].classList.remove('selected');
+          // 其他按鈕拿掉「選到了」的樣子
+        }
+      }
+    }
+
+    function createCharButtons() {
+      // 依照 TEST_CHARACTERS 清單，自動做出選字按鈕
+      for (let i = 0; i < TEST_CHARACTERS.length; i++) {
+        const character = TEST_CHARACTERS[i];
+        // 取出第 i 個字
+        const button = document.createElement('button');
+        // 建立一個新的按鈕
+        button.textContent = character;
+        // 按鈕上顯示這個字
+        button.className = 'char-button';
+        // 套用 .char-button 的樣子
+        button.addEventListener('click', function () {
+          // 按下這個按鈕時
+          selectCharacter(character);
+          // 切換到這個字
+        });
+        charButtonsBox.appendChild(button);
+        // 把按鈕放進畫面
+      }
+    }
+
+
+    // ---------- 13. 網頁打開時，依序做這些準備 ----------
+
+    createCharButtons();
+    // 做出選字按鈕
+    applyBoardSize();
+    // 決定田字格大小
+
+    writer = HanziWriter.create('writerArea', currentCharacter, {
+      // 建立 Hanzi Writer 寫字器，畫在 id="writerArea" 的地方
+      width: boardSize,
+      // 寬
+      height: boardSize,
+      // 高
+      padding: padding,
+      // 字和邊框的距離
+      showCharacter: false,
+      // 一開始「不要」顯示黑色的字
+      showOutline: true,
+      // 要顯示「淡灰色的字」讓小朋友描
+      outlineColor: '#dddddd',
+      // 淡灰色
+      strokeColor: '#339af0',
+      // 筆順動畫用藍色
+      strokeAnimationSpeed: 1,
+      // 動畫速度（1 是正常速度）
+      delayBetweenStrokes: 400,
+      // 每一筆動畫之間停 0.4 秒，比較看得清楚
+      onLoadCharDataSuccess: function (data) {
+        // 字的資料下載成功時會執行這裡
+        characterData = data;
+        // 存起來，評分時要用（data.medians 就是每一筆的中心線）
+        showMessage('照著灰色的字寫寫看！');
+      },
+      onLoadCharDataError: function () {
+        // 下載失敗時（例如沒有網路）會執行這裡
+        showMessage('字載入失敗，請檢查網路後重新整理');
+      }
+    });
+
+    updateCharButtons();
+    // 讓第一個字的按鈕變黃色
+
+    document.getElementById('undoButton').addEventListener('click', undoLastStroke);
+    // 按「擦掉上一筆」→ 執行 undoLastStroke
+    document.getElementById('clearButton').addEventListener('click', clearAllStrokes);
+    // 按「全部重寫」→ 執行 clearAllStrokes
+    document.getElementById('demoButton').addEventListener('click', playDemo);
+    // 按「示範筆順」→ 執行 playDemo
+    document.getElementById('checkButton').addEventListener('click', checkAnswer);
+    // 按「確定」→ 執行 checkAnswer
+
+    window.addEventListener('resize', applyBoardSize);
+    // 螢幕大小改變時（例如平板轉向），重新調整田字格大小
+  </script>
+</body>
+</html>
