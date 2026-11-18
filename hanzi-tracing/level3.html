@@ -281,6 +281,15 @@
     // 整條線平均最多可以偏多遠。越大越寬鬆
     // （沒有灰色字可以描，所以比描紅版的 100 稍微寬鬆一點）
 
+    const MIN_LENGTH_RATIO = 0.6;
+    // 一筆至少要有標準筆畫 60% 的長度，太短就算錯。越小越寬鬆
+
+    const TOUCH_STANDARD = 50;
+    // 標準字裡，兩筆的中心線距離小於這個數字，就當作這兩筆「應該接在一起」
+
+    const CONNECT_LIMIT = 80;
+    // 小朋友寫的兩筆，距離超過這個數字，就算「沒有接好」。越大越寬鬆
+
     const MIN_STROKE_LENGTH = 30;
     // 比這個還短的線當作「不小心點到」，不算一筆
 
@@ -545,6 +554,23 @@
       return total;
     }
 
+    function closestDistance(pointsA, pointsB) {
+      // 兩條線「最靠近的地方」有多近（0 代表有碰到）
+      let nearest = Infinity;
+      // 先假設無限遠
+      for (let i = 0; i < pointsA.length; i++) {
+        for (let j = 0; j < pointsB.length; j++) {
+          const d = distance(pointsA[i], pointsB[j]);
+          // A 線上的一點到 B 線上的一點
+          if (d < nearest) {
+            nearest = d;
+            // 更近就記下來
+          }
+        }
+      }
+      return nearest;
+    }
+
     function makeDensePoints(median) {
       // 在標準筆畫的轉折點之間，每隔 10 單位補一個點
       const result = [];
@@ -611,8 +637,12 @@
         return false;
         // 有一段沒寫到
       }
+      if (getStrokeLength(userPoints) < getStrokeLength(standardPoints) * MIN_LENGTH_RATIO) {
+        return false;
+        // 寫得太短（例如「山」最後一豎只寫了一小段）
+      }
       return true;
-      // 都通過：像！
+      // 五項都通過：像！
     }
 
 
@@ -669,17 +699,29 @@
       const standardBox = getBounds(getStandardStrokes());
       // 標準字的方框
 
-      const userSize = Math.max(userBox.maxX - userBox.minX, userBox.maxY - userBox.minY);
-      // 小朋友的字有多大（取寬、高中比較長的那個）
-      const standardSize = Math.max(standardBox.maxX - standardBox.minX, standardBox.maxY - standardBox.minY);
-      // 標準字有多大
+      const userWidth = userBox.maxX - userBox.minX;
+      // 小朋友的字有多寬
+      const userHeight = userBox.maxY - userBox.minY;
+      // 小朋友的字有多高
+      const standardWidth = standardBox.maxX - standardBox.minX;
+      // 標準字有多寬
+      const standardHeight = standardBox.maxY - standardBox.minY;
+      // 標準字有多高
 
       let scale = 1;
       // 縮放倍數，先設 1（不縮放）
-      if (userSize > 50) {
-        // 小朋友的字不是小到幾乎看不見
-        scale = standardSize / userSize;
-        // 例如標準字 800、小朋友寫 400 → 放大 2 倍
+      if (userWidth > 50 && userHeight > 50) {
+        // 寬和高都不是小到幾乎看不見
+        scale = (standardWidth / userWidth + standardHeight / userHeight) / 2;
+        // 「寬要放大幾倍」和「高要放大幾倍」取平均
+        // 例如標準字寬 800、小朋友寫 400 → 寬要放大 2 倍
+        // 寬、高用同一個倍數，字才不會被拉長或壓扁
+      } else if (userWidth > 50) {
+        scale = standardWidth / userWidth;
+        // 只有寬度夠大（例如「一」這種扁扁的字），就只看寬
+      } else if (userHeight > 50) {
+        scale = standardHeight / userHeight;
+        // 只有高度夠大，就只看高
       }
 
       const userCenterX = (userBox.minX + userBox.maxX) / 2;
@@ -756,9 +798,13 @@
 
       const used = [];
       // 記錄每一個標準筆畫「已經被配對過了沒」
+      const matchedBy = [];
+      // 記錄每一個標準筆畫，是被小朋友的「第幾筆」配對到的（-1 代表沒有）
       for (let j = 0; j < totalStrokes; j++) {
         used.push(false);
         // 一開始全部都還沒配對
+        matchedBy.push(-1);
+        // 一開始都沒有被配對到
       }
 
       strokeResults = [];
@@ -790,6 +836,8 @@
           // 寫對
           used[expected] = true;
           // 這一個標準筆畫配對掉了
+          matchedBy[expected] = i;
+          // 記下：是小朋友的第 i 筆
           goodCount = goodCount + 1;
           continue;
           // 這一筆檢查完，換下一筆
@@ -823,6 +871,8 @@
           // 筆畫寫對了，但順序不對
           used[bestMatch] = true;
           // 這個標準筆畫配對掉了
+          matchedBy[bestMatch] = i;
+          // 記下：是小朋友的第 i 筆
           orderCount = orderCount + 1;
         } else {
           // 問題 (3)：都不像
@@ -832,6 +882,48 @@
           if (expected !== -1) {
             used[expected] = true;
             // 當作他想寫「下一筆」但寫歪了，這樣後面的筆畫才不會全部被當成筆順錯
+          }
+        }
+      }
+
+      // 檢查「該接起來的筆畫有沒有接好」
+      // 例如「山」的第二筆（豎折）要接到第三筆（右邊的豎）
+      let notConnectedCount = 0;
+      // 有幾個地方沒接好
+      const standardStrokes = getStandardStrokes();
+      // 標準筆畫（{x, y} 格式）
+      for (let a = 0; a < totalStrokes; a++) {
+        for (let b = a + 1; b < totalStrokes; b++) {
+          // 每兩個標準筆畫 a、b 都檢查一次（b 是比較後面寫的那筆）
+          if (closestDistance(standardStrokes[a], standardStrokes[b]) > TOUCH_STANDARD) {
+            continue;
+            // 標準字裡這兩筆本來就沒有接在一起，跳過
+          }
+          const childA = matchedBy[a];
+          // 小朋友寫的哪一筆對應到 a
+          const childB = matchedBy[b];
+          // 小朋友寫的哪一筆對應到 b
+          if (childA === -1 || childB === -1) {
+            continue;
+            // 有一筆沒寫到或已經判錯，就不用再檢查接不接
+          }
+          if (strokeResults[childB] === 'place') {
+            continue;
+            // b 已經是位置錯了，不用重複扣
+          }
+          if (closestDistance(strokes[childA], strokes[childB]) > CONNECT_LIMIT) {
+            // 小朋友寫的這兩筆離太遠，沒接起來
+            if (strokeResults[childB] === 'good') {
+              goodCount = goodCount - 1;
+              // 原本算寫對，要扣回來
+            } else {
+              orderCount = orderCount - 1;
+              // 原本算筆順錯，要扣回來
+            }
+            strokeResults[childB] = 'place';
+            // 改成位置錯（怪比較後面寫的那一筆）
+            placeCount = placeCount + 1;
+            notConnectedCount = notConnectedCount + 1;
           }
         }
       }
@@ -877,6 +969,10 @@
       if (missingCount > 0) {
         text = text + '　少寫 ' + missingCount;
         // 有少寫的話才顯示
+      }
+      if (notConnectedCount > 0) {
+        text = text + '<br>有 ' + notConnectedCount + ' 個地方沒有接好喔';
+        // 有沒接好的地方才顯示
       }
       showMessage(text);
       redraw();

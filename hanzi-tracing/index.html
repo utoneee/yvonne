@@ -277,6 +277,9 @@
     const AVERAGE_LIMIT = 100;
     // 整條線「平均」最多可以偏離標準線多遠。數字越大越寬鬆
 
+    const MIN_LENGTH_RATIO = 0.6;
+    // 一筆至少要有標準筆畫 60% 的長度，太短就算錯。越小越寬鬆
+
     const MIN_STROKE_LENGTH = 30;
     // 比這個還短的線，當作「不小心點到」，直接丟掉不算一筆
 
@@ -698,8 +701,14 @@
         // 有一大段沒描到 → 例如「豎折」只畫成一條斜線
       }
 
+      // 檢查 5：長度夠不夠？
+      if (getStrokeLength(userPoints) < getStrokeLength(standardPoints) * MIN_LENGTH_RATIO) {
+        return false;
+        // 寫得太短 → 例如只描了一小段就停了
+      }
+
       return true;
-      // 四項都通過 → 這一筆寫對了
+      // 五項都通過 → 這一筆寫對了
     }
 
 
