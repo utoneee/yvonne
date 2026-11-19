@@ -12,6 +12,9 @@
   <title>看圖選字（第一關）</title>
   <!-- 瀏覽器分頁上的標題 -->
 
+  <script src="game-data.js"></script>
+  <!-- 載入共用的字表和進度紀錄 -->
+
   <style>
     html, body {
       margin: 0;
@@ -289,19 +292,12 @@
 
     // ---------- 1. 題目資料（想加字就照這個格式加一行） ----------
 
-    const QUESTIONS = [
-      { character: '山', picture: '⛰️', zhuyin: 'ㄕㄢ' },
-      // 山：山的圖
-      { character: '口', picture: '👄', zhuyin: 'ㄎㄡˇ' },
-      // 口：嘴巴的圖
-      { character: '人', picture: '🧍', zhuyin: 'ㄖㄣˊ' },
-      // 人：站著的人
-      { character: '日', picture: '☀️', zhuyin: 'ㄖˋ' },
-      // 日：太陽
-      { character: '大', picture: '<span style="font-size: 40%">🐭</span>🐘', zhuyin: 'ㄉㄚˋ' }
-      // 大：小小的老鼠旁邊站著大大的大象
-      // picture 裡面可以寫 HTML，這裡用 font-size: 40% 把老鼠縮小
-    ];
+    const QUESTIONS = WORDS;
+    // 題目資料來自 game-data.js 的 WORDS（想加字，請改 game-data.js）
+
+    const FISH_CHARACTER = getCharacterFromUrl();
+    // 從釣魚畫面過來時，網址會帶著要練習的字（例如 level1.html?char=山）
+    // 直接打開這個檔案時是 null，會進入「一輪 5 題」的測試模式
 
     const CHOICE_COUNT = 3;
     // 每一題有幾個選項
@@ -407,6 +403,10 @@
       // 還沒答對
 
       progressBox.textContent = '第 ' + (questionIndex + 1) + ' 題 / 共 ' + questionOrder.length + ' 題';
+      if (FISH_CHARACTER !== null) {
+        progressBox.textContent = '🐟 ' + LEVEL_NAMES[1];
+        // 從釣魚過來的只有一題，改成顯示關卡名稱
+      }
       // 更新進度
       pictureBox.innerHTML = item.picture;
       // 顯示圖片（用 innerHTML，因為「大」的圖片裡有 HTML）
@@ -498,7 +498,14 @@
       messageBox.innerHTML = '答對了！' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '<br>「' + item.character + '」';
       // 顯示星星，並再說一次這個字
 
-      if (questionIndex === questionOrder.length - 1) {
+      if (FISH_CHARACTER !== null) {
+        // 從釣魚過來的：記錄結果，告訴小朋友魚有沒有長大，然後回去釣魚
+        const result = recordResult(item.character, 1, stars);
+        // 記錄「這個字在第一關拿到幾顆星」（game-data.js 會決定魚要不要長大）
+        messageBox.innerHTML = messageBox.innerHTML + '<br>' + growMessage(item.character, result);
+        // 加上「長大了！」之類的話
+        nextButton.textContent = '回去釣魚 🎣';
+      } else if (questionIndex === questionOrder.length - 1) {
         nextButton.textContent = '看看成績 🎉';
         // 最後一題：按鈕改成「看看成績」
       } else {
@@ -513,6 +520,11 @@
     // ---------- 7. 下一題、結束、重新開始 ----------
 
     function goNext() {
+      if (FISH_CHARACTER !== null) {
+        backToFishing();
+        // 從釣魚過來的：答完就回去釣魚
+        return;
+      }
       if (questionIndex === questionOrder.length - 1) {
         showResult();
         // 已經是最後一題 → 顯示成績
@@ -549,6 +561,10 @@
     function startRound() {
       questionOrder = shuffle(QUESTIONS);
       // 題目洗牌，每一輪的順序都不一樣
+      if (FISH_CHARACTER !== null && getWord(FISH_CHARACTER) !== null) {
+        questionOrder = [getWord(FISH_CHARACTER)];
+        // 從釣魚過來的：只出這條魚身上的那個字
+      }
       questionIndex = 0;
       // 從第一題開始
       totalStars = 0;

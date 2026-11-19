@@ -12,6 +12,9 @@
   <title>國字默寫測試（第三關）</title>
   <!-- 瀏覽器分頁上的標題 -->
 
+  <script src="game-data.js"></script>
+  <!-- 載入共用的字表和進度紀錄 -->
+
   <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.3/dist/hanzi-writer.min.js"></script>
   <!-- 載入 Hanzi Writer：提供字形和每一筆的資料 -->
 
@@ -66,6 +69,28 @@
       /* 白底 */
       color: #333333;
       /* 深灰字 */
+    }
+
+    .back-button {
+      /* 從釣魚過來時，最上面的「回去釣魚」按鈕 */
+      height: 56px;
+      /* 跟選字按鈕差不多高，畫面才不會跳 */
+      padding: 0 20px;
+      /* 左右留白 */
+      font-size: 22px;
+      /* 文字大小 */
+      font-weight: bold;
+      /* 粗體 */
+      color: white;
+      /* 白字 */
+      background: #20c997;
+      /* 湖水綠 */
+      border: none;
+      /* 不要邊框 */
+      border-radius: 14px;
+      /* 圓角 */
+      touch-action: manipulation;
+      /* 連點兩下不要放大 */
     }
 
     .char-button.selected {
@@ -274,7 +299,16 @@
 
     // ---------- 1. 可以自己調整的設定 ----------
 
-    const TEST_CHARACTERS = ['山', '口', '人', '日', '大'];
+    const FISH_CHARACTER = getCharacterFromUrl();
+    // 從釣魚畫面過來時，網址會帶著要練習的字（例如 level3.html?char=山）
+    // 直接打開這個檔案時是 null，可以用上面的按鈕切換字來測試
+
+    let TEST_CHARACTERS = wordCharacters();
+    // 可以切換的字（來自 game-data.js 的字表）
+    if (FISH_CHARACTER !== null) {
+      TEST_CHARACTERS = [FISH_CHARACTER];
+      // 從釣魚過來的：只練這一個字
+    }
     // 要練習的字
 
     const START_END_LIMIT = 200;
@@ -1116,6 +1150,10 @@
         text = text + '<div class="hint">還有 ' + (hints.length - MAX_HINTS) + ' 個地方要注意</div>';
         // 太多的話，剩下的只說還有幾個
       }
+      if (FISH_CHARACTER !== null) {
+        text = text + '<div class="hint">' + recordAndDescribe(currentCharacter, 3, stars) + '</div>';
+        // 從釣魚過來的：記錄結果，加上「魚有沒有長大」
+      }
       showMessage(text);
       redraw();
       // 重畫：每一筆換成對應的顏色
@@ -1179,6 +1217,17 @@
     }
 
     function createCharButtons() {
+      if (FISH_CHARACTER !== null) {
+        // 從釣魚過來的：不用切換字，這裡改放「回去釣魚」按鈕
+        const backButton = document.createElement('button');
+        backButton.textContent = '🎣 回去釣魚';
+        backButton.className = 'back-button';
+        backButton.addEventListener('click', backToFishing);
+        // 按下就回到釣魚畫面
+        charButtonsBox.appendChild(backButton);
+        return;
+        // 不用再做選字按鈕
+      }
       for (let i = 0; i < TEST_CHARACTERS.length; i++) {
         const character = TEST_CHARACTERS[i];
         const button = document.createElement('button');
