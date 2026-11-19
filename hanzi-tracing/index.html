@@ -198,9 +198,11 @@
     }
 
     #practiceButton { background: #f08c00; }
-    /* 「去練習這個字」：橘色 */
+    /* 「開始挑戰」：橘色 */
     #keepFishingButton { background: #37b24d; }
-    /* 「繼續釣魚」：綠色 */
+    /* 「放牠回去」：綠色 */
+    #closeBookButton { background: #20c997; }
+    /* 記錄本的「回去釣魚」：湖水綠，跟關卡裡的「回去」按鈕同一個顏色 */
 
     .top-button {
       /* 左上角、右上角的小按鈕 */
@@ -1953,11 +1955,9 @@
     }
     createPickButtons();
     // 做出選角色按鈕
-    const params = new URLSearchParams(window.location.search);
-    // 讀網址問號後面的部分
-    if (params.get('continue') === '1' && loadPlayer() >= 0) {
+    if (isReturningFromLevel() && loadPlayer() >= 0) {
       startGame();
-      // 從關卡回來（網址有 ?continue=1）：用同一個檔案繼續玩
+      // 從關卡回來：用同一個檔案繼續玩（isReturningFromLevel 在 game-data.js 裡）
     } else {
       showSlotScreen();
       // 剛打開遊戲：先選檔案

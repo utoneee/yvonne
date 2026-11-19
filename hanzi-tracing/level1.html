@@ -510,6 +510,8 @@
         detail = detail + '<br>' + growMessage(item.character, result);
         // 加上「長大了！」之類的話
         nextButton.textContent = '回去釣魚 🎣';
+        nextButton.style.background = '#20c997';
+        // 湖水綠，跟其他關卡的「回去」按鈕同一個顏色
       } else if (questionIndex === questionOrder.length - 1) {
         nextButton.textContent = '看看成績 🎉';
         // 最後一題：按鈕改成「看看成績」

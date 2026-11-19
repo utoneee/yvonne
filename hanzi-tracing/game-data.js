@@ -289,9 +289,33 @@ function getCharacterFromUrl() {
   return params.get('char');
 }
 
+const RETURN_KEY = 'hanziFishing.returning';
+// 記下「剛從關卡要回去釣魚」的時間
+
 function backToFishing() {
-  // 回到釣魚畫面（?continue=1 代表「繼續玩」，不用再選檔案）
+  // 回到釣魚畫面，而且不用再選檔案
+  // 用兩種方法告訴釣魚畫面「這是從關卡回來的」：
+  //   1. 網址後面加上 ?continue=1
+  //   2. 在瀏覽器裡記下現在的時間（有些環境會把網址 ? 後面的部分拿掉，這時還有這個可以用）
+  writeStorage(RETURN_KEY, String(Date.now()));
+  // Date.now() 是現在的時間（從 1970 年到現在幾毫秒）
   window.location.href = 'index.html?continue=1';
+}
+
+function isReturningFromLevel() {
+  // 釣魚畫面打開時用來判斷：是不是剛從關卡回來？
+  const params = new URLSearchParams(window.location.search);
+  // 讀網址問號後面的部分
+  const time = Number(readStorage(RETURN_KEY));
+  // 讀出記下的時間（沒有的話 Number(null) 是 0）
+  writeStorage(RETURN_KEY, null);
+  // 用過就清掉，下次重新打開遊戲時，才會顯示「你是哪一位？」
+  if (params.get('continue') === '1') {
+    return true;
+    // 網址有 ?continue=1
+  }
+  return Date.now() - time < 60000;
+  // 或是 1 分鐘（60000 毫秒）內按過「回去釣魚」
 }
 
 function loadPlayer() {
