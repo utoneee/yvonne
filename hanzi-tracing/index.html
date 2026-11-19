@@ -202,12 +202,10 @@
     #keepFishingButton { background: #37b24d; }
     /* 「繼續釣魚」：綠色 */
 
-    #changeButton {
-      /* 左上角「換角色」的小按鈕 */
+    .top-button {
+      /* 左上角、右上角的小按鈕 */
       position: fixed;
       /* 固定在螢幕上 */
-      left: 10px;
-      /* 離左邊 10px */
       top: 10px;
       /* 離上面 10px */
       padding: 8px 12px;
@@ -225,6 +223,175 @@
       touch-action: manipulation;
       /* 連點兩下不要放大 */
     }
+
+    #playerButton { left: 10px; }
+    /* 玩家按鈕：左上角 */
+    #bookButton { right: 10px; }
+    /* 記錄本按鈕：右上角 */
+
+    #slotList {
+      /* 玩家一、玩家二的檔案 */
+      display: flex;
+      /* 左右並排 */
+      gap: 14px;
+      /* 間距 */
+      justify-content: center;
+      /* 置中 */
+    }
+
+    .slot {
+      /* 一個檔案（檔案按鈕＋下面的清除按鈕） */
+      display: flex;
+      /* 由上往下排 */
+      flex-direction: column;
+      align-items: center;
+      /* 置中 */
+      gap: 6px;
+      /* 間距 */
+    }
+
+    .slot-button {
+      /* 檔案按鈕 */
+      width: 120px;
+      /* 寬 */
+      min-height: 150px;
+      /* 高 */
+      padding: 8px 0;
+      /* 上下內部留白 */
+      background: white;
+      /* 白底 */
+      border: 4px solid #5c3d2e;
+      /* 咖啡色邊框 */
+      font-size: 20px;
+      /* 玩家名字的大小 */
+      font-weight: bold;
+      /* 粗體 */
+      color: #5c3d2e;
+      /* 咖啡色 */
+      touch-action: manipulation;
+      /* 連點兩下不要放大 */
+    }
+
+    .slot-button:active, .guest-button:active {
+      transform: scale(0.95);
+      /* 按下去時縮小一點 */
+    }
+
+    .slot-button canvas {
+      display: block;
+      /* 自己佔一行 */
+      margin: 0 auto 4px auto;
+      /* 置中 */
+    }
+
+    .slot-plus {
+      /* 空的檔案：大大的「＋」 */
+      font-size: 56px;
+      /* 很大 */
+      line-height: 80px;
+      /* 跟角色圖一樣高 */
+      color: #adb5bd;
+      /* 灰色 */
+    }
+
+    .slot-info {
+      /* 檔案按鈕裡的小字（學會幾個字、開新檔案） */
+      font-size: 15px;
+      /* 小一點 */
+      font-weight: normal;
+      /* 不要粗體 */
+      margin-top: 2px;
+    }
+
+    .clear-button {
+      /* 檔案下面的「清除」按鈕：小小的，避免小朋友誤按 */
+      font-size: 14px;
+      padding: 4px 10px;
+      color: #868e96;
+      /* 灰色 */
+      background: transparent;
+      /* 透明底 */
+      border: 2px solid #ced4da;
+      /* 淡灰色框 */
+      touch-action: manipulation;
+    }
+
+    .clear-button.confirm {
+      /* 按第一次之後：變紅色提醒 */
+      color: white;
+      background: #fa5252;
+      border-color: #fa5252;
+    }
+
+    .guest-button {
+      /* 「訪客」和「返回」按鈕 */
+      margin-top: 16px;
+      /* 跟上面隔開 */
+      padding: 10px 20px;
+      /* 內部留白 */
+      font-size: 18px;
+      /* 文字大小 */
+      font-weight: bold;
+      color: #5c3d2e;
+      /* 咖啡色 */
+      background: #fff;
+      /* 白底 */
+      border: 3px dashed #5c3d2e;
+      /* 虛線框：表示比較次要 */
+      touch-action: manipulation;
+    }
+
+    .book-box {
+      /* 記錄本的框 */
+      max-height: 86vh;
+      /* 最高是螢幕高的 86% */
+      overflow-y: auto;
+      /* 卡片太多時，可以在框裡上下滑動 */
+      width: 100%;
+      /* 寬度盡量撐開（最多 420px） */
+      box-sizing: border-box;
+      /* 寬度包含邊框和內距 */
+    }
+
+    .book-summary {
+      /* 「學會幾個字」 */
+      font-size: 18px;
+      color: #5c3d2e;
+      margin: -6px 0 12px 0;
+      /* 跟標題靠近一點 */
+    }
+
+    #bookList {
+      /* 卡片排成兩欄 */
+      display: grid;
+      /* 用格子排版 */
+      grid-template-columns: 1fr 1fr;
+      /* 兩欄，一樣寬 */
+      gap: 10px;
+      /* 卡片間距 */
+    }
+
+    .book-card {
+      /* 一張字卡 */
+      background: white;
+      border: 3px solid #5c3d2e;
+      padding: 8px 4px;
+      font-size: 15px;
+      color: #5c3d2e;
+      line-height: 1.4;
+    }
+
+    .book-card canvas {
+      display: block;
+      margin: 0 auto 4px auto;
+      /* 魚的圖置中 */
+    }
+
+    .book-stage {
+      font-size: 17px;
+      font-weight: bold;
+      /* 「中魚」這幾個字粗體 */
+    }
   </style>
 </head>
 
@@ -232,15 +399,39 @@
   <canvas id="game"></canvas>
   <!-- 整個釣魚遊戲都畫在這張畫布上 -->
 
-  <button id="changeButton" class="hidden">換角色</button>
-  <!-- 左上角的「換角色」按鈕（選好角色後才出現） -->
+  <button id="playerButton" class="top-button hidden">👤 玩家一</button>
+  <!-- 左上角：現在是哪個玩家，點了可以換玩家 -->
+  <button id="bookButton" class="top-button hidden">📖 記錄本</button>
+  <!-- 右上角：打開記錄本 -->
 
-  <div id="pickScreen" class="overlay">
-    <!-- 選角色的畫面 -->
+  <div id="slotScreen" class="overlay">
+    <!-- 一開始：選檔案的畫面 -->
+    <div class="pixel-box">
+      <div class="title">國字釣魚 🎣<br>你是哪一位？</div>
+      <div id="slotList"></div>
+      <!-- 玩家一、玩家二的檔案按鈕會由 JavaScript 放進來 -->
+      <button id="guestButton" class="guest-button">訪客（不會存檔）</button>
+    </div>
+  </div>
+
+  <div id="pickScreen" class="overlay hidden">
+    <!-- 新檔案、訪客：選角色的畫面 -->
     <div class="pixel-box">
       <div class="title">選一個好朋友<br>一起去釣魚吧！</div>
       <div id="pickList"></div>
       <!-- 三個角色按鈕會由 JavaScript 放進來 -->
+      <button id="pickBackButton" class="guest-button">← 返回</button>
+    </div>
+  </div>
+
+  <div id="bookScreen" class="overlay hidden">
+    <!-- 記錄本 -->
+    <div class="pixel-box book-box">
+      <div id="bookTitle" class="title">📖 玩家一的記錄本</div>
+      <div id="bookSummary" class="book-summary">學會 0 / 5 個字</div>
+      <div id="bookList"></div>
+      <!-- 每個字一張卡片，由 JavaScript 放進來 -->
+      <button id="closeBookButton" class="big-button">回去釣魚 🎣</button>
     </div>
   </div>
 
@@ -451,8 +642,14 @@
     // 釣到魚的視窗
     const caughtCharacterBox = document.getElementById('caughtCharacter');
     // 視窗裡的大國字
-    const changeButton = document.getElementById('changeButton');
-    // 換角色按鈕
+    const playerButton = document.getElementById('playerButton');
+    // 左上角的玩家按鈕
+    const bookButton = document.getElementById('bookButton');
+    // 右上角的記錄本按鈕
+    const slotScreen = document.getElementById('slotScreen');
+    // 選檔案畫面
+    const bookScreen = document.getElementById('bookScreen');
+    // 記錄本畫面
 
 
     // ---------- 4. 遊戲的資料 ----------
@@ -747,8 +944,9 @@
       // 身上的字
       const stage = getStage(character);
       // 這個字學到哪個階段（決定魚的大小）
-      let colors = FISH_COLORS[Math.floor(random(0, FISH_COLORS.length))];
-      // 隨機挑一種顏色
+      let colors = FISH_COLORS[wordIndex(character) % FISH_COLORS.length];
+      // 每個字固定一種顏色（第 1 個字橘色、第 2 個字綠色……輪流），小朋友比較記得住
+      // %（餘數）讓字超過 4 個時，顏色會從頭輪一次
       if (stage === 3) {
         colors = GOLD_COLORS;
         // 已經學會的字：金色
@@ -1332,46 +1530,262 @@
     });
 
 
-    // ---------- 13. 選角色 ----------
+    // ---------- 13. 選檔案、選角色 ----------
+
+    function makeSpriteCanvas(sprite, colors, cellSize) {
+      // 做一張小畫布，把點陣圖畫上去（選檔案、選角色的按鈕會用到）
+      const width = sprite[0].length;
+      // 點陣圖幾格寬
+      const height = sprite.length;
+      // 幾格高
+      const ratio = window.devicePixelRatio || 1;
+      const small = document.createElement('canvas');
+      small.style.width = width * cellSize + 'px';
+      small.style.height = height * cellSize + 'px';
+      small.width = width * cellSize * ratio;
+      small.height = height * cellSize * ratio;
+      const smallContext = small.getContext('2d');
+      smallContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      drawSprite(smallContext, sprite, colors, 0, 0, cellSize, false);
+      return small;
+    }
+
+    function showSlotScreen() {
+      // 顯示選檔案畫面（每次打開都重新做按鈕，才會顯示最新的進度）
+      const slotList = document.getElementById('slotList');
+      slotList.innerHTML = '';
+      // 清掉舊的按鈕
+      const playerSlots = ['player1', 'player2'];
+      // 會存檔的兩個檔案
+      for (let i = 0; i < playerSlots.length; i++) {
+        const slot = playerSlots[i];
+        const data = loadSlot(slot);
+        // 讀出這個檔案的資料
+        const box = document.createElement('div');
+        box.className = 'slot';
+
+        const button = document.createElement('button');
+        button.className = 'slot-button';
+        if (data.player >= 0) {
+          // 有資料的檔案：顯示角色、名字、學會幾個字
+          button.appendChild(makeSpriteCanvas(PLAYERS[data.player].sprite, PLAYERS[data.player].colors, 5));
+          button.appendChild(document.createTextNode(SLOT_NAMES[slot]));
+          const info = document.createElement('div');
+          info.className = 'slot-info';
+          info.textContent = '學會 ' + countMastered(data.progress) + ' 個字';
+          button.appendChild(info);
+        } else {
+          // 空的檔案：顯示「＋」和「開新檔案」
+          const plus = document.createElement('div');
+          plus.className = 'slot-plus';
+          plus.textContent = '＋';
+          button.appendChild(plus);
+          button.appendChild(document.createTextNode(SLOT_NAMES[slot]));
+          const info = document.createElement('div');
+          info.className = 'slot-info';
+          info.textContent = '開新檔案';
+          button.appendChild(info);
+        }
+        button.addEventListener('click', function () {
+          chooseSlot(slot);
+          // 選這個檔案
+        });
+        box.appendChild(button);
+
+        if (data.player >= 0) {
+          box.appendChild(makeClearButton(slot));
+          // 有資料的檔案，下面放「清除」按鈕
+        }
+        slotList.appendChild(box);
+      }
+      slotScreen.classList.remove('hidden');
+      // 打開畫面
+    }
+
+    function makeClearButton(slot) {
+      // 「清除」按鈕：要連按兩下才會真的清除
+      const button = document.createElement('button');
+      button.className = 'clear-button';
+      button.textContent = '清除';
+      let armed = false;
+      // 是不是已經按過第一下
+      button.addEventListener('click', function () {
+        if (!armed) {
+          armed = true;
+          button.textContent = '再按一次清除';
+          button.classList.add('confirm');
+          // 第一下：變紅色，提醒再按一次
+          setTimeout(function () {
+            armed = false;
+            button.textContent = '清除';
+            button.classList.remove('confirm');
+            // 3 秒內沒有再按，就恢復原狀
+          }, 3000);
+          return;
+        }
+        clearSlot(slot);
+        // 第二下：真的清除
+        showSlotScreen();
+        // 重新顯示檔案畫面
+      });
+      return button;
+    }
+
+    function chooseSlot(slot) {
+      // 選了一個檔案
+      setCurrentSlot(slot);
+      // 記住現在用這個檔案
+      slotScreen.classList.add('hidden');
+      if (loadPlayer() >= 0) {
+        startGame();
+        // 舊檔案：已經選過角色，直接開始
+      } else {
+        pickScreen.classList.remove('hidden');
+        // 新檔案：先選角色
+      }
+    }
 
     function createPickButtons() {
+      // 做出三個角色按鈕
       for (let i = 0; i < PLAYERS.length; i++) {
         const button = document.createElement('button');
-        // 做一個按鈕
         button.className = 'pick-button';
-        const preview = document.createElement('canvas');
-        // 按鈕裡放一張小畫布，畫角色
-        const cellSize = 5;
-        // 每一格 5 像素
-        const ratio = window.devicePixelRatio || 1;
-        preview.style.width = 14 * cellSize + 'px';
-        preview.style.height = 16 * cellSize + 'px';
-        preview.width = 14 * cellSize * ratio;
-        preview.height = 16 * cellSize * ratio;
-        const previewContext = preview.getContext('2d');
-        previewContext.setTransform(ratio, 0, 0, ratio, 0, 0);
-        drawSprite(previewContext, PLAYERS[i].sprite, PLAYERS[i].colors, 0, 0, cellSize, false);
-        // 把角色畫在小畫布上
-        button.appendChild(preview);
+        button.appendChild(makeSpriteCanvas(PLAYERS[i].sprite, PLAYERS[i].colors, 5));
+        // 角色的圖
         button.appendChild(document.createTextNode(PLAYERS[i].name));
-        // 加上名字
+        // 角色的名字
         button.addEventListener('click', function () {
-          playerIndex = i;
-          // 記住選了誰
           savePlayer(i);
-          // 也存進瀏覽器，下次回來不用再選
-          pickScreen.classList.add('hidden');
-          // 關掉選角色畫面
-          changeButton.classList.remove('hidden');
-          // 顯示「換角色」按鈕
+          // 存進目前的檔案
+          startGame();
+          // 開始釣魚
         });
         pickList.appendChild(button);
       }
     }
 
-    changeButton.addEventListener('click', function () {
-      pickScreen.classList.remove('hidden');
-      // 打開選角色畫面
+    function startGame() {
+      // 用目前的檔案開始釣魚
+      playerIndex = loadPlayer();
+      // 這個檔案選的角色
+      slotScreen.classList.add('hidden');
+      pickScreen.classList.add('hidden');
+      bookScreen.classList.add('hidden');
+      // 關掉所有選單
+      playerButton.textContent = '👤 ' + SLOT_NAMES[getCurrentSlot()];
+      // 左上角顯示玩家名字
+      playerButton.classList.remove('hidden');
+      bookButton.classList.remove('hidden');
+      // 顯示左上角、右上角的按鈕
+      fishes = [];
+      // 換了檔案，每個字的階段不一樣，重新放魚
+      for (let i = 0; i < FISH_COUNT; i++) {
+        fishes.push(makeFish(false));
+      }
+      biter = null;
+      hookState = 'idle';
+      // 魚鉤收回來
+    }
+
+    document.getElementById('guestButton').addEventListener('click', function () {
+      clearSlot('guest');
+      // 訪客每次都從頭開始
+      chooseSlot('guest');
+    });
+
+    document.getElementById('pickBackButton').addEventListener('click', function () {
+      pickScreen.classList.add('hidden');
+      showSlotScreen();
+      // 從選角色回到選檔案
+    });
+
+    playerButton.addEventListener('click', showSlotScreen);
+    // 左上角的玩家按鈕：回到選檔案（換玩家）
+
+
+    // ---------- 13-2. 記錄本 ----------
+
+    function showBook() {
+      // 打開記錄本：每個字一張卡片
+      const progress = loadProgress();
+      // 目前檔案的進度
+      document.getElementById('bookTitle').textContent = '📖 ' + SLOT_NAMES[getCurrentSlot()] + '的記錄本';
+      document.getElementById('bookSummary').textContent = '學會 ' + countMastered(progress) + ' / ' + WORDS.length + ' 個字';
+      const bookList = document.getElementById('bookList');
+      bookList.innerHTML = '';
+      // 清掉舊的卡片
+      for (let i = 0; i < WORDS.length; i++) {
+        const character = WORDS[i].character;
+        const record = progress[character];
+        // 這個字的紀錄（沒練過是 undefined）
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        if (record) {
+          // 練過的字：畫出現在的魚
+          let colors = FISH_COLORS[i % FISH_COLORS.length];
+          if (record.stage === 3) {
+            colors = GOLD_COLORS;
+            // 學會了：金色
+          }
+          card.appendChild(makeFishCanvas(colors, FISH_SIZES[record.stage], character));
+          addCardText(card, STAGE_NAMES[record.stage], '練習 ' + record.practiceCount + ' 次');
+        } else {
+          // 還沒練過：灰色的影子和問號
+          const shadow = { O: '#adb5bd', B: '#ced4da', L: '#e9ecef', E: '#adb5bd' };
+          card.appendChild(makeFishCanvas(shadow, 1, '？'));
+          addCardText(card, '？？？', '還沒釣到');
+        }
+        bookList.appendChild(card);
+      }
+      bookScreen.classList.remove('hidden');
+      // 打開畫面
+    }
+
+    function addCardText(card, stageText, infoText) {
+      // 在卡片上加兩行字：粗體的階段名字、下面的小字
+      // （不用 innerHTML +=，因為那樣會讓瀏覽器重做卡片，畫好的魚會不見）
+      const stage = document.createElement('div');
+      stage.className = 'book-stage';
+      stage.textContent = stageText;
+      card.appendChild(stage);
+      const info = document.createElement('div');
+      info.textContent = infoText;
+      card.appendChild(info);
+    }
+
+    function makeFishCanvas(colors, scale, text) {
+      // 做一張小畫布，畫一條魚，肚子上寫字（記錄本用）
+      const cellSize = 4 * scale;
+      // 每一格幾像素（大魚的格子比較大）
+      const width = 120;
+      const height = 66;
+      // 畫布固定大小，大魚小魚都放得下
+      const ratio = window.devicePixelRatio || 1;
+      const small = document.createElement('canvas');
+      small.style.width = width + 'px';
+      small.style.height = height + 'px';
+      small.width = width * ratio;
+      small.height = height * ratio;
+      const smallContext = small.getContext('2d');
+      smallContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      const left = (width - 22 * cellSize) / 2;
+      const top = (height - 13 * cellSize) / 2;
+      // 讓魚在畫布正中間
+      drawSprite(smallContext, FISH_SPRITE, colors, left / cellSize, top / cellSize, cellSize, false);
+      smallContext.fillStyle = '#212529';
+      smallContext.font = 'bold ' + Math.round(cellSize * 6.5) + 'px "BiauKai", "Kaiti TC", "STKaiti", "TW-Kai", "DFKai-SB", "標楷體", serif';
+      smallContext.textAlign = 'center';
+      smallContext.textBaseline = 'middle';
+      smallContext.fillText(text, left + 10 * cellSize, top + 6.8 * cellSize);
+      // 在肚子上寫字
+      return small;
+    }
+
+    bookButton.addEventListener('click', showBook);
+    // 右上角的記錄本按鈕
+    document.getElementById('closeBookButton').addEventListener('click', function () {
+      bookScreen.classList.add('hidden');
+      // 關掉記錄本
     });
 
 
@@ -1453,15 +1867,14 @@
     }
     createPickButtons();
     // 做出選角色按鈕
-    playerIndex = loadPlayer();
-    // 讀出上次選的角色
-    if (playerIndex >= 0 && playerIndex < PLAYERS.length) {
-      pickScreen.classList.add('hidden');
-      // 選過了（例如從關卡回來），直接開始釣魚
-      changeButton.classList.remove('hidden');
+    const params = new URLSearchParams(window.location.search);
+    // 讀網址問號後面的部分
+    if (params.get('continue') === '1' && loadPlayer() >= 0) {
+      startGame();
+      // 從關卡回來（網址有 ?continue=1）：用同一個檔案繼續玩
     } else {
-      playerIndex = -1;
-      // 沒選過，顯示選角色畫面
+      showSlotScreen();
+      // 剛打開遊戲：先選檔案
     }
     window.addEventListener('resize', resize);
     // 螢幕大小改變時重新計算

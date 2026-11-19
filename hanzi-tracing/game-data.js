@@ -33,43 +33,115 @@ const LEVEL_NAMES = ['', '第一關：看圖選字', '第二關：描紅', '第�
 const STARS_TO_PASS = [0, 1, 2, 2];
 // 每一關至少要幾顆星才能讓魚長大：第一關 1 顆（答對就好）、第二關 2 顆、第三關 2 顆
 
-const SAVE_KEY = 'hanziFishing.progress';
-// 進度存在瀏覽器裡的名字
+// ---------- 3. 存檔 ----------
+// 同一台裝置可以有好幾個「檔案」，每個人的進度分開存：
+//   玩家一（player1）、玩家二（player2）：會一直保存
+//   訪客（guest）：每次選「訪客」都會重新開始
+// 每個檔案存的樣子像這樣：
+//   { player: 0, progress: { "山": { stage: 1, practiceCount: 3 } } }
+//   player 是選的動物（0 貓、1 企鵝、2 水獺；-1 代表還沒選）
+// 資料存在瀏覽器的 localStorage 裡（關掉網頁再打開也還在，但換一台裝置就沒有）
 
-const PLAYER_KEY = 'hanziFishing.player';
-// 選的角色存在瀏覽器裡的名字
+const SLOTS = ['player1', 'player2', 'guest'];
+// 所有的檔案
 
+const SLOT_NAMES = { player1: '玩家一', player2: '玩家二', guest: '訪客' };
+// 每個檔案顯示的名字
 
-// ---------- 3. 讀取、儲存進度 ----------
-// 進度存在瀏覽器的 localStorage 裡（關掉網頁再打開也還在，但換一台手機就沒有）
-// 存的樣子像這樣：{ "山": { stage: 1, practiceCount: 3 }, "口": { stage: 0, practiceCount: 1 } }
+const STORAGE_PREFIX = 'hanziFishing.';
+// 存在瀏覽器裡的名字開頭，例如玩家一的檔案叫 hanziFishing.player1
 
-function loadProgress() {
-  // 讀出所有字的進度
+const CURRENT_SLOT_KEY = 'hanziFishing.currentSlot';
+// 記住「現在用的是哪一個檔案」
+
+function readStorage(key) {
+  // 從瀏覽器讀出一段文字（讀不到就回傳 null）
   try {
     // try：試試看，如果出錯（例如瀏覽器不允許儲存）就跳到 catch
-    const text = localStorage.getItem(SAVE_KEY);
-    // 從瀏覽器拿出存的文字
-    if (text === null) {
-      return {};
-      // 從來沒存過：回傳空的進度
-    }
-    return JSON.parse(text);
-    // 把文字變回物件
+    return localStorage.getItem(key);
   } catch (error) {
-    return {};
-    // 出錯了：當作沒有進度
+    return null;
   }
 }
 
-function saveProgress(progress) {
-  // 把所有字的進度存起來
+function writeStorage(key, text) {
+  // 把一段文字存進瀏覽器（text 是 null 的話就刪掉）
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
-    // 把物件變成文字再存
+    if (text === null) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, text);
+    }
   } catch (error) {
     // 存不了（例如無痕模式）就算了，遊戲還是可以玩
   }
+}
+
+function loadSlot(slot) {
+  // 讀出某個檔案的資料
+  const text = readStorage(STORAGE_PREFIX + slot);
+  if (text === null) {
+    return { player: -1, progress: {} };
+    // 空的檔案
+  }
+  try {
+    return JSON.parse(text);
+    // 把文字變回物件
+  } catch (error) {
+    return { player: -1, progress: {} };
+    // 資料壞掉了，當作空的檔案
+  }
+}
+
+function saveSlot(slot, data) {
+  // 把某個檔案的資料存起來
+  writeStorage(STORAGE_PREFIX + slot, JSON.stringify(data));
+  // 把物件變成文字再存
+}
+
+function clearSlot(slot) {
+  // 清除某個檔案（變回空的）
+  writeStorage(STORAGE_PREFIX + slot, null);
+}
+
+function getCurrentSlot() {
+  // 現在用的是哪一個檔案（沒選過的話當作訪客）
+  const slot = readStorage(CURRENT_SLOT_KEY);
+  if (SLOTS.indexOf(slot) === -1) {
+    return 'guest';
+    // indexOf 找不到會回傳 -1：代表不是我們認識的檔案
+  }
+  return slot;
+}
+
+function setCurrentSlot(slot) {
+  // 記住現在用哪一個檔案
+  writeStorage(CURRENT_SLOT_KEY, slot);
+}
+
+function loadProgress() {
+  // 讀出「目前檔案」所有字的進度
+  return loadSlot(getCurrentSlot()).progress;
+}
+
+function saveProgress(progress) {
+  // 把所有字的進度存進「目前檔案」
+  const slot = getCurrentSlot();
+  const data = loadSlot(slot);
+  data.progress = progress;
+  saveSlot(slot, data);
+}
+
+function countMastered(progress) {
+  // 數一數學會了幾個字（金色的魚有幾條）
+  let count = 0;
+  for (let i = 0; i < WORDS.length; i++) {
+    const record = progress[WORDS[i].character];
+    if (record && record.stage === 3) {
+      count = count + 1;
+    }
+  }
+  return count;
 }
 
 function getStage(character) {
@@ -158,6 +230,16 @@ function wordCharacters() {
   return list;
 }
 
+function wordIndex(character) {
+  // 某個字在字表裡是第幾個（找不到回傳 0）
+  for (let i = 0; i < WORDS.length; i++) {
+    if (WORDS[i].character === character) {
+      return i;
+    }
+  }
+  return 0;
+}
+
 function getWord(character) {
   // 從字表找出某個字的資料（找不到就回傳 null）
   for (let i = 0; i < WORDS.length; i++) {
@@ -177,29 +259,19 @@ function getCharacterFromUrl() {
 }
 
 function backToFishing() {
-  // 回到釣魚畫面
-  window.location.href = 'index.html';
+  // 回到釣魚畫面（?continue=1 代表「繼續玩」，不用再選檔案）
+  window.location.href = 'index.html?continue=1';
 }
 
 function loadPlayer() {
-  // 讀出上次選的角色（0 貓、1 企鵝、2 水獺；沒選過回傳 -1）
-  try {
-    const text = localStorage.getItem(PLAYER_KEY);
-    if (text === null) {
-      return -1;
-    }
-    return Number(text);
-    // 把文字變成數字
-  } catch (error) {
-    return -1;
-  }
+  // 讀出目前檔案選的動物（0 貓、1 企鵝、2 水獺；還沒選回傳 -1）
+  return loadSlot(getCurrentSlot()).player;
 }
 
 function savePlayer(index) {
-  // 記住選的角色
-  try {
-    localStorage.setItem(PLAYER_KEY, String(index));
-  } catch (error) {
-    // 存不了就算了
-  }
+  // 把選的動物存進目前檔案
+  const slot = getCurrentSlot();
+  const data = loadSlot(slot);
+  data.player = index;
+  saveSlot(slot, data);
 }
