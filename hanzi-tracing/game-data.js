@@ -209,7 +209,8 @@ function recordAndDescribe(character, level, stars) {
 function growMessage(character, result) {
   // 依照結果，做出一句給小朋友看的話
   if (result.newStage > result.oldStage) {
-    return '🎉「' + character + '」長\u{E01E1}大了！變成' + STAGE_NAMES[result.newStage];
+    return '🎉「' + character + '」長\u{E01E1}大了！<br>變成' + STAGE_NAMES[result.newStage];
+    // <br> 讓「變成大魚」換到下一行，比較好讀
   }
   if (result.oldStage === 3) {
     return '✨ 複習完成！';

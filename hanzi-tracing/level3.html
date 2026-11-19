@@ -83,28 +83,6 @@
       font-size: 16px;
     }
 
-    .back-button {
-      /* 從釣魚過來時，最上面的「回去釣魚」按鈕 */
-      height: 56px;
-      /* 跟選字按鈕差不多高，畫面才不會跳 */
-      padding: 0 20px;
-      /* 左右留白 */
-      font-size: 22px;
-      /* 文字大小 */
-      font-weight: bold;
-      /* 粗體 */
-      color: white;
-      /* 白字 */
-      background: #20c997;
-      /* 湖水綠 */
-      border: none;
-      /* 不要邊框 */
-      border-radius: 14px;
-      /* 圓角 */
-      touch-action: manipulation;
-      /* 連點兩下不要放大 */
-    }
-
     .char-button.selected {
       /* 目前選到的字 */
       background: #339af0;
@@ -408,7 +386,12 @@
     function calculateBoardSize() {
       const widthLimit = window.innerWidth - 40;
       // 螢幕寬度扣掉左右留白
-      const heightLimit = window.innerHeight - 400;
+      let heightLimit = window.innerHeight - 400;
+      // 螢幕高度扣掉上下其他東西的空間
+      if (FISH_CHARACTER !== null) {
+        heightLimit = heightLimit + 60;
+        // 從釣魚過來的：上面沒有選字按鈕，格子可以大一點
+      }
       // 螢幕高度扣掉選字按鈕、題目、文字區、按鈕的空間
       let size = Math.min(widthLimit, heightLimit, 520);
       // 取最小的，最大 520
@@ -1273,15 +1256,9 @@
 
     function createCharButtons() {
       if (FISH_CHARACTER !== null) {
-        // 從釣魚過來的：不用切換字，這裡改放「回去釣魚」按鈕
-        const backButton = document.createElement('button');
-        backButton.textContent = '🎣 回去釣魚';
-        backButton.className = 'back-button';
-        backButton.addEventListener('click', backToFishing);
-        // 按下就回到釣魚畫面
-        charButtonsBox.appendChild(backButton);
         return;
-        // 不用再做選字按鈕
+        // 從釣魚過來的：只練一個字，不用做選字按鈕
+        // （回去釣魚：評分後，打勾按鈕會變成「回去」）
       }
       for (let i = 0; i < TEST_CHARACTERS.length; i++) {
         const character = TEST_CHARACTERS[i];
