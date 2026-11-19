@@ -48,13 +48,21 @@
     }
 
     #pictureCard {
-      /* 放圖片的白色卡片 */
-      width: 220px;
+      /* 放圖片的白色卡片：左邊是圖，右邊是直式注音 */
+      width: 260px;
       /* 寬 */
+      height: 150px;
+      /* 高（固定，換題時畫面才不會跳） */
       margin: 0 auto;
       /* 水平置中 */
-      padding: 16px 0 10px 0;
-      /* 上 16px、下 10px 的內部空間 */
+      display: flex;
+      /* 讓圖片和注音左右並排 */
+      align-items: center;
+      /* 上下置中 */
+      justify-content: center;
+      /* 左右置中 */
+      gap: 14px;
+      /* 圖片和注音之間的距離 */
       background: white;
       /* 白底 */
       border: 4px solid #20c997;
@@ -80,13 +88,51 @@
     }
 
     #zhuyin {
-      /* 圖片下面的注音提示 */
+      /* 圖片右邊的直式注音 */
+      display: flex;
+      /* 讓「注音符號那一直排」和「聲調」左右並排 */
+      align-items: flex-end;
+      /* 聲調要對齊最後一個符號，所以往下對齊 */
       font-size: 30px;
       /* 注音大小 */
-      margin-top: 6px;
-      /* 跟圖片隔開一點 */
+      line-height: 1.1;
+      /* 每個符號的高度 */
       color: #087f5b;
       /* 深綠色 */
+    }
+
+    .zhuyin-column {
+      /* 注音符號由上往下排成一直排 */
+      display: flex;
+      /* 用 flex 排列 */
+      flex-direction: column;
+      /* column = 由上往下排 */
+      align-items: center;
+      /* 每個符號置中 */
+    }
+
+    .zhuyin-light {
+      /* 輕聲的「˙」：放在第一個符號的上面，小一點 */
+      font-size: 30px;
+      /* 「˙」本身很小，所以字的大小跟注音一樣 */
+      font-weight: bold;
+      /* 加粗，比較看得清楚 */
+      line-height: 0.8;
+      /* 不要佔太多高度 */
+    }
+
+    .zhuyin-tone {
+      /* 二、三、四聲的符號：放在最後一個符號的右邊 */
+      font-size: 30px;
+      /* 聲調符號本身很小，所以字的大小跟注音一樣 */
+      font-weight: bold;
+      /* 加粗，比較看得清楚 */
+      height: 33px;
+      /* 跟一個注音符號一樣高（30px × 1.1），才會對齊最後一個符號 */
+      line-height: 1;
+      /* 聲調靠上一點，在最後一個符號的右上方 */
+      width: 16px;
+      /* 固定寬度，有沒有聲調，注音都在同一個位置 */
     }
 
     #question {
@@ -219,7 +265,7 @@
     <div id="picture"></div>
     <!-- 圖片（emoji）會放在這裡 -->
     <div id="zhuyin"></div>
-    <!-- 注音提示會放在這裡 -->
+    <!-- 直式注音會放在圖片右邊 -->
   </div>
 
   <div id="question">這是哪一個字？</div>
@@ -313,6 +359,43 @@
     }
 
 
+    // ---------- 4-2. 小工具：把注音排成直式 ----------
+
+    function makeVerticalZhuyin(text) {
+      // 例如輸入「ㄎㄡˇ」，做出：
+      //   ㄎ
+      //   ㄡˇ    ← 聲調在最後一個符號的右邊
+      // 輕聲「˙」（例如「˙ㄉㄜ」）則放在最上面
+      let tone = '';
+      // 二、三、四聲的符號（一聲沒有符號）
+      let light = '';
+      // 輕聲的「˙」
+      let columnHtml = '';
+      // 直排的注音符號
+      for (let i = 0; i < text.length; i++) {
+        // 一個字一個字看
+        const symbol = text[i];
+        if (symbol === 'ˊ' || symbol === 'ˇ' || symbol === 'ˋ') {
+          tone = symbol;
+          // 是聲調，先記起來，等一下放右邊
+        } else if (symbol === '˙') {
+          light = symbol;
+          // 是輕聲，等一下放最上面
+        } else {
+          columnHtml = columnHtml + '<span>' + symbol + '</span>';
+          // 是注音符號，加到直排裡（每個 span 會自動排成一列）
+        }
+      }
+      if (light !== '') {
+        columnHtml = '<span class="zhuyin-light">' + light + '</span>' + columnHtml;
+        // 有輕聲的話，放在直排的最前面（也就是最上面）
+      }
+      return '<div class="zhuyin-column">' + columnHtml + '</div>'
+        + '<div class="zhuyin-tone">' + tone + '</div>';
+      // 左邊是直排的符號，右邊是聲調
+    }
+
+
     // ---------- 5. 出題 ----------
 
     function showQuestion() {
@@ -327,7 +410,8 @@
       // 更新進度
       pictureBox.innerHTML = item.picture;
       // 顯示圖片（用 innerHTML，因為「大」的圖片裡有 HTML）
-      zhuyinBox.textContent = item.zhuyin;
+      zhuyinBox.innerHTML = makeVerticalZhuyin(item.zhuyin);
+      // 把注音（例如「ㄎㄡˇ」）變成直式的 HTML 再放進去
       // 顯示注音
       messageBox.textContent = '';
       // 清空提示
@@ -452,7 +536,7 @@
       progressBox.textContent = '全部完成！';
       pictureBox.innerHTML = '🎣';
       // 成績畫面的圖片：釣竿
-      zhuyinBox.textContent = '';
+      zhuyinBox.innerHTML = '';
       // 不用注音
       choicesBox.innerHTML = '';
       // 拿掉選項按鈕
