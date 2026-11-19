@@ -38,8 +38,8 @@ const STARS_TO_PASS = [0, 1, 2, 2];
 //   玩家一（player1）、玩家二（player2）：會一直保存
 //   訪客（guest）：每次選「訪客」都會重新開始
 // 每個檔案存的樣子像這樣：
-//   { player: 0, progress: { "山": { stage: 1, practiceCount: 3 } } }
-//   player 是選的動物（0 貓、1 企鵝、2 水獺；-1 代表還沒選）
+//   { player: 0, name: "小明", progress: { "山": { stage: 1, practiceCount: 3 } } }
+//   player 是選的動物（0 貓、1 企鵝、2 水獺；-1 代表還沒選）；name 是小朋友輸入的名字
 // 資料存在瀏覽器的 localStorage 裡（關掉網頁再打開也還在，但換一台裝置就沒有）
 
 const SLOTS = ['player1', 'player2', 'guest'];
@@ -274,4 +274,21 @@ function savePlayer(index) {
   const data = loadSlot(slot);
   data.player = index;
   saveSlot(slot, data);
+}
+
+function savePlayerName(name) {
+  // 把名字存進目前檔案
+  const slot = getCurrentSlot();
+  const data = loadSlot(slot);
+  data.name = name;
+  saveSlot(slot, data);
+}
+
+function getPlayerName(slot) {
+  // 某個檔案的名字（沒輸入過名字的話，用「玩家一」這種預設名字）
+  const data = loadSlot(slot);
+  if (data.name) {
+    return data.name;
+  }
+  return SLOT_NAMES[slot];
 }
