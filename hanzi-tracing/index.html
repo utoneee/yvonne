@@ -423,6 +423,11 @@
       /* 「中魚」這幾個字粗體 */
     }
   </style>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&display=swap">
+  <!-- 從 Google Fonts 載入「注音粉圓」字型（每個字旁邊有注音） -->
+  <link rel="stylesheet" href="game-style.css">
+  <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
 <body>
@@ -1299,7 +1304,17 @@
       rect(7, boxTop + 1, gameWidth - 14, boxHeight - 2, '#fff9db');
       // 淡黃色底
       ctx.fillStyle = '#5c3d2e';
-      ctx.font = 'bold ' + Math.round(unit * 4) + 'px "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif';
+      let fontSize = Math.round(unit * 4);
+      // 字的大小：先試 4 格高
+      const maxWidth = (gameWidth - 18) * unit;
+      // 文字最寬只能這麼寬（框的寬度扣掉左右留白）
+      ctx.font = fontSize + 'px "Bpmf Huninn", "PingFang TC", "Microsoft JhengHei", sans-serif';
+      // 用注音字型（每個字旁邊有注音，所以字會比較寬）
+      while (ctx.measureText(text).width > maxWidth && fontSize > 10) {
+        fontSize = fontSize - 1;
+        ctx.font = fontSize + 'px "Bpmf Huninn", "PingFang TC", "Microsoft JhengHei", sans-serif';
+        // measureText 量出文字有多寬；太寬就把字縮小一點，再量一次
+      }
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, gameWidth / 2 * unit, (boxTop + 4.7) * unit);
@@ -1448,7 +1463,8 @@
           biter = null;
           hookState = 'idle';
           // 魚鉤收回來
-          showMessage('哎呀，魚跑掉了～再試一次！');
+          showMessage('哎呀\u{E01E1}，魚跑掉了～再試一次！');
+          // \u{E01E1}：讓注音字型把「呀」念成輕聲
         }
       }
 

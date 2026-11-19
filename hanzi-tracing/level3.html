@@ -71,6 +71,18 @@
       /* 深灰字 */
     }
 
+    .back-icon {
+      /* 「回去釣魚」按鈕裡的 🎣 */
+      display: block;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .back-text {
+      /* 「回去」兩個字：小一點，按鈕才放得下 */
+      font-size: 16px;
+    }
+
     .back-button {
       /* 從釣魚過來時，最上面的「回去釣魚」按鈕 */
       height: 56px;
@@ -256,6 +268,11 @@
     #checkButton { background: #37b24d; }
     /* 確定：綠色 */
   </style>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&display=swap">
+  <!-- 從 Google Fonts 載入「注音粉圓」字型（每個字旁邊有注音） -->
+  <link rel="stylesheet" href="game-style.css">
+  <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
 <body>
@@ -284,10 +301,12 @@
   <!-- 提示和評分結果 -->
 
   <div class="tool-row">
-    <!-- 三個功能按鈕排成一排 -->
-    <button id="undoButton" class="tool-button">↩ 擦掉<br>上一筆</button>
-    <button id="clearButton" class="tool-button">🗑 全部<br>重寫</button>
-    <button id="checkButton" class="tool-button">✔ 確定</button>
+    <!-- 按鈕用圖示代替文字（小一的孩子看圖就懂）：
+         橡皮擦 = 擦掉上一筆、圓形箭頭 = 全部重寫、播放 = 示範筆順、打勾 = 確定
+         aria-label 是給「螢幕報讀軟體」念的文字，畫面上看不到 -->
+    <button id="undoButton" class="tool-button" aria-label="擦掉上一筆"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="rotate(-35 24 24)"><rect x="6" y="15" width="36" height="18" rx="4" fill="#ffc9c9"/><rect x="6" y="15" width="13" height="18" rx="4" fill="#ffffff"/><rect x="6" y="15" width="36" height="18" rx="4" fill="none" stroke="#5c3d2e" stroke-width="3"/></g></svg></button>
+    <button id="clearButton" class="tool-button" aria-label="全部重寫"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M39 26a15 15 0 1 1-5-11.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M35 5v10.5H24.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button id="checkButton" class="tool-button" aria-label="確定"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 
   <script>
@@ -578,6 +597,8 @@
         // 清掉評分（寫的時候不顯示對錯）
         showMessage('繼續寫寫看！');
       }
+      setCheckGoesBack(false);
+      // 又開始寫了：按鈕變回「確定」
       currentStroke = [getPointFromEvent(event)];
       // 新的一筆，先放第一個點
       userStrokes.push(currentStroke);
@@ -1115,15 +1136,7 @@
       }
 
       let text = '';
-      // 要顯示的文字
-      if (stars === 0) {
-        text = '再試一次！加油 💪';
-      } else if (stars === 3) {
-        text = '⭐⭐⭐ 太棒了！';
-      } else {
-        text = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
-        // 拿到幾顆星就顯示幾個 ⭐，剩下的用 ☆ 補滿
-      }
+      // 星星下面的說明（提醒、魚有沒有長大）
 
       const hints = [];
       // 收集所有要顯示的提醒（每一個都是一行文字）
@@ -1153,8 +1166,11 @@
       if (FISH_CHARACTER !== null) {
         text = text + '<div class="hint">' + recordAndDescribe(currentCharacter, 3, stars) + '</div>';
         // 從釣魚過來的：記錄結果，加上「魚有沒有長大」
+        setCheckGoesBack(true);
+        // 打勾按鈕變成「回去釣魚」
       }
-      showMessage(text);
+      showStars(messageBox, stars, text);
+      // 播放星星動畫：空的星星框 → 星星一顆一顆亮起來 → 評語和說明（showStars 在 game-data.js 裡）
       redraw();
       // 重畫：每一筆換成對應的顏色
     }
@@ -1162,9 +1178,46 @@
 
     // ---------- 12. 其他按鈕 ----------
 
+    // ---------- 打勾按鈕變成「回去釣魚」 ----------
+    // 從釣魚過來時，按下「確定」看完星星，打勾按鈕會原地變成 🎣「回去釣魚」
+    // 孩子的手指就在那裡，不用到畫面最上面找按鈕；如果又開始寫或擦，會變回打勾
+
+    const checkButton = document.getElementById('checkButton');
+    const CHECK_BUTTON_HTML = checkButton.innerHTML;
+    // 記下打勾按鈕原本的樣子，等一下要變回來
+    let checkGoesBack = false;
+    // 現在按下這個按鈕，是「回去釣魚」（true）還是「確定」（false）
+
+    function setCheckGoesBack(goesBack) {
+      // 切換打勾按鈕的功能和樣子
+      checkGoesBack = goesBack;
+      if (goesBack) {
+        checkButton.innerHTML = '<span class="back-icon">🎣</span><span class="back-text">回去</span>';
+        checkButton.style.background = '#20c997';
+        // 湖水綠的「回去釣魚」
+      } else {
+        checkButton.innerHTML = CHECK_BUTTON_HTML;
+        checkButton.style.background = '';
+        // 變回原本的綠色打勾（'' 代表用 CSS 裡寫的顏色）
+      }
+    }
+
+    function onCheckButton() {
+      if (checkGoesBack) {
+        backToFishing();
+        // 現在是「回去釣魚」
+      } else {
+        checkAnswer();
+        // 現在是「確定」
+      }
+    }
+
+
     function undoLastStroke() {
+      setCheckGoesBack(false);
+      // 按鈕變回「確定」
       userStrokes.pop();
-      // 拿掉最後一筆
+      // 把清單最後一筆拿掉
       strokeResults = null;
       // 清掉評分
       showMessage('擦掉一筆了');
@@ -1172,10 +1225,12 @@
     }
 
     function clearAllStrokes() {
+      setCheckGoesBack(false);
+      // 按鈕變回「確定」
       userStrokes = [];
-      // 全部清空
+      // 清單變成空的
       strokeResults = null;
-      showMessage('看著上面的字，在格子裡寫出來！');
+      showMessage('看著上面的字，在格子\u{E01E1}裡寫出來！');
       redraw();
     }
 
@@ -1268,10 +1323,10 @@
       onLoadCharDataSuccess: function (data) {
         characterData = data;
         // 存起來，評分時用
-        showMessage('看著上面的字，在格子裡寫出來！');
+        showMessage('看著上面的字，在格子\u{E01E1}裡寫出來！');
       },
       onLoadCharDataError: function () {
-        showMessage('字載入失敗，請檢查網路後重新整理');
+        showMessage('字載入失敗，請檢查網路後重\u{E01E1}新整理');
       }
     });
 
@@ -1282,7 +1337,7 @@
     // 擦掉上一筆
     document.getElementById('clearButton').addEventListener('click', clearAllStrokes);
     // 全部重寫
-    document.getElementById('checkButton').addEventListener('click', checkAnswer);
+    checkButton.addEventListener('click', onCheckButton);
     // 確定
 
     window.addEventListener('resize', applyBoardSize);

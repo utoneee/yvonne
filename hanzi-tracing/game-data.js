@@ -200,7 +200,7 @@ function recordAndDescribe(character, level, stars) {
     grewThisVisit = true;
     // 記住：這次已經長大了
   } else if (grewThisVisit) {
-    return '🎉「' + character + '」已經長大了，回去釣魚吧！';
+    return '🎉「' + character + '」已經長\u{E01E1}大了，回去釣魚吧！';
     // 長大之後又重寫一次，還是告訴小朋友已經長大了
   }
   return growMessage(character, result);
@@ -209,12 +209,12 @@ function recordAndDescribe(character, level, stars) {
 function growMessage(character, result) {
   // 依照結果，做出一句給小朋友看的話
   if (result.newStage > result.oldStage) {
-    return '🎉「' + character + '」長大了！變成' + STAGE_NAMES[result.newStage];
+    return '🎉「' + character + '」長\u{E01E1}大了！變成' + STAGE_NAMES[result.newStage];
   }
   if (result.oldStage === 3) {
     return '✨ 複習完成！';
   }
-  return '拿到 ' + STARS_TO_PASS[result.level] + ' 顆星以上，「' + character + '」就會長大喔！';
+  return '拿到 ' + STARS_TO_PASS[result.level] + ' 顆星以上，「' + character + '」就會長\u{E01E1}大喔！';
   // 還沒過關：告訴小朋友要幾顆星（可以當場再寫一次）
 }
 
@@ -291,4 +291,94 @@ function getPlayerName(slot) {
     return data.name;
   }
   return SLOT_NAMES[slot];
+}
+
+
+// ---------- 5. 注音字型的破音字 ----------
+// 注音字型會自動幫每個字加上注音，但有些字有好幾種讀音（破音字），字型不一定猜得對
+// 在字的後面加上一個看不見的記號 \u{E01E1}，就是告訴字型「用這個字的第 2 種讀音」
+// 這個遊戲裡用到的有：長\u{E01E1}大（ㄓㄤˇ）、重\u{E01E1}寫（ㄔㄨㄥˊ）、格子\u{E01E1}（˙ㄗ）、哎呀\u{E01E1}（˙ㄧㄚ）
+// 在 HTML 裡要寫成 &#xE01E1;
+
+
+// ---------- 6. 星星動畫 ----------
+
+function starSVG(filled) {
+  // 畫一顆星星的圖（filled 是 true：金色的星星；false：灰色的空框）
+  let fill = 'none';
+  // 空框：裡面不塗顏色
+  let stroke = '#adb5bd';
+  // 空框：灰色的邊
+  if (filled) {
+    fill = '#fcc419';
+    // 亮起來：金黃色
+    stroke = '#e67700';
+    // 橘色的邊
+  }
+  return '<polygon points="12,2 15,9 22,9.5 16.5,14.5 18.5,21.5 12,17.5 5.5,21.5 7.5,14.5 2,9.5 9,9" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.8" stroke-linejoin="round"/>';
+  // polygon 是用 10 個點連起來的多邊形（五角星有 5 個尖角 + 5 個凹進去的點）
+}
+
+function praiseFor(stars) {
+  // 依照星星數給一句評語
+  if (stars === 3) {
+    return '太棒了！';
+  }
+  if (stars === 2) {
+    return '很好喔！';
+  }
+  if (stars === 1) {
+    return '不錯喔！';
+  }
+  return '再試一次！加油 💪';
+}
+
+function showStars(box, stars, detailHTML) {
+  // 在 box 裡播放星星動畫：
+  //   1. 三個空的星星框跳出來
+  //   2. 拿到的星星一顆一顆亮起來
+  //   3. 評語和說明（detailHTML）慢慢出現
+  box.innerHTML = '';
+  // 先清空
+  const row = document.createElement('div');
+  row.className = 'star-row';
+  // 星星和評語在同一排
+  const starIcons = [];
+  for (let i = 0; i < 3; i++) {
+    const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    // SVG 圖要用 createElementNS 建立（NS 是「命名空間」，告訴瀏覽器這是 SVG）
+    star.setAttribute('viewBox', '0 0 24 24');
+    star.setAttribute('class', 'star');
+    star.style.animationDelay = (i * 0.12) + 's';
+    // 三個框依序跳出來，每個晚 0.12 秒
+    star.innerHTML = starSVG(false);
+    // 先畫空框
+    row.appendChild(star);
+    starIcons.push(star);
+  }
+  const praise = document.createElement('span');
+  // 評語（先空著）
+  row.appendChild(praise);
+  box.appendChild(row);
+  const detail = document.createElement('div');
+  // 說明（先空著）
+  box.appendChild(detail);
+
+  for (let i = 0; i < stars; i++) {
+    setTimeout(function () {
+      starIcons[i].innerHTML = starSVG(true);
+      starIcons[i].setAttribute('class', 'star filled');
+      // 第 i 顆星星亮起來，並播放「彈一下」的動畫
+    }, 600 + i * 450);
+    // 0.6 秒後亮第 1 顆，之後每 0.45 秒亮下一顆
+  }
+
+  setTimeout(function () {
+    praise.textContent = praiseFor(stars);
+    praise.className = 'fade-in';
+    // 星星都亮完後，評語出現
+    detail.innerHTML = detailHTML;
+    detail.className = 'star-detail fade-in';
+    // 說明也一起出現
+  }, 700 + stars * 450);
 }

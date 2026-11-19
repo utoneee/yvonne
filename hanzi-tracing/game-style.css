@@ -1,0 +1,87 @@
+/* ==========================================================
+   game-style.css：所有頁面共用的樣式
+   ========================================================== */
+
+/* ---------- 1. 注音字型 ----------
+   「注音粉圓」（Bpmf Huninn）是有注音的字型：每個國字旁邊會自動出現直式注音
+   字型從 Google Fonts 載入（每一頁的 <head> 裡有一行 <link> 負責載入）
+   按鈕和輸入框預設不會跟著網頁的字型，所以要特別寫出來
+   答案的字（魚身上的字、選項按鈕）各自指定了楷書，不會有注音，才不會直接告訴孩子答案 */
+body, button, input {
+  font-family: "Bpmf Huninn", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+}
+
+
+/* ---------- 2. 圖示按鈕 ---------- */
+.icon {
+  /* 按鈕裡的圖示（橡皮擦、圓形箭頭、打勾……） */
+  width: 44px;
+  height: 44px;
+  display: block;
+  /* 自己佔一行 */
+  margin: 0 auto;
+  /* 左右置中 */
+}
+
+
+/* ---------- 3. 星星動畫 ----------
+   流程：三個空的星星框跳出來 → 拿到的星星一顆一顆亮起來 → 評語慢慢出現 */
+.star-row {
+  /* 星星和評語排成一排 */
+  display: flex;
+  align-items: center;
+  /* 上下置中 */
+  justify-content: center;
+  /* 左右置中 */
+  gap: 8px;
+}
+
+.star {
+  /* 一顆星星 */
+  width: 40px;
+  height: 40px;
+  animation: star-appear 0.3s ease-out both;
+  /* 剛出現時，從小變大 */
+}
+
+.star.filled {
+  animation: star-pop 0.45s ease-out both;
+  /* 亮起來的時候，彈一下 */
+}
+
+@keyframes star-appear {
+  /* 空的星星框：從看不見、很小，變成正常大小 */
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes star-pop {
+  /* 亮起來：先放大到 1.5 倍，再縮回正常大小 */
+  0%   { transform: scale(0.6); }
+  60%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+.star-detail {
+  /* 星星下面的說明：比評語小一點，才不會把按鈕擠出畫面 */
+  font-size: 0.8em;
+  /* em 是「跟外面的字比」，0.8em = 外面字的 8 成大 */
+  line-height: 1.5;
+}
+
+.fade-in {
+  /* 評語、說明：慢慢出現 */
+  animation: fade-in 0.4s ease-out both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  /* 一開始：透明、往下一點點 */
+  to   { opacity: 1; transform: translateY(0); }
+  /* 最後：看得見、回到原位 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 如果裝置設定了「減少動態效果」，就不要動畫 */
+  .star, .star.filled, .fade-in { animation: none; }
+}

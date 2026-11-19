@@ -257,6 +257,11 @@
       /* 按下去縮小一點 */
     }
   </style>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&display=swap">
+  <!-- 從 Google Fonts 載入「注音粉圓」字型（每個字旁邊有注音） -->
+  <link rel="stylesheet" href="game-style.css">
+  <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
 <body>
@@ -495,14 +500,14 @@
       totalStars = totalStars + stars;
       // 加到總星數
 
-      messageBox.innerHTML = '答對了！' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '<br>「' + item.character + '」';
-      // 顯示星星，並再說一次這個字
+      let detail = '答對了！「' + item.character + '」';
+      // 星星下面的說明：再說一次這個字
 
       if (FISH_CHARACTER !== null) {
         // 從釣魚過來的：記錄結果，告訴小朋友魚有沒有長大，然後回去釣魚
         const result = recordResult(item.character, 1, stars);
         // 記錄「這個字在第一關拿到幾顆星」（game-data.js 會決定魚要不要長大）
-        messageBox.innerHTML = messageBox.innerHTML + '<br>' + growMessage(item.character, result);
+        detail = detail + '<br>' + growMessage(item.character, result);
         // 加上「長大了！」之類的話
         nextButton.textContent = '回去釣魚 🎣';
       } else if (questionIndex === questionOrder.length - 1) {
@@ -512,6 +517,8 @@
         nextButton.textContent = '下一題 ➜';
         // 其他題：「下一題」
       }
+      showStars(messageBox, stars, detail);
+      // 播放星星動畫：空的星星框 → 星星一顆一顆亮起來 → 評語和說明（showStars 在 game-data.js 裡）
       nextButton.style.visibility = 'visible';
       // 顯示按鈕
     }
