@@ -164,6 +164,45 @@
       /* 對齊上面 */
     }
 
+    #countdown {
+      /* 倒數 3、2、1：蓋在田字格上，數字在正中間 */
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      /* 四邊貼齊田字格 = 蓋住整個格子 */
+      display: flex;
+      align-items: center;
+      /* 上下置中 */
+      justify-content: center;
+      /* 左右置中 */
+      background: rgba(255, 255, 255, 0.6);
+      /* 半透明的白色，後面淡淡的字還看得到 */
+      font-size: 140px;
+      /* 數字很大 */
+      font-weight: bold;
+      color: #f08c00;
+      /* 橘色 */
+    }
+
+    #countdown.countdown-hidden {
+      display: none;
+      /* 不倒數的時候藏起來 */
+    }
+
+    .countdown-number {
+      animation: count-pop 0.6s ease-out both;
+      /* 每個數字出現時「彈」一下 */
+    }
+
+    @keyframes count-pop {
+      from { transform: scale(2); opacity: 0; }
+      /* 一開始：很大、透明 */
+      to   { transform: scale(1); opacity: 1; }
+      /* 最後：正常大小、看得見 */
+    }
+
     #drawCanvas {
       /* 小朋友用手指寫字的「透明畫布」，疊在最上層 */
       position: absolute;
@@ -260,7 +299,9 @@
     <div id="writerArea"></div>
     <!-- 第 3 層：Hanzi Writer 畫的淡灰色字 -->
     <canvas id="drawCanvas"></canvas>
-    <!-- 第 4 層（最上面）：小朋友寫字的透明畫布 -->
+    <!-- 第 4 層：小朋友寫字的透明畫布 -->
+    <div id="countdown" class="countdown-hidden"></div>
+    <!-- 第 5 層（最上面）：一開始的倒數 3、2、1（平常藏起來） -->
   </div>
 
   <div id="message">字載入中，請稍等…</div>
@@ -895,6 +936,50 @@
       // 重畫（畫布會變乾淨）
     }
 
+    let countdownTimer = null;
+    // 倒數用的計時器（null 代表沒有在倒數）
+
+    function startCountdown() {
+      // 倒數 3、2、1，倒數完自動播放一次筆順動畫
+      const countdownBox = document.getElementById('countdown');
+      let number = 3;
+      // 從 3 開始
+      isAnimating = true;
+      // 倒數的時候先不給寫（寫字、擦掉、重寫都會先檢查 isAnimating）
+      showMessage('準備看筆順囉！');
+      countdownBox.innerHTML = '<span class="countdown-number">' + number + '</span>';
+      countdownBox.classList.remove('countdown-hidden');
+      // 顯示「3」
+      countdownTimer = setInterval(function () {
+        // setInterval：每 0.8 秒執行一次這裡
+        number = number - 1;
+        if (number === 0) {
+          // 倒數完了
+          clearInterval(countdownTimer);
+          // 停止計時器
+          countdownTimer = null;
+          countdownBox.classList.add('countdown-hidden');
+          // 藏起倒數
+          isAnimating = false;
+          // 先解除，playDemo 才會播放
+          playDemo();
+          // 播放筆順動畫（播完會自動顯示「換你寫寫看！」）
+          return;
+        }
+        countdownBox.innerHTML = '<span class="countdown-number">' + number + '</span>';
+        // 換成下一個數字（每次放新的 span，「彈一下」的動畫才會重新播放）
+      }, 800);
+    }
+
+    function stopCountdown() {
+      // 倒數到一半就換字時，把倒數停掉
+      if (countdownTimer !== null) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      document.getElementById('countdown').classList.add('countdown-hidden');
+    }
+
     function playDemo() {
       // 「示範筆順」
       if (isAnimating || characterData === null) {
@@ -938,6 +1023,8 @@
       // 清掉小朋友寫的線
       strokeResults = null;
       // 清掉評分結果
+      stopCountdown();
+      // 如果正在倒數，先停掉
       isAnimating = false;
       // 如果動畫還在播，直接當作結束
       canvas.style.visibility = 'visible';
@@ -1025,7 +1112,8 @@
         // 字的資料下載成功時會執行這裡
         characterData = data;
         // 存起來，評分時要用（data.medians 就是每一筆的中心線）
-        showMessage('照著灰色的字寫寫看！');
+        startCountdown();
+        // 倒數 3、2、1，然後自動播放一次筆順
       },
       onLoadCharDataError: function () {
         // 下載失敗時（例如沒有網路）會執行這裡
