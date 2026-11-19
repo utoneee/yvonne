@@ -1,0 +1,485 @@
+<!doctype html>
+<!-- 告訴瀏覽器：這是一份標準的 HTML 網頁 -->
+<html lang="zh-Hant">
+<!-- 這個網頁的語言是繁體中文 -->
+<head>
+  <meta charset="utf-8">
+  <!-- 使用 utf-8 編碼，中文字才不會變成亂碼 -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <!-- 用手機的寬度顯示，並且禁止兩指縮放 -->
+
+  <title>看圖選字（第一關）</title>
+  <!-- 瀏覽器分頁上的標題 -->
+
+  <style>
+    html, body {
+      margin: 0;
+      /* 拿掉預設外邊距 */
+      padding: 0;
+      /* 拿掉預設內邊距 */
+      background: #e6fcf5;
+      /* 背景：淡淡的湖水綠（第一關是小湖） */
+    }
+
+    body {
+      font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      /* 一般文字用的繁體中文字型 */
+      text-align: center;
+      /* 全部置中 */
+      color: #333333;
+      /* 文字深灰色 */
+      -webkit-user-select: none;
+      /* （Safari）長按不要選取文字 */
+      user-select: none;
+      /* （其他瀏覽器）長按不要選取文字 */
+      -webkit-touch-callout: none;
+      /* iPhone 長按不要跳出選單 */
+    }
+
+    #progress {
+      /* 最上面的「第幾題 / 共幾題」 */
+      font-size: 20px;
+      /* 字的大小 */
+      margin: 14px 0 6px 0;
+      /* 上 14px、下 6px */
+      color: #555555;
+      /* 灰一點，不要搶走注意力 */
+    }
+
+    #pictureCard {
+      /* 放圖片的白色卡片 */
+      width: 220px;
+      /* 寬 */
+      margin: 0 auto;
+      /* 水平置中 */
+      padding: 16px 0 10px 0;
+      /* 上 16px、下 10px 的內部空間 */
+      background: white;
+      /* 白底 */
+      border: 4px solid #20c997;
+      /* 湖水綠邊框 */
+      border-radius: 24px;
+      /* 圓角 */
+    }
+
+    #picture {
+      /* 圖片（emoji） */
+      font-size: 96px;
+      /* emoji 是文字，所以用字的大小控制圖片大小 */
+      line-height: 1.2;
+      /* 行高 */
+      height: 120px;
+      /* 固定高度，換題時畫面才不會跳 */
+      display: flex;
+      /* 用 flex 讓 emoji 上下、左右置中 */
+      align-items: flex-end;
+      /* 貼著底部對齊（大象和老鼠才會站在同一條地平線上） */
+      justify-content: center;
+      /* 左右置中 */
+    }
+
+    #zhuyin {
+      /* 圖片下面的注音提示 */
+      font-size: 30px;
+      /* 注音大小 */
+      margin-top: 6px;
+      /* 跟圖片隔開一點 */
+      color: #087f5b;
+      /* 深綠色 */
+    }
+
+    #question {
+      /* 「這是哪一個字？」 */
+      font-size: 24px;
+      /* 字的大小 */
+      margin: 16px 0 12px 0;
+      /* 上下空間 */
+    }
+
+    #choices {
+      /* 放三個選項按鈕的區域 */
+      display: flex;
+      /* 讓按鈕左右並排 */
+      justify-content: center;
+      /* 置中 */
+      gap: 14px;
+      /* 按鈕之間的距離 */
+      padding: 0 16px;
+      /* 左右留 16px，按鈕才不會貼著螢幕邊緣 */
+    }
+
+    .choice-button {
+      /* 每一個選項按鈕 */
+      width: 104px;
+      /* 寬 104px，小手指很好按 */
+      height: 104px;
+      /* 高 104px */
+      font-size: 68px;
+      /* 字很大 */
+      font-family: "BiauKai", "Kaiti TC", "STKaiti", "TW-Kai", "DFKai-SB", "標楷體", serif;
+      /* 選項的字用楷書（跟課本一樣），裝置沒有楷書時就用一般的明體 */
+      background: white;
+      /* 白底 */
+      color: #333333;
+      /* 深灰字 */
+      border: 4px solid #20c997;
+      /* 湖水綠邊框 */
+      border-radius: 20px;
+      /* 圓角 */
+      touch-action: manipulation;
+      /* 連點兩下不要放大畫面 */
+      padding: 0;
+      /* 拿掉按鈕預設的內邊距，字才會在正中間 */
+    }
+
+    .choice-button:active {
+      transform: scale(0.95);
+      /* 按下去時縮小一點，讓小朋友知道有按到 */
+    }
+
+    .choice-button.wrong {
+      /* 選錯的按鈕 */
+      background: #e9ecef;
+      /* 變成灰底 */
+      color: #adb5bd;
+      /* 字變淡 */
+      border-color: #ced4da;
+      /* 邊框變灰 */
+      animation: shake 0.4s;
+      /* 左右搖一搖（動畫定義在下面） */
+    }
+
+    .choice-button.right {
+      /* 選對的按鈕 */
+      background: #40c057;
+      /* 綠底 */
+      color: white;
+      /* 白字 */
+      border-color: #2f9e44;
+      /* 深綠邊框 */
+    }
+
+    @keyframes shake {
+      /* 「搖一搖」動畫：往左、往右、回到原位 */
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(-8px); }
+      50%  { transform: translateX(8px); }
+      75%  { transform: translateX(-8px); }
+      100% { transform: translateX(0); }
+    }
+
+    #message {
+      /* 答對、答錯的提示文字 */
+      font-size: 26px;
+      /* 字的大小 */
+      min-height: 76px;
+      /* 先保留高度，畫面才不會跳 */
+      margin: 14px 16px 6px 16px;
+      /* 上下左右的空間 */
+      line-height: 1.4;
+      /* 行距 */
+    }
+
+    #nextButton {
+      /* 「下一題」按鈕 */
+      min-width: 220px;
+      /* 夠寬 */
+      min-height: 68px;
+      /* 夠高 */
+      font-size: 26px;
+      /* 文字大小 */
+      border: none;
+      /* 不要邊框 */
+      border-radius: 18px;
+      /* 圓角 */
+      background: #339af0;
+      /* 藍色 */
+      color: white;
+      /* 白字 */
+      touch-action: manipulation;
+      /* 連點兩下不要放大 */
+      visibility: hidden;
+      /* 一開始先藏起來（但還是佔著位置，畫面才不會跳），答對才出現 */
+    }
+
+    #nextButton:active {
+      transform: scale(0.95);
+      /* 按下去縮小一點 */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="progress">第 1 題 / 共 5 題</div>
+  <!-- 進度 -->
+
+  <div id="pictureCard">
+    <!-- 圖片卡片 -->
+    <div id="picture"></div>
+    <!-- 圖片（emoji）會放在這裡 -->
+    <div id="zhuyin"></div>
+    <!-- 注音提示會放在這裡 -->
+  </div>
+
+  <div id="question">這是哪一個字？</div>
+  <!-- 題目 -->
+
+  <div id="choices"></div>
+  <!-- 三個選項按鈕（由 JavaScript 自動產生） -->
+
+  <div id="message"></div>
+  <!-- 提示文字 -->
+
+  <button id="nextButton">下一題 ➜</button>
+  <!-- 下一題按鈕 -->
+
+  <script>
+    // ==========================================================
+    // 第一關（看圖選字）的程式
+    // 流程：看圖 → 從 3 個字裡選一個 → 選錯可以再選 → 選對拿星星 → 下一題
+    // ==========================================================
+
+
+    // ---------- 1. 題目資料（想加字就照這個格式加一行） ----------
+
+    const QUESTIONS = [
+      { character: '山', picture: '⛰️', zhuyin: 'ㄕㄢ' },
+      // 山：山的圖
+      { character: '口', picture: '👄', zhuyin: 'ㄎㄡˇ' },
+      // 口：嘴巴的圖
+      { character: '人', picture: '🧍', zhuyin: 'ㄖㄣˊ' },
+      // 人：站著的人
+      { character: '日', picture: '☀️', zhuyin: 'ㄖˋ' },
+      // 日：太陽
+      { character: '大', picture: '<span style="font-size: 40%">🐭</span>🐘', zhuyin: 'ㄉㄚˋ' }
+      // 大：小小的老鼠旁邊站著大大的大象
+      // picture 裡面可以寫 HTML，這裡用 font-size: 40% 把老鼠縮小
+    ];
+
+    const CHOICE_COUNT = 3;
+    // 每一題有幾個選項
+
+
+    // ---------- 2. 找出網頁上的元素 ----------
+
+    const progressBox = document.getElementById('progress');
+    // 進度文字
+    const pictureBox = document.getElementById('picture');
+    // 圖片
+    const zhuyinBox = document.getElementById('zhuyin');
+    // 注音
+    const choicesBox = document.getElementById('choices');
+    // 選項按鈕區
+    const messageBox = document.getElementById('message');
+    // 提示文字
+    const nextButton = document.getElementById('nextButton');
+    // 下一題按鈕
+
+
+    // ---------- 3. 會變動的資料 ----------
+
+    let questionOrder = [];
+    // 這一輪的出題順序（把 QUESTIONS 洗牌後放這裡）
+    let questionIndex = 0;
+    // 現在是第幾題（從 0 開始算）
+    let tries = 0;
+    // 這一題已經選了幾次
+    let answered = false;
+    // 這一題答對了沒（答對後就不能再按選項）
+    let totalStars = 0;
+    // 這一輪總共拿到幾顆星
+
+
+    // ---------- 4. 小工具：洗牌 ----------
+
+    function shuffle(list) {
+      // 把清單的順序打亂，回傳一個新的清單（原本的清單不會被改到）
+      const result = list.slice();
+      // 先複製一份
+      for (let i = result.length - 1; i > 0; i--) {
+        // 從最後一個開始，往前一個一個處理
+        const j = Math.floor(Math.random() * (i + 1));
+        // 隨機挑一個位置 j（0 到 i 之間）
+        const temp = result[i];
+        // 先把第 i 個暫存起來
+        result[i] = result[j];
+        // 第 j 個放到第 i 個的位置
+        result[j] = temp;
+        // 暫存的放到第 j 個的位置（兩個交換完成）
+      }
+      return result;
+      // 回傳洗好的清單
+    }
+
+
+    // ---------- 5. 出題 ----------
+
+    function showQuestion() {
+      const item = questionOrder[questionIndex];
+      // 這一題的資料
+      tries = 0;
+      // 重新計算選了幾次
+      answered = false;
+      // 還沒答對
+
+      progressBox.textContent = '第 ' + (questionIndex + 1) + ' 題 / 共 ' + questionOrder.length + ' 題';
+      // 更新進度
+      pictureBox.innerHTML = item.picture;
+      // 顯示圖片（用 innerHTML，因為「大」的圖片裡有 HTML）
+      zhuyinBox.textContent = item.zhuyin;
+      // 顯示注音
+      messageBox.textContent = '';
+      // 清空提示
+      nextButton.style.visibility = 'hidden';
+      // 藏起「下一題」按鈕
+
+      const choices = makeChoices(item.character);
+      // 做出 3 個選項（1 個正確答案 + 2 個錯的）
+      choicesBox.innerHTML = '';
+      // 清掉上一題的按鈕
+      for (let i = 0; i < choices.length; i++) {
+        const button = document.createElement('button');
+        // 做一個新按鈕
+        button.className = 'choice-button';
+        // 套用 .choice-button 的樣子
+        button.textContent = choices[i];
+        // 按鈕上顯示這個字
+        button.addEventListener('click', function () {
+          checkChoice(button, item);
+          // 按下時，檢查選得對不對
+        });
+        choicesBox.appendChild(button);
+        // 放進畫面
+      }
+    }
+
+    function makeChoices(answer) {
+      // 做出選項：正確答案 + 從其他字裡隨機挑的錯誤答案，最後再打亂順序
+      const others = [];
+      // 用來放「其他的字」
+      for (let i = 0; i < QUESTIONS.length; i++) {
+        if (QUESTIONS[i].character !== answer) {
+          others.push(QUESTIONS[i].character);
+          // 不是正確答案的字，都放進來
+        }
+      }
+      const wrongChoices = shuffle(others).slice(0, CHOICE_COUNT - 1);
+      // 把其他的字洗牌，取前 2 個當錯誤選項
+      wrongChoices.push(answer);
+      // 加上正確答案
+      return shuffle(wrongChoices);
+      // 再洗一次牌，正確答案才不會永遠在最後面
+    }
+
+
+    // ---------- 6. 小朋友按下選項 ----------
+
+    function checkChoice(button, item) {
+      if (answered || button.classList.contains('wrong')) {
+        return;
+        // 已經答對了，或按的是已經選錯變灰的按鈕，就不理它
+      }
+      tries = tries + 1;
+      // 選了幾次 +1
+
+      if (button.textContent !== item.character) {
+        // 選錯了
+        button.classList.add('wrong');
+        // 按鈕變灰、搖一搖
+        messageBox.textContent = '再想想看喔！🤔';
+        return;
+        // 讓小朋友繼續選
+      }
+
+      // 選對了
+      answered = true;
+      // 標記答對，其他按鈕不能再按
+      button.classList.add('right');
+      // 按鈕變綠色
+
+      let stars = 1;
+      // 星星數：先設 1 顆
+      if (tries === 1) {
+        stars = 3;
+        // 第一次就選對：3 顆星
+      } else if (tries === 2) {
+        stars = 2;
+        // 第二次選對：2 顆星
+      }
+      // 第三次以後選對：維持 1 顆星
+      totalStars = totalStars + stars;
+      // 加到總星數
+
+      messageBox.innerHTML = '答對了！' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '<br>「' + item.character + '」';
+      // 顯示星星，並再說一次這個字
+
+      if (questionIndex === questionOrder.length - 1) {
+        nextButton.textContent = '看看成績 🎉';
+        // 最後一題：按鈕改成「看看成績」
+      } else {
+        nextButton.textContent = '下一題 ➜';
+        // 其他題：「下一題」
+      }
+      nextButton.style.visibility = 'visible';
+      // 顯示按鈕
+    }
+
+
+    // ---------- 7. 下一題、結束、重新開始 ----------
+
+    function goNext() {
+      if (questionIndex === questionOrder.length - 1) {
+        showResult();
+        // 已經是最後一題 → 顯示成績
+        return;
+      }
+      if (questionIndex >= questionOrder.length) {
+        startRound();
+        // 成績畫面時按下按鈕 → 重新開始一輪
+        return;
+      }
+      questionIndex = questionIndex + 1;
+      // 換到下一題
+      showQuestion();
+    }
+
+    function showResult() {
+      questionIndex = questionOrder.length;
+      // 把題號設成「超過最後一題」，代表現在是成績畫面
+      const maxStars = questionOrder.length * 3;
+      // 最多可以拿幾顆星
+      progressBox.textContent = '全部完成！';
+      pictureBox.innerHTML = '🎣';
+      // 成績畫面的圖片：釣竿
+      zhuyinBox.textContent = '';
+      // 不用注音
+      choicesBox.innerHTML = '';
+      // 拿掉選項按鈕
+      messageBox.innerHTML = '你一共拿到<br>⭐ ' + totalStars + ' / ' + maxStars + ' 顆星';
+      // 顯示總星數
+      nextButton.textContent = '再玩一次 🔁';
+      nextButton.style.visibility = 'visible';
+    }
+
+    function startRound() {
+      questionOrder = shuffle(QUESTIONS);
+      // 題目洗牌，每一輪的順序都不一樣
+      questionIndex = 0;
+      // 從第一題開始
+      totalStars = 0;
+      // 星星歸零
+      showQuestion();
+      // 出第一題
+    }
+
+
+    // ---------- 8. 網頁打開時 ----------
+
+    nextButton.addEventListener('click', goNext);
+    // 按「下一題」→ 執行 goNext
+    startRound();
+    // 開始第一輪
+  </script>
+</body>
+</html>
