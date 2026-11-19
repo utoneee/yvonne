@@ -177,11 +177,14 @@
       /* 行距 */
     }
 
+    .hint  { font-size: 18px; }
+    /* 提醒文字：比星星小一點，才放得下好幾行 */
     .good  { color: #2f9e44; font-weight: bold; }
     /* 「寫對」用綠色粗體 */
     .order { color: #e67700; font-weight: bold; }
     /* 「筆順錯」用橘色粗體 */
     .place { color: #e03131; font-weight: bold; }
+    /* 提醒文字會直接用結果名稱當 class，所以 order 和 place 兩種顏色都要有 */
     /* 「位置錯」用紅色粗體 */
 
     .tool-row {
@@ -299,6 +302,9 @@
     const CENTER_LIMIT = 150;
     // 整個字的中心點，最多可以離標準位置多遠，太遠扣一顆星。越大越寬鬆
     // （整個格子寬大約是 1024 × 1.1，150 大約是格子的 1/7）
+
+    const MAX_HINTS = 2;
+    // 文字提醒最多顯示幾行（太多行會把按鈕擠出畫面）
 
     const MIN_STROKE_LENGTH = 30;
     // 比這個還短的線當作「不小心點到」，不算一筆
@@ -446,6 +452,46 @@
         drawOneStroke(userStrokes[i], color);
         // 畫出這一筆
       }
+      if (strokeResults !== null) {
+        // 評分後，在寫錯的筆畫起點標上號碼，讓小朋友對照下面的文字提醒
+        for (let i = 0; i < userStrokes.length; i++) {
+          if (strokeResults[i] !== 'good') {
+            drawStrokeNumber(userStrokes[i][0], i + 1, strokeResults[i]);
+            // 在第 i 筆的第一個點畫號碼
+          }
+        }
+      }
+    }
+
+    function drawStrokeNumber(point, number, result) {
+      // 畫一個有號碼的小圓圈
+      const p = charToScreen(point);
+      // 換成螢幕座標
+      const radius = boardSize * 0.045;
+      // 圓圈大小跟著格子大小變
+      ctx.beginPath();
+      // 開始畫新的形狀
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      // 畫一個完整的圓（0 到 2π 就是一整圈）
+      if (result === 'order') {
+        ctx.fillStyle = '#e67700';
+        // 筆順錯：橘色
+      } else {
+        ctx.fillStyle = '#c92a2a';
+        // 位置錯：紅色
+      }
+      ctx.fill();
+      // 塗滿圓圈
+      ctx.fillStyle = 'white';
+      // 號碼是白色
+      ctx.font = 'bold ' + Math.round(radius * 1.3) + 'px sans-serif';
+      // 號碼的字體大小
+      ctx.textAlign = 'center';
+      // 左右置中
+      ctx.textBaseline = 'middle';
+      // 上下置中
+      ctx.fillText(String(number), p.x, p.y);
+      // 寫上號碼
     }
 
     function drawOneStroke(points, color) {
@@ -795,9 +841,9 @@
         // 像「丨」這種細細的字，寬度幾乎是 0，只看高度
       }
       if (sizeRatio < MIN_SIZE_RATIO) {
-        problems.push('字寫太小了，要寫大一點喔');
+        problems.push('字太小了，寫大一點喔');
       } else if (sizeRatio > MAX_SIZE_RATIO) {
-        problems.push('字寫太大了，要寫小一點喔');
+        problems.push('字太大了，寫小一點喔');
       }
 
       // ----- 2. 位置 -----
@@ -819,7 +865,7 @@
         } else if (dy < -CENTER_LIMIT / 2) {
           direction = direction + '下';
         }
-        problems.push('字偏' + direction + '了，要寫在格子中間喔');
+        problems.push('字偏' + direction + '了，寫在中間喔');
       }
       return problems;
       // 回傳所有問題
@@ -875,12 +921,12 @@
 
       strokeResults = [];
       // 每一筆的結果
+      const strokeHints = [];
+      // 每一筆的提醒文字（寫對的那筆是空的 ''）
+      let extraCount = 0;
+      // 多寫了幾筆
       let goodCount = 0;
       // 寫對幾筆
-      let orderCount = 0;
-      // 筆順錯幾筆
-      let placeCount = 0;
-      // 位置錯幾筆
 
       for (let i = 0; i < strokes.length; i++) {
         // 小朋友寫的每一筆，依照他寫的順序檢查
@@ -900,6 +946,8 @@
         if (expected !== -1 && isStrokeCorrect(strokes[i], medians[expected])) {
           strokeResults.push('good');
           // 寫對
+          strokeHints.push('');
+          // 寫對不用提醒
           used[expected] = true;
           // 這一個標準筆畫配對掉了
           matchedBy[expected] = i;
@@ -935,16 +983,24 @@
         if (bestMatch !== -1) {
           strokeResults.push('order');
           // 筆畫寫對了，但順序不對
+          strokeHints.push('順序錯了，要第 ' + (bestMatch + 1) + ' 個寫');
+          // 告訴小朋友這一筆照筆順應該排第幾
           used[bestMatch] = true;
           // 這個標準筆畫配對掉了
           matchedBy[bestMatch] = i;
           // 記下：是小朋友的第 i 筆
-          orderCount = orderCount + 1;
         } else {
           // 問題 (3)：都不像
           strokeResults.push('place');
           // 位置錯（寫歪、寫錯地方，或多寫的筆畫）
-          placeCount = placeCount + 1;
+          if (expected === -1) {
+            strokeHints.push('多寫了這一筆');
+            // 標準筆畫都配對完了還在寫 → 多寫
+            extraCount = extraCount + 1;
+          } else {
+            strokeHints.push('寫歪了或寫錯地方');
+            // 其他情況 → 寫歪
+          }
           if (expected !== -1) {
             used[expected] = true;
             // 當作他想寫「下一筆」但寫歪了，這樣後面的筆畫才不會全部被當成筆順錯
@@ -954,8 +1010,6 @@
 
       // 檢查「該接起來的筆畫有沒有接好」
       // 例如「山」的第二筆（豎折）要接到第三筆（右邊的豎）
-      let notConnectedCount = 0;
-      // 有幾個地方沒接好
       const standardStrokes = getStandardStrokes();
       // 標準筆畫（{x, y} 格式）
       for (let a = 0; a < totalStrokes; a++) {
@@ -982,14 +1036,11 @@
             if (strokeResults[childB] === 'good') {
               goodCount = goodCount - 1;
               // 原本算寫對，要扣回來
-            } else {
-              orderCount = orderCount - 1;
-              // 原本算筆順錯，要扣回來
             }
             strokeResults[childB] = 'place';
             // 改成位置錯（怪比較後面寫的那一筆）
-            placeCount = placeCount + 1;
-            notConnectedCount = notConnectedCount + 1;
+            strokeHints[childB] = '沒有接到第 ' + (childA + 1) + ' 筆';
+            // 提醒：跟哪一筆沒接好（「第幾筆」都是照小朋友寫的順序算）
           }
         }
       }
@@ -1005,8 +1056,6 @@
 
       const percent = goodCount / totalStrokes * 100;
       // 正確率 = 寫對（位置和筆順都對）的筆數 ÷ 總筆數
-      const percentText = Math.round(percent) + '%';
-      // 顯示用的文字
 
       let stars = 0;
       // 星星數
@@ -1022,6 +1071,10 @@
       // 檢查整個字的大小和位置，回傳一串「問題說明」（沒問題就是空的清單）
       stars = stars - layoutProblems.length;
       // 每有一個整體問題，就扣一顆星
+      if (extraCount > 0) {
+        stars = stars - 1;
+        // 有多寫的筆畫，再扣一顆星
+      }
       if (stars < 0) {
         stars = 0;
         // 星星最少是 0
@@ -1030,28 +1083,38 @@
       let text = '';
       // 要顯示的文字
       if (stars === 0) {
-        text = '再試一次！加油 💪 正確率 ' + percentText + '<br>';
+        text = '再試一次！加油 💪';
+      } else if (stars === 3) {
+        text = '⭐⭐⭐ 太棒了！';
       } else {
-        text = '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + ' 正確率 ' + percentText + '<br>';
-        // 星星 + 正確率
+        text = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+        // 拿到幾顆星就顯示幾個 ⭐，剩下的用 ☆ 補滿
       }
-      text = text + '<span class="good">對 ' + goodCount + '</span>　';
-      // 綠色：寫對幾筆
-      text = text + '<span class="order">筆順錯 ' + orderCount + '</span>　';
-      // 橘色：筆順錯幾筆
-      text = text + '<span class="place">位置錯 ' + placeCount + '</span>';
-      // 紅色：位置錯幾筆
+
+      const hints = [];
+      // 收集所有要顯示的提醒（每一個都是一行文字）
+      for (let i = 0; i < strokeHints.length; i++) {
+        if (strokeHints[i] !== '') {
+          // 這一筆有問題
+          hints.push('<span class="' + strokeResults[i] + '">第 ' + (i + 1) + ' 筆：' + strokeHints[i] + '</span>');
+          // 用這一筆的顏色（橘或紅）顯示，例如「第 3 筆：寫歪了或寫錯地方」
+        }
+      }
       if (missingCount > 0) {
-        text = text + '　少寫 ' + missingCount;
-        // 有少寫的話才顯示
-      }
-      if (notConnectedCount > 0) {
-        text = text + '<br>有 ' + notConnectedCount + ' 個地方沒有接好喔';
-        // 有沒接好的地方才顯示
+        hints.push('還少寫 ' + missingCount + ' 筆喔');
+        // 有少寫的話才提醒
       }
       for (let k = 0; k < layoutProblems.length; k++) {
-        text = text + '<br>' + layoutProblems[k];
-        // 把每一個整體問題都顯示出來，例如「字寫太小了」
+        hints.push(layoutProblems[k]);
+        // 整體問題，例如「字寫太小了」
+      }
+      for (let k = 0; k < hints.length && k < MAX_HINTS; k++) {
+        text = text + '<div class="hint">' + hints[k] + '</div>';
+        // 每個提醒一行（用比較小的字），最多顯示 MAX_HINTS 行
+      }
+      if (hints.length > MAX_HINTS) {
+        text = text + '<div class="hint">還有 ' + (hints.length - MAX_HINTS) + ' 個地方要注意</div>';
+        // 太多的話，剩下的只說還有幾個
       }
       showMessage(text);
       redraw();
