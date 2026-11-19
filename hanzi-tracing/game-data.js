@@ -7,6 +7,28 @@
 
 // ---------- 1. 字表 ----------
 
+const WHITE_PAINT_PICTURE =
+  '<svg viewBox="0 0 80 64" width="1.25em" height="1em" aria-hidden="true">' +
+    '<g transform="rotate(-18 36 32)">' +
+      '<rect x="4" y="18" width="7" height="28" rx="1" fill="#adb5bd" stroke="#495057" stroke-width="2"/>' +
+      // 管子尾巴（壓扁的那一端）
+      '<path d="M11 16 H40 L48 25 V39 L40 48 H11 Z" fill="#dee2e6" stroke="#495057" stroke-width="2.5" stroke-linejoin="round"/>' +
+      // 銀色的管身（右邊漸漸變細）
+      '<rect x="17" y="22" width="17" height="20" rx="2" fill="#ffffff" stroke="#868e96" stroke-width="1.5"/>' +
+      // 白色的標籤：代表這是白色顏料
+      '<rect x="48" y="27" width="7" height="10" rx="1" fill="#495057"/>' +
+      // 管口
+    '</g>' +
+    '<path d="M56 27 C63 26 66 33 62 38 C58 43 61 48 67 48" fill="none" stroke="#868e96" stroke-width="16" stroke-linecap="round"/>' +
+    '<path d="M56 27 C63 26 66 33 62 38 C58 43 61 48 67 48" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>' +
+    // 從管口擠出來、彎彎的白色顏料：先畫一條粗的灰線，再在上面畫一條細一點的白線，
+    // 看起來就是「有灰色邊的白色顏料」（放在白色卡片上才看得到）
+  '</svg>';
+// 「白」的圖：一條擠出白色顏料的顏料管（emoji 裡沒有，所以用 SVG 自己畫）
+// SVG 是用程式畫圖：rect 是長方形、path 是用線連起來的形狀
+// width="1.25em" height="1em"：圖的大小跟著字的大小變（em = 一個字的大小）
+
+
 const WORDS = [
   { character: '山', picture: '⛰️', zhuyin: 'ㄕㄢ' },
   { character: '口', picture: '👄', zhuyin: 'ㄎㄡˇ' },
@@ -17,11 +39,11 @@ const WORDS = [
   { character: '上', picture: '⬆️', zhuyin: 'ㄕㄤˋ' },
   { character: '下', picture: '⬇️', zhuyin: 'ㄒㄧㄚˋ' },
   { character: '手', picture: '✋', zhuyin: 'ㄕㄡˇ' },
-  { character: '白', picture: '<span style="font-size: 60%">☁️🥛</span>', zhuyin: 'ㄅㄞˊ' }
+  { character: '白', picture: WHITE_PAINT_PICTURE, zhuyin: 'ㄅㄞˊ' }
 ];
 // 想加新字：照上面的格式多加一行（記得上一行最後要有逗號）
 // 「上」「下」用箭頭，不用手指的圖，才不會跟「手」搞混
-// 「白」用兩樣白色的東西（白雲、牛奶），讓孩子想到「白色」；兩個圖放在一起比較寬，所以縮小成 60%
+// 「白」沒有適合的 emoji，所以用上面自己畫的「白色顏料」圖
 // character：字；picture：第一關的圖（emoji，可以寫 HTML）；zhuyin：注音
 
 
