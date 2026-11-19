@@ -266,8 +266,21 @@
     const MIN_GAME_HEIGHT = 120;
     // 畫面直的方向至少要有幾格（平板比較寬，如果只看寬度，格子會大到放不下 4 條魚）
 
-    const ATTRACT_DISTANCE = 26;
-    // 魚離魚鉤多近（格數）時，會注意到魚鉤並游過去
+    const DROP_SPEED = 15;
+    // 魚鉤每秒往下沉幾格（慢一點，沉下去的途中可能會被別的魚咬走）
+
+    const ATTRACT_DISTANCE = 20;
+    // 魚離魚鉤多近（格數）時，才有機會注意到魚鉤
+
+    const NOTICE_WHILE_DROPPING = 0.25;
+    // 魚鉤「正在沉」的時候，經過的魚每秒有多少機率會注意到（0.25 = 25%）
+    // 機率不高，所以偶爾會被半路的魚攔走，釣到意想不到的字
+
+    const NOTICE_WHILE_WAITING = 1.5;
+    // 魚鉤「停好」之後，附近的魚每秒注意到的機率（大於 1 代表幾乎馬上就會注意到）
+
+    const MAX_WAIT = 3;
+    // 魚鉤停好後，最多等幾秒；時間到還沒有魚，最近的那條魚會自己游過來
 
     const TAP_POWER = 9;
     // 每點一下，集氣條增加多少（集滿是 100）
@@ -453,6 +466,8 @@
     // 集氣條（0 到 100）
     let reelTimeLeft = 0;
     // 還剩幾秒可以拉
+    let waitTime = 0;
+    // 魚鉤停好後已經等了幾秒
     let leapTime = 0;
     // 魚跳出水面的動畫已經跑了幾秒
     let leapStart = { x: 0, y: 0 };
@@ -990,19 +1005,21 @@
 
     function updateFishing(seconds) {
       if (hookState === 'dropping') {
-        // 魚鉤往目標位置移動
+        // 魚鉤慢慢往目標位置沉下去
         const dx = hookTarget.x - hook.x;
         const dy = hookTarget.y - hook.y;
         const distanceLeft = Math.sqrt(dx * dx + dy * dy);
         // 還差多遠
-        const step = 60 * seconds;
-        // 這一次可以移動多遠（每秒 60 格）
+        const step = DROP_SPEED * seconds;
+        // 這一次可以移動多遠
         if (distanceLeft <= step) {
           hook.x = hookTarget.x;
           hook.y = hookTarget.y;
           // 到了
           hookState = 'waiting';
-          // 開始等魚
+          // 停在這裡等魚
+          waitTime = 0;
+          // 開始計算等了多久
         } else {
           hook.x = hook.x + dx / distanceLeft * step;
           hook.y = hook.y + dy / distanceLeft * step;
@@ -1010,57 +1027,72 @@
         }
       }
 
-      if (hookState === 'waiting') {
-        if (biter === null) {
-          // 還沒有魚游過來，找一條「離魚鉤夠近」的魚
-          let nearest = null;
-          let nearestDistance = ATTRACT_DISTANCE;
-          for (let i = 0; i < fishes.length; i++) {
-            if (fishes[i].fleeing) {
-              continue;
-              // 正在逃跑的魚不算
-            }
-            const mouth = fishMouth(fishes[i]);
-            const d = Math.hypot(mouth.x - hook.x, mouth.y - hook.y);
-            // 魚嘴到魚鉤的距離（Math.hypot 就是畢氏定理算距離）
-            if (d < nearestDistance) {
-              nearest = fishes[i];
-              nearestDistance = d;
-              // 找到更近的
-            }
+      if ((hookState === 'dropping' || hookState === 'waiting') && biter === null) {
+        // 魚鉤在水裡（不管是正在沉、還是已經停好），附近的魚「有機會」注意到它
+        for (let i = 0; i < fishes.length; i++) {
+          if (fishes[i].fleeing) {
+            continue;
+            // 正在逃跑的魚不算
           }
-          biter = nearest;
-          // 最近的那條魚會游過來（如果都太遠，biter 還是 null）
+          const mouth = fishMouth(fishes[i]);
+          const d = Math.hypot(mouth.x - hook.x, mouth.y - hook.y);
+          // 魚嘴到魚鉤的距離（Math.hypot 就是畢氏定理算距離）
+          let chance = NOTICE_WHILE_WAITING;
+          // 魚鉤停好了：機率高
+          if (hookState === 'dropping') {
+            chance = NOTICE_WHILE_DROPPING;
+            // 魚鉤還在沉：機率低
+          }
+          if (d < ATTRACT_DISTANCE && Math.random() < chance * seconds) {
+            // 夠近，而且「擲骰子」擲中了 → 這條魚注意到魚鉤
+            // （chance 是每秒的機率，乘上這一次經過的秒數，就是這一次的機率）
+            biter = fishes[i];
+            break;
+            // 找到一條就好
+          }
         }
-        if (biter !== null) {
-          // 有魚正在游過來：讓牠的嘴巴往魚鉤靠近
-          if (hook.x < biter.x + 11) {
-            biter.direction = -1;
-            // 魚鉤在魚的左邊，魚就面向左
-          } else {
-            biter.direction = 1;
-            // 魚鉤在魚的右邊，魚就面向右
+        if (biter !== null && hookState === 'dropping') {
+          hookState = 'waiting';
+          // 有魚要來咬了，魚鉤停在原地等牠
+        }
+        if (biter === null && hookState === 'waiting') {
+          waitTime = waitTime + seconds;
+          // 還沒有魚，等待時間增加
+          if (waitTime > MAX_WAIT) {
+            biter = nearestFish();
+            // 等太久了，讓最近的那條魚自己游過來
           }
-          const mouth = fishMouth(biter);
-          const dx = hook.x - mouth.x;
-          const dy = hook.y - mouth.y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          const step = 12 * seconds;
-          // 每秒游 12 格
-          if (d <= step) {
-            biter.x = biter.x + dx;
-            biter.y = biter.y + dy;
-            // 咬到了！
-            hookState = 'hooked';
-            power = 0;
-            // 集氣條歸零
-            reelTimeLeft = REEL_TIME;
-            // 開始倒數
-          } else {
-            biter.x = biter.x + dx / d * step;
-            biter.y = biter.y + dy / d * step;
-            // 往魚鉤游一點
-          }
+        }
+      }
+
+      if (hookState === 'waiting' && biter !== null) {
+        // 有魚正在游過來：讓牠的嘴巴往魚鉤靠近
+        if (hook.x < biter.x + 11) {
+          biter.direction = -1;
+          // 魚鉤在魚的左邊，魚就面向左
+        } else {
+          biter.direction = 1;
+          // 魚鉤在魚的右邊，魚就面向右
+        }
+        const mouth = fishMouth(biter);
+        const dx = hook.x - mouth.x;
+        const dy = hook.y - mouth.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        const step = 18 * seconds;
+        // 每秒游 18 格（注意到魚鉤後游得比平常快，小朋友不用等太久）
+        if (d <= step) {
+          biter.x = biter.x + dx;
+          biter.y = biter.y + dy;
+          // 咬到了！
+          hookState = 'hooked';
+          power = 0;
+          // 集氣條歸零
+          reelTimeLeft = REEL_TIME;
+          // 開始倒數
+        } else {
+          biter.x = biter.x + dx / d * step;
+          biter.y = biter.y + dy / d * step;
+          // 往魚鉤游一點
         }
       }
 
@@ -1116,6 +1148,26 @@
       }
     }
 
+    function nearestFish() {
+      // 找出嘴巴離魚鉤最近的魚（不算正在逃跑的）
+      let nearest = null;
+      let nearestDistance = Infinity;
+      // 先假設無限遠
+      for (let i = 0; i < fishes.length; i++) {
+        if (fishes[i].fleeing) {
+          continue;
+        }
+        const mouth = fishMouth(fishes[i]);
+        const d = Math.hypot(mouth.x - hook.x, mouth.y - hook.y);
+        if (d < nearestDistance) {
+          nearest = fishes[i];
+          nearestDistance = d;
+          // 找到更近的就記下來
+        }
+      }
+      return nearest;
+    }
+
     function showMessage(text) {
       // 在畫面上方暫時顯示一段提示，2.5 秒後消失
       message = text;
@@ -1159,12 +1211,9 @@
       if (hookState === 'idle' || hookState === 'waiting' || hookState === 'dropping') {
         if (y > waterTop + 3) {
           // 點在水裡：把魚鉤放到那裡
-          if (hookState === 'idle') {
-            const tip = rodTip();
-            hook.x = tip.x + 0.5;
-            hook.y = tip.y + 5;
-            // 從釣竿尖端開始放
-          }
+          hook.x = x;
+          hook.y = waterTop;
+          // 魚鉤從點的位置「正上方的水面」開始，垂直往下沉
           if (biter !== null) {
             biter = null;
             // 換位置的話，本來游過來的魚就不追了
