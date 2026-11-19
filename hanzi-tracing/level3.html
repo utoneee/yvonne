@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <!-- 用手機的寬度顯示，並且禁止兩指縮放 -->
 
-  <title>國字默寫測試（第三關）</title>
+  <title>國字抄寫測試（第三關）</title>
   <!-- 瀏覽器分頁上的標題 -->
 
   <script src="game-data.js"></script>
@@ -108,17 +108,24 @@
     }
 
     #sampleArea {
-      /* 顯示「要寫的字」的小方框（Hanzi Writer 會畫在這裡面） */
-      width: 100px;
-      /* 寬 100px */
-      height: 100px;
-      /* 高 100px */
+      /* 顯示「要寫的字」的範例格：跟下面一樣是田字格，孩子可以對照每一筆在哪一格 */
+      position: relative;
+      /* 讓裡面的虛線和字可以疊在一起 */
+      width: 140px;
+      /* 寬 140px（要跟 JavaScript 裡的 SAMPLE_SIZE 一樣） */
+      height: 140px;
+      /* 高 140px */
       background: white;
       /* 白底 */
-      border: 3px solid #339af0;
-      /* 藍框 */
-      border-radius: 12px;
-      /* 圓角 */
+      border: 3px solid #e05252;
+      /* 紅框，跟下面的田字格一樣 */
+    }
+
+    #sampleWriter {
+      /* Hanzi Writer 畫範例字的地方，疊在虛線上面 */
+      position: absolute;
+      left: 0;
+      top: 0;
     }
 
     #board {
@@ -259,10 +266,17 @@
 
   <div id="question">
     <!-- 題目區 -->
-    <span>請寫出<br>這個字 👉</span>
+    <span>請照著<br>寫寫看 👉</span>
     <!-- 說明文字 -->
-    <div id="sampleArea"></div>
-    <!-- 要寫的字會顯示在這裡 -->
+    <div id="sampleArea">
+      <!-- 範例格：也是田字格 -->
+      <div class="grid-line horizontal"></div>
+      <!-- 橫虛線 -->
+      <div class="grid-line vertical"></div>
+      <!-- 直虛線 -->
+      <div id="sampleWriter"></div>
+      <!-- 要抄寫的字會畫在這裡（疊在虛線上面） -->
+    </div>
   </div>
 
   <div id="board">
@@ -289,7 +303,7 @@
 
   <script>
     // ==========================================================
-    // 第三關（默寫）的程式
+    // 第三關（抄寫）的程式
     // 很多部分和描紅版（index.html）一樣，不一樣的地方會特別標示【第三關新增】
     // ==========================================================
 
@@ -386,7 +400,7 @@
     function calculateBoardSize() {
       const widthLimit = window.innerWidth - 40;
       // 螢幕寬度扣掉左右留白
-      let heightLimit = window.innerHeight - 400;
+      let heightLimit = window.innerHeight - 440;
       // 螢幕高度扣掉上下其他東西的空間
       if (FISH_CHARACTER !== null) {
         heightLimit = heightLimit + 60;
@@ -741,7 +755,7 @@
 
 
     // ---------- 10.【第三關新增】把小朋友的字「搬到中間、縮放成標準大小」 ----------
-    // 描紅時有灰色的字當位置參考；默寫時沒有，小朋友可能寫得偏一邊、太大或太小
+    // 描紅時有灰色的字當位置參考；抄寫時沒有，小朋友可能寫得偏一邊、太大或太小
     // 如果不先調整，每一筆都會被當成「位置錯」
     // 做法：用一個「剛好框住整個字的方框」，把小朋友的方框對齊到標準字的方框
 
@@ -1283,14 +1297,17 @@
     applyBoardSize();
     // 決定田字格大小
 
-    sampleWriter = HanziWriter.create('sampleArea', currentCharacter, {
-      // 【第三關新增】上方的題目字：直接顯示完整的黑色字
-      // 田字格裡「不」放 Hanzi Writer，因為這一關沒有灰色字可以描
-      width: 100,
-      height: 100,
-      // 和 #sampleArea 一樣大
-      padding: 8,
-      // 留一點白邊
+    const SAMPLE_SIZE = 140;
+    // 範例格的大小（要跟 CSS 裡 #sampleArea 的寬高一樣）
+
+    sampleWriter = HanziWriter.create('sampleWriter', currentCharacter, {
+      // 【第三關新增】上方的範例字：直接顯示完整的黑色字
+      // 下面的田字格裡「不」放 Hanzi Writer，因為這一關沒有灰色字可以描
+      width: SAMPLE_SIZE,
+      height: SAMPLE_SIZE,
+      // 和範例格一樣大
+      padding: Math.round(SAMPLE_SIZE * BOARD_PADDING_RATIO),
+      // 字和邊框的距離，跟下面的田字格用同一個比例，字在格子裡的位置才會一樣
       showCharacter: true,
       // 顯示完整的字
       showOutline: false,

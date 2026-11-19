@@ -12,8 +12,16 @@ const WORDS = [
   { character: '口', picture: '👄', zhuyin: 'ㄎㄡˇ' },
   { character: '人', picture: '🧍', zhuyin: 'ㄖㄣˊ' },
   { character: '日', picture: '☀️', zhuyin: 'ㄖˋ' },
-  { character: '大', picture: '<span style="font-size: 40%">🐭</span>🐘', zhuyin: 'ㄉㄚˋ' }
+  { character: '大', picture: '<span style="font-size: 40%">🐭</span>🐘', zhuyin: 'ㄉㄚˋ' },
+  { character: '拍', picture: '👏', zhuyin: 'ㄆㄞ' },
+  { character: '上', picture: '⬆️', zhuyin: 'ㄕㄤˋ' },
+  { character: '下', picture: '⬇️', zhuyin: 'ㄒㄧㄚˋ' },
+  { character: '手', picture: '✋', zhuyin: 'ㄕㄡˇ' },
+  { character: '白', picture: '<span style="font-size: 60%">☁️🥛</span>', zhuyin: 'ㄅㄞˊ' }
 ];
+// 想加新字：照上面的格式多加一行（記得上一行最後要有逗號）
+// 「上」「下」用箭頭，不用手指的圖，才不會跟「手」搞混
+// 「白」用兩樣白色的東西（白雲、牛奶），讓孩子想到「白色」；兩個圖放在一起比較寬，所以縮小成 60%
 // character：字；picture：第一關的圖（emoji，可以寫 HTML）；zhuyin：注音
 
 
@@ -21,13 +29,13 @@ const WORDS = [
 // 每個字都有自己的階段，魚會隨著練習「長大」：
 //   階段 0：小魚   → 釣到後去第一關（看圖選字）
 //   階段 1：中魚   → 釣到後去第二關（描紅）
-//   階段 2：大魚   → 釣到後去第三關（默寫）
-//   階段 3：金色魚 → 已經學會，釣到後用第三關（默寫）複習
+//   階段 2：大魚   → 釣到後去第三關（抄寫）
+//   階段 3：金色魚 → 已經學會，釣到後用第三關（抄寫）複習
 
 const STAGE_NAMES = ['小魚', '中魚', '大魚', '金色的魚'];
 // 每個階段的名字
 
-const LEVEL_NAMES = ['', '第一關：看圖選字', '第二關：描紅', '第三關：默寫'];
+const LEVEL_NAMES = ['', '第一關：看圖選字', '第二關：描紅', '第三關：抄寫'];
 // 每一關的名字（第 0 個空著，這樣 LEVEL_NAMES[1] 就是第一關）
 
 const STARS_TO_PASS = [0, 1, 2, 2];
