@@ -24,8 +24,6 @@
       /* 拿掉預設外邊距 */
       padding: 0;
       /* 拿掉預設內邊距 */
-      background: #e7f5ff;
-      /* 背景：淡淡的海水藍（第三關是海邊） */
       overscroll-behavior: none;
       /* 滑到底時不要「彈一下」 */
     }
@@ -35,8 +33,6 @@
       /* 繁體中文字型 */
       text-align: center;
       /* 全部置中 */
-      color: #333333;
-      /* 文字深灰色 */
       -webkit-user-select: none;
       /* （Safari）長按不要選取文字 */
       user-select: none;
@@ -61,10 +57,6 @@
       /* 字的大小 */
       margin: 3px;
       /* 按鈕間距 */
-      border: 3px solid #339af0;
-      /* 藍色邊框 */
-      border-radius: 12px;
-      /* 圓角 */
       background: white;
       /* 白底 */
       color: #333333;
@@ -105,6 +97,12 @@
       /* 跟下面的田字格隔開 */
       font-size: 22px;
       /* 說明文字大小 */
+    }
+
+    .level3-sign {
+      /* 第三關的招牌：放在範例格左邊，字小一點 */
+      margin: 0 0 8px 0;
+      font-size: 18px;
     }
 
     #sampleArea {
@@ -188,7 +186,9 @@
     }
 
     #message {
-      /* 提示和評分結果 */
+      /* 提示和評分結果（外框是 pixel-panel 點陣對話框） */
+      padding: 6px 10px;
+      /* 框裡面留一點空間 */
       font-size: 22px;
       /* 字的大小 */
       min-height: 64px;
@@ -217,12 +217,14 @@
       /* 置中 */
       gap: 10px;
       /* 按鈕間距 */
-      margin: 0 16px 12px 16px;
+      margin: 0 16px 8px 16px;
       /* 左右留 16px */
     }
 
     .tool-button {
       /* 功能按鈕 */
+      color: white;
+      /* 白色的字（「回去」兩個字） */
       flex: 1;
       /* 平分寬度 */
       max-width: 200px;
@@ -231,19 +233,6 @@
       /* 夠高，好按 */
       font-size: 22px;
       /* 文字大小 */
-      border: none;
-      /* 不要邊框 */
-      border-radius: 16px;
-      /* 圓角 */
-      color: white;
-      /* 白字 */
-      touch-action: manipulation;
-      /* 連點兩下不要放大 */
-    }
-
-    .tool-button:active {
-      transform: scale(0.95);
-      /* 按下去時縮小一點，讓小朋友知道有按到 */
     }
 
     #undoButton  { background: #f59f00; }
@@ -260,15 +249,20 @@
   <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
-<body>
+<body class="level-page scene-sea">
+  <!-- level-page、scene-sea 在 game-style.css：點陣風格、海邊的背景 -->
   <div id="charButtons"></div>
   <!-- 選字按鈕（由 JavaScript 自動產生） -->
 
   <div id="question">
     <!-- 題目區 -->
-    <span>請照著<br>寫寫看 👉</span>
+    <div>
+      <div class="pixel-sign level3-sign">第三關<br>抄寫</div>
+      <!-- 木頭招牌（放在範例格左邊，畫面才不會變高） -->
+      <div>請照著<br>寫寫看 👉</div>
+    </div>
     <!-- 說明文字 -->
-    <div id="sampleArea">
+    <div id="sampleArea" class="grid-shadow">
       <!-- 範例格：也是田字格 -->
       <div class="grid-line horizontal"></div>
       <!-- 橫虛線 -->
@@ -279,7 +273,7 @@
     </div>
   </div>
 
-  <div id="board">
+  <div id="board" class="grid-shadow">
     <!-- 空白田字格：這一關「沒有」灰色的字可以描 -->
     <div class="grid-line horizontal"></div>
     <!-- 橫虛線 -->
@@ -289,16 +283,16 @@
     <!-- 寫字的畫布 -->
   </div>
 
-  <div id="message">字載入中，請稍等…</div>
+  <div id="message" class="pixel-panel">字載入中，請稍等…</div>
   <!-- 提示和評分結果 -->
 
   <div class="tool-row">
     <!-- 按鈕用圖示代替文字（小一的孩子看圖就懂）：
          橡皮擦 = 擦掉上一筆、圓形箭頭 = 全部重寫、播放 = 示範筆順、打勾 = 確定
          aria-label 是給「螢幕報讀軟體」念的文字，畫面上看不到 -->
-    <button id="undoButton" class="tool-button" aria-label="擦掉上一筆"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="rotate(-35 24 24)"><rect x="6" y="15" width="36" height="18" rx="4" fill="#ffc9c9"/><rect x="6" y="15" width="13" height="18" rx="4" fill="#ffffff"/><rect x="6" y="15" width="36" height="18" rx="4" fill="none" stroke="#5c3d2e" stroke-width="3"/></g></svg></button>
-    <button id="clearButton" class="tool-button" aria-label="全部重寫"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M39 26a15 15 0 1 1-5-11.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M35 5v10.5H24.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button id="checkButton" class="tool-button" aria-label="確定"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button id="undoButton" class="tool-button pixel-button" aria-label="擦掉上一筆"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="rotate(-35 24 24)"><rect x="6" y="15" width="36" height="18" rx="4" fill="#ffc9c9"/><rect x="6" y="15" width="13" height="18" rx="4" fill="#ffffff"/><rect x="6" y="15" width="36" height="18" rx="4" fill="none" stroke="#5c3d2e" stroke-width="3"/></g></svg></button>
+    <button id="clearButton" class="tool-button pixel-button" aria-label="全部重寫"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M39 26a15 15 0 1 1-5-11.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M35 5v10.5H24.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button id="checkButton" class="tool-button pixel-button" aria-label="確定"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 
   <script>
@@ -400,7 +394,7 @@
     function calculateBoardSize() {
       const widthLimit = window.innerWidth - 40;
       // 螢幕寬度扣掉左右留白
-      let heightLimit = window.innerHeight - 440;
+      let heightLimit = window.innerHeight - 484;
       // 螢幕高度扣掉上下其他東西的空間
       if (FISH_CHARACTER !== null) {
         heightLimit = heightLimit + 60;
@@ -409,9 +403,9 @@
       // 螢幕高度扣掉選字按鈕、題目、文字區、按鈕的空間
       let size = Math.min(widthLimit, heightLimit, 520);
       // 取最小的，最大 520
-      if (size < 240) {
-        size = 240;
-        // 至少 240，免得太小
+      if (size < 228) {
+        size = 228;
+        // 至少 228，免得太小
       }
       return Math.floor(size);
       // 去掉小數點
@@ -1279,7 +1273,7 @@
         const button = document.createElement('button');
         // 做一個按鈕
         button.textContent = character;
-        button.className = 'char-button';
+        button.className = 'char-button pixel-button';
         button.addEventListener('click', function () {
           selectCharacter(character);
           // 按下就切換到這個字

@@ -21,8 +21,6 @@
       /* 拿掉預設外邊距 */
       padding: 0;
       /* 拿掉預設內邊距 */
-      background: #e6fcf5;
-      /* 背景：淡淡的湖水綠（第一關是小湖） */
     }
 
     body {
@@ -30,8 +28,6 @@
       /* 一般文字用的繁體中文字型 */
       text-align: center;
       /* 全部置中 */
-      color: #333333;
-      /* 文字深灰色 */
       -webkit-user-select: none;
       /* （Safari）長按不要選取文字 */
       user-select: none;
@@ -42,12 +38,6 @@
 
     #progress {
       /* 最上面的「第幾題 / 共幾題」 */
-      font-size: 20px;
-      /* 字的大小 */
-      margin: 14px 0 6px 0;
-      /* 上 14px、下 6px */
-      color: #555555;
-      /* 灰一點，不要搶走注意力 */
     }
 
     #pictureCard {
@@ -66,12 +56,6 @@
       /* 左右置中 */
       gap: 14px;
       /* 圖片和注音之間的距離 */
-      background: white;
-      /* 白底 */
-      border: 4px solid #20c997;
-      /* 湖水綠邊框 */
-      border-radius: 24px;
-      /* 圓角 */
     }
 
     #picture {
@@ -172,19 +156,8 @@
       /* 白底 */
       color: #333333;
       /* 深灰字 */
-      border: 4px solid #20c997;
-      /* 湖水綠邊框 */
-      border-radius: 20px;
-      /* 圓角 */
-      touch-action: manipulation;
-      /* 連點兩下不要放大畫面 */
       padding: 0;
       /* 拿掉按鈕預設的內邊距，字才會在正中間 */
-    }
-
-    .choice-button:active {
-      transform: scale(0.95);
-      /* 按下去時縮小一點，讓小朋友知道有按到 */
     }
 
     .choice-button.wrong {
@@ -193,7 +166,7 @@
       /* 變成灰底 */
       color: #adb5bd;
       /* 字變淡 */
-      border-color: #ced4da;
+      border-color: #868e96;
       /* 邊框變灰 */
       animation: shake 0.4s;
       /* 左右搖一搖（動畫定義在下面） */
@@ -205,8 +178,6 @@
       /* 綠底 */
       color: white;
       /* 白字 */
-      border-color: #2f9e44;
-      /* 深綠邊框 */
     }
 
     @keyframes shake {
@@ -219,7 +190,9 @@
     }
 
     #message {
-      /* 答對、答錯的提示文字 */
+      /* 答對、答錯的提示文字（外框是 pixel-panel 點陣對話框） */
+      padding: 6px 10px;
+      /* 框裡面留一點空間 */
       font-size: 26px;
       /* 字的大小 */
       min-height: 76px;
@@ -230,32 +203,27 @@
       /* 行距 */
     }
 
+    #message:empty {
+      visibility: hidden;
+      /* 還沒有文字的時候（:empty = 裡面是空的），先把框藏起來，但還是佔著位置 */
+    }
+
     #nextButton {
       /* 「下一題」按鈕 */
+      color: white;
+      /* 白字 */
       min-width: 220px;
       /* 夠寬 */
       min-height: 68px;
       /* 夠高 */
       font-size: 26px;
       /* 文字大小 */
-      border: none;
-      /* 不要邊框 */
-      border-radius: 18px;
-      /* 圓角 */
       background: #339af0;
       /* 藍色 */
-      color: white;
-      /* 白字 */
-      touch-action: manipulation;
-      /* 連點兩下不要放大 */
       visibility: hidden;
       /* 一開始先藏起來（但還是佔著位置，畫面才不會跳），答對才出現 */
     }
 
-    #nextButton:active {
-      transform: scale(0.95);
-      /* 按下去縮小一點 */
-    }
   </style>
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bpmf+Huninn&display=swap">
@@ -264,11 +232,12 @@
   <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
-<body>
-  <div id="progress">第 1 題 / 共 5 題</div>
+<body class="level-page scene-lake">
+  <!-- level-page、scene-lake 在 game-style.css：點陣風格、小湖的背景 -->
+  <div id="progress" class="pixel-sign">第 1 題 / 共 5 題</div>
   <!-- 進度 -->
 
-  <div id="pictureCard">
+  <div id="pictureCard" class="pixel-panel">
     <!-- 圖片卡片 -->
     <div id="picture"></div>
     <!-- 圖片（emoji）會放在這裡 -->
@@ -282,10 +251,10 @@
   <div id="choices"></div>
   <!-- 三個選項按鈕（由 JavaScript 自動產生） -->
 
-  <div id="message"></div>
+  <div id="message" class="pixel-panel"></div>
   <!-- 提示文字 -->
 
-  <button id="nextButton">下一題 ➜</button>
+  <button id="nextButton" class="pixel-button">下一題 ➜</button>
   <!-- 下一題按鈕 -->
 
   <script>
@@ -430,7 +399,8 @@
       for (let i = 0; i < choices.length; i++) {
         const button = document.createElement('button');
         // 做一個新按鈕
-        button.className = 'choice-button';
+        button.className = 'choice-button pixel-button';
+        // 兩個 class：choice-button（這一頁的樣子）、pixel-button（共用的點陣按鈕）
         // 套用 .choice-button 的樣子
         button.textContent = choices[i];
         // 按鈕上顯示這個字

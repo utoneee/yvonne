@@ -436,9 +436,9 @@
   <canvas id="game"></canvas>
   <!-- 整個釣魚遊戲都畫在這張畫布上 -->
 
-  <button id="playerButton" class="top-button hidden">👤 玩家一</button>
+  <button id="playerButton" class="top-button pixel-button hidden">👤 玩家一</button>
   <!-- 左上角：現在是哪個玩家，點了可以換玩家 -->
-  <button id="bookButton" class="top-button hidden">📖 記錄本</button>
+  <button id="bookButton" class="top-button pixel-button hidden">📖 記錄本</button>
   <!-- 右上角：打開記錄本 -->
 
   <div id="slotScreen" class="overlay">
@@ -469,7 +469,7 @@
       <!-- 剛剛選的角色會畫在這裡 -->
       <input id="nameInput" type="text" maxlength="6" autocomplete="off">
       <!-- 輸入名字的框（最多 6 個字） -->
-      <button id="nameDoneButton" class="big-button">開始釣魚 🎣</button>
+      <button id="nameDoneButton" class="big-button pixel-button">開始釣魚 🎣</button>
     </div>
   </div>
 
@@ -480,7 +480,7 @@
       <div id="bookSummary" class="book-summary">學會 0 / 5 個字</div>
       <div id="bookList"></div>
       <!-- 每個字一張卡片，由 JavaScript 放進來 -->
-      <button id="closeBookButton" class="big-button">回去釣魚 🎣</button>
+      <button id="closeBookButton" class="big-button pixel-button">回去釣魚 🎣</button>
     </div>
   </div>
 
@@ -493,8 +493,8 @@
       <!-- 魚身上的字 -->
       <div id="caughtLevel" class="level-name">第一關：看圖選字</div>
       <!-- 要挑戰哪一關 -->
-      <button id="practiceButton" class="big-button">開始挑戰 ✏️</button>
-      <button id="keepFishingButton" class="big-button">放牠回去 🎣</button>
+      <button id="practiceButton" class="big-button pixel-button">開始挑戰 ✏️</button>
+      <button id="keepFishingButton" class="big-button pixel-button">放牠回去 🎣</button>
     </div>
   </div>
 
@@ -1625,7 +1625,7 @@
         box.className = 'slot';
 
         const button = document.createElement('button');
-        button.className = 'slot-button';
+        button.className = 'slot-button pixel-button';
         if (data.player >= 0) {
           // 有資料的檔案：顯示角色和名字
           button.appendChild(makeSpriteCanvas(PLAYERS[data.player].sprite, PLAYERS[data.player].colors, 5));
@@ -1706,7 +1706,7 @@
       // 做出三個角色按鈕
       for (let i = 0; i < PLAYERS.length; i++) {
         const button = document.createElement('button');
-        button.className = 'pick-button';
+        button.className = 'pick-button pixel-button';
         button.appendChild(makeSpriteCanvas(PLAYERS[i].sprite, PLAYERS[i].colors, 5));
         // 角色的圖
         button.appendChild(document.createTextNode(PLAYERS[i].name));

@@ -85,3 +85,87 @@ body, button, input {
   /* 如果裝置設定了「減少動態效果」，就不要動畫 */
   .star, .star.filled, .fade-in { animation: none; }
 }
+
+
+/* ---------- 4. 點陣風格（關卡頁面和釣魚畫面一致） ----------
+   跟釣魚畫面一樣：方角、粗粗的咖啡色邊框、下方一條沒有模糊的深色「影子」 */
+:root {
+  /* :root 是整個網頁；這裡定義「顏色變數」，下面用 var(--名字) 拿來用，要換顏色只要改這裡 */
+  --ink: #5c3d2e;
+  /* 咖啡色：框線、文字 */
+  --shadow: #3b2a20;
+  /* 深咖啡色：影子 */
+  --paper: #fff9db;
+  /* 米黃色：對話框的底色 */
+  --wood: #9c6644;
+  /* 木頭色：招牌 */
+}
+
+/* 三個關卡的背景：淡淡的水波紋（每 30px 有一條稍微深一點的線，像點陣畫的水面）
+   第一關小湖（偏綠）、第二關溪邊（淡藍）、第三關海邊（藍） */
+.scene-lake {
+  background: repeating-linear-gradient(to bottom, #c3fae8 0 26px, #b2f2dd 26px 30px);
+  /* repeating-linear-gradient：一直重複的條紋。0～26px 淺色、26～30px 深一點 */
+}
+
+.scene-stream {
+  background: repeating-linear-gradient(to bottom, #d0ebff 0 26px, #bfe2fd 26px 30px);
+}
+
+.scene-sea {
+  background: repeating-linear-gradient(to bottom, #a5d8ff 0 26px, #94cefb 26px 30px);
+}
+
+.level-page {
+  min-height: 100vh;
+  /* 背景至少佔滿整個螢幕高 */
+  display: flow-root;
+  /* 讓最上面元素的 margin 留在頁面裡面，不要「漏」到外面把整頁往下推（不然會多出一點點捲動） */
+  color: var(--ink);
+  /* 文字用咖啡色 */
+}
+
+.pixel-sign {
+  /* 木頭招牌：關卡名字 */
+  display: inline-block;
+  /* 寬度跟著文字，不要佔滿整行 */
+  margin: 12px 0 10px 0;
+  padding: 4px 14px;
+  background: var(--wood);
+  color: var(--paper);
+  /* 米黃色的字 */
+  border: 4px solid var(--shadow);
+  box-shadow: 0 4px 0 var(--shadow);
+  /* 影子：往下 4px、不模糊 */
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.pixel-panel {
+  /* 米黃色的點陣對話框（提示、星星、圖片卡片） */
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: 0 5px 0 var(--shadow);
+}
+
+.pixel-button {
+  /* 點陣按鈕：方角、粗框、下面有影子 */
+  border: 4px solid var(--shadow);
+  border-radius: 0;
+  /* 方角 */
+  box-shadow: 0 5px 0 var(--shadow);
+  touch-action: manipulation;
+  /* 連點兩下不要放大 */
+  /* 文字顏色由每個按鈕自己決定（有的是白字、有的是深色字） */
+}
+
+.pixel-button:active {
+  /* 按下去：整個按鈕往下壓 4px，影子變短，看起來像真的被按下去 */
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--shadow);
+}
+
+.grid-shadow {
+  /* 田字格下面的影子，看起來有厚度 */
+  box-shadow: 0 6px 0 var(--shadow);
+}
