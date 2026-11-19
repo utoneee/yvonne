@@ -109,10 +109,10 @@
       /* 顯示「要寫的字」的範例格：跟下面一樣是田字格，孩子可以對照每一筆在哪一格 */
       position: relative;
       /* 讓裡面的虛線和字可以疊在一起 */
-      width: 140px;
-      /* 寬 140px（要跟 JavaScript 裡的 SAMPLE_SIZE 一樣） */
-      height: 140px;
-      /* 高 140px */
+      width: 124px;
+      /* 寬 124px（要跟 JavaScript 裡的 SAMPLE_SIZE 一樣） */
+      height: 124px;
+      /* 高 124px */
       background: white;
       /* 白底 */
       border: 3px solid #e05252;
@@ -229,7 +229,7 @@
       /* 平分寬度 */
       max-width: 200px;
       /* 平板上不要太寬 */
-      min-height: 68px;
+      min-height: 60px;
       /* 夠高，好按 */
       font-size: 22px;
       /* 文字大小 */
@@ -249,8 +249,10 @@
   <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
-<body class="level-page scene-sea">
-  <!-- level-page、scene-sea 在 game-style.css：點陣風格、海邊的背景 -->
+<body class="level-page">
+  <!-- level-page 在 game-style.css：點陣風格、內容放在畫面正中間 -->
+  <main class="level-panel">
+  <!-- 題目區：半透明白底，後面看得到湖邊風景 -->
   <div id="charButtons"></div>
   <!-- 選字按鈕（由 JavaScript 自動產生） -->
 
@@ -283,7 +285,7 @@
     <!-- 寫字的畫布 -->
   </div>
 
-  <div id="message" class="pixel-panel">字載入中，請稍等…</div>
+  <div id="message">字載入中，請稍等…</div>
   <!-- 提示和評分結果 -->
 
   <div class="tool-row">
@@ -294,6 +296,8 @@
     <button id="clearButton" class="tool-button pixel-button" aria-label="全部重寫"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M39 26a15 15 0 1 1-5-11.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M35 5v10.5H24.5" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button id="checkButton" class="tool-button pixel-button" aria-label="確定"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
+
+  </main>
 
   <script>
     // ==========================================================
@@ -392,9 +396,9 @@
     // ---------- 4. 決定田字格大小 ----------
 
     function calculateBoardSize() {
-      const widthLimit = window.innerWidth - 40;
+      const widthLimit = window.innerWidth - 64;
       // 螢幕寬度扣掉左右留白
-      let heightLimit = window.innerHeight - 484;
+      let heightLimit = window.innerHeight - 500;
       // 螢幕高度扣掉上下其他東西的空間
       if (FISH_CHARACTER !== null) {
         heightLimit = heightLimit + 60;
@@ -1291,7 +1295,7 @@
     applyBoardSize();
     // 決定田字格大小
 
-    const SAMPLE_SIZE = 140;
+    const SAMPLE_SIZE = 124;
     // 範例格的大小（要跟 CSS 裡 #sampleArea 的寬高一樣）
 
     sampleWriter = HanziWriter.create('sampleWriter', currentCharacter, {
@@ -1331,5 +1335,7 @@
     window.addEventListener('resize', applyBoardSize);
     // 螢幕轉向時重新調整大小
   </script>
+  <script src="scene-background.js"></script>
+  <!-- 在最底層畫出跟釣魚畫面一樣的湖邊風景 -->
 </body>
 </html>

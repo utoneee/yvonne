@@ -233,8 +233,8 @@
       /* 同一排的按鈕平分寬度 */
       max-width: 260px;
       /* 平板上不要拉得太寬 */
-      min-height: 68px;
-      /* 高度至少 68px，小手指很好按 */
+      min-height: 60px;
+      /* 高度至少 60px，小手指很好按 */
       font-size: 24px;
       /* 按鈕文字大小 */
     }
@@ -255,9 +255,11 @@
   <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
-<body class="level-page scene-stream">
+<body class="level-page">
   <!-- body 裡面放的是「真正會顯示在畫面上」的東西 -->
-  <!-- level-page、scene-stream 在 game-style.css：點陣風格、溪邊的背景 -->
+  <!-- level-page 在 game-style.css：點陣風格、內容放在畫面正中間 -->
+  <main class="level-panel">
+  <!-- 題目區：半透明白底，後面看得到湖邊風景 -->
 
   <div class="pixel-sign">🐟 第二關・描紅</div>
   <!-- 木頭招牌 -->
@@ -279,7 +281,7 @@
     <!-- 第 5 層（最上面）：一開始的倒數 3、2、1（平常藏起來） -->
   </div>
 
-  <div id="message" class="pixel-panel">字載入中，請稍等…</div>
+  <div id="message">字載入中，請稍等…</div>
   <!-- 提示文字、評分結果會顯示在這裡 -->
 
   <div class="tool-row">
@@ -291,6 +293,8 @@
     <button id="demoButton" class="tool-button pixel-button" aria-label="示範筆順"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 10l22 14-22 14z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg></button>
     <button id="checkButton" class="tool-button pixel-button" aria-label="確定"><svg class="icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
+
+  </main>
 
   <script>
     // ==========================================================
@@ -378,9 +382,9 @@
 
     function calculateBoardSize() {
       // 這個「函式」負責算出田字格要多大
-      const widthLimit = window.innerWidth - 40;
+      const widthLimit = window.innerWidth - 64;
       // 螢幕寬度扣掉左右留白和邊框
-      let heightLimit = window.innerHeight - 450;
+      let heightLimit = window.innerHeight - 490;
       // 螢幕高度扣掉上下其他東西的空間
       if (FISH_CHARACTER !== null) {
         heightLimit = heightLimit + 60;
@@ -1112,5 +1116,7 @@
     window.addEventListener('resize', applyBoardSize);
     // 螢幕大小改變時（例如平板轉向），重新調整田字格大小
   </script>
+  <script src="scene-background.js"></script>
+  <!-- 在最底層畫出跟釣魚畫面一樣的湖邊風景 -->
 </body>
 </html>

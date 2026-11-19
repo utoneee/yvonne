@@ -15,4 +15,5 @@
 - `level2.html`：第二關，描紅（中魚，需要網路）
 - `level3.html`：第三關，抄寫（大魚、金色的魚，需要網路）
 - `game-data.js`：共用的字表和進度紀錄。新增練習的字請改這裡
+- `scene-background.js`：在關卡頁面的背景畫出跟釣魚畫面一樣的點陣湖邊風景
 - `game-style.css`：共用樣式。說明文字用 Google Fonts 的「注音粉圓」（Bpmf Huninn）字型，每個字旁邊會有注音（需要網路）

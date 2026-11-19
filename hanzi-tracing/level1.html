@@ -204,8 +204,8 @@
     }
 
     #message:empty {
-      visibility: hidden;
-      /* 還沒有文字的時候（:empty = 裡面是空的），先把框藏起來，但還是佔著位置 */
+      display: none;
+      /* 還沒有文字的時候（:empty = 裡面是空的），先不顯示也不佔位置，題目才會集中在畫面中間 */
     }
 
     #nextButton {
@@ -220,8 +220,8 @@
       /* 文字大小 */
       background: #339af0;
       /* 藍色 */
-      visibility: hidden;
-      /* 一開始先藏起來（但還是佔著位置，畫面才不會跳），答對才出現 */
+      display: none;
+      /* 一開始先藏起來（不佔位置），答對才出現 */
     }
 
   </style>
@@ -232,8 +232,10 @@
   <!-- 共用樣式：注音字型、圖示按鈕、星星動畫 -->
 </head>
 
-<body class="level-page scene-lake">
-  <!-- level-page、scene-lake 在 game-style.css：點陣風格、小湖的背景 -->
+<body class="level-page">
+  <!-- level-page 在 game-style.css：點陣風格、內容放在畫面正中間 -->
+  <main class="level-panel">
+  <!-- 題目區：半透明白底，後面看得到湖邊風景 -->
   <div id="progress" class="pixel-sign">第 1 題 / 共 5 題</div>
   <!-- 進度 -->
 
@@ -251,11 +253,13 @@
   <div id="choices"></div>
   <!-- 三個選項按鈕（由 JavaScript 自動產生） -->
 
-  <div id="message" class="pixel-panel"></div>
+  <div id="message"></div>
   <!-- 提示文字 -->
 
   <button id="nextButton" class="pixel-button">下一題 ➜</button>
   <!-- 下一題按鈕 -->
+
+  </main>
 
   <script>
     // ==========================================================
@@ -389,7 +393,7 @@
       // 顯示注音
       messageBox.textContent = '';
       // 清空提示
-      nextButton.style.visibility = 'hidden';
+      nextButton.style.display = 'none';
       // 藏起「下一題」按鈕
 
       const choices = makeChoices(item.character);
@@ -491,7 +495,7 @@
       }
       showStars(messageBox, stars, detail);
       // 播放星星動畫：空的星星框 → 星星一顆一顆亮起來 → 評語和說明（showStars 在 game-data.js 裡）
-      nextButton.style.visibility = 'visible';
+      nextButton.style.display = 'inline-block';
       // 顯示按鈕
     }
 
@@ -534,7 +538,7 @@
       messageBox.innerHTML = '你一共拿到<br>⭐ ' + totalStars + ' / ' + maxStars + ' 顆星';
       // 顯示總星數
       nextButton.textContent = '再玩一次 🔁';
-      nextButton.style.visibility = 'visible';
+      nextButton.style.display = 'inline-block';
     }
 
     function startRound() {
@@ -560,5 +564,7 @@
     startRound();
     // 開始第一輪
   </script>
+  <script src="scene-background.js"></script>
+  <!-- 在最底層畫出跟釣魚畫面一樣的湖邊風景 -->
 </body>
 </html>

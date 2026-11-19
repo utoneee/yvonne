@@ -36,6 +36,11 @@ body, button, input {
   gap: 8px;
 }
 
+.star-row span {
+  white-space: nowrap;
+  /* 評語（例如「太棒了！」）不要被拆成兩行 */
+}
+
 .star {
   /* 一顆星星 */
   width: 40px;
@@ -101,28 +106,47 @@ body, button, input {
   /* 木頭色：招牌 */
 }
 
-/* 三個關卡的背景：淡淡的水波紋（每 30px 有一條稍微深一點的線，像點陣畫的水面）
-   第一關小湖（偏綠）、第二關溪邊（淡藍）、第三關海邊（藍） */
-.scene-lake {
-  background: repeating-linear-gradient(to bottom, #c3fae8 0 26px, #b2f2dd 26px 30px);
-  /* repeating-linear-gradient：一直重複的條紋。0～26px 淺色、26～30px 深一點 */
-}
-
-.scene-stream {
-  background: repeating-linear-gradient(to bottom, #d0ebff 0 26px, #bfe2fd 26px 30px);
-}
-
-.scene-sea {
-  background: repeating-linear-gradient(to bottom, #a5d8ff 0 26px, #94cefb 26px 30px);
+#sceneBackground {
+  /* 釣魚畫面的風景（scene-background.js 畫的），固定在最底層、佔滿整個螢幕 */
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  /* z-index 負數 = 放在所有東西的後面 */
 }
 
 .level-page {
+  /* 關卡頁面：內容在畫面中間（上下、左右都置中） */
   min-height: 100vh;
-  /* 背景至少佔滿整個螢幕高 */
-  display: flow-root;
-  /* 讓最上面元素的 margin 留在頁面裡面，不要「漏」到外面把整頁往下推（不然會多出一點點捲動） */
+  /* 至少佔滿整個螢幕高 */
+  display: flex;
+  flex-direction: column;
+  /* 由上往下排 */
+  align-items: center;
+  /* 左右置中 */
+  justify-content: center;
+  /* 上下置中 */
   color: var(--ink);
   /* 文字用咖啡色 */
+  background: #74c0fc;
+  /* 風景還沒畫好之前，先顯示天空的顏色 */
+}
+
+.level-panel {
+  /* 題目區：半透明的白底，後面的湖邊風景還看得到 */
+  width: calc(100% - 20px);
+  /* 左右各留 10px */
+  max-width: 560px;
+  /* 平板上不要太寬 */
+  box-sizing: border-box;
+  /* 寬度包含邊框和內距 */
+  margin: 10px 0;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  /* 白色、72% 不透明（數字越小越透明，後面的風景越清楚） */
+  border: 4px solid var(--ink);
+  box-shadow: 0 6px 0 var(--shadow);
+  /* 跟釣魚畫面的對話框一樣：咖啡色粗框、下面有影子 */
 }
 
 .pixel-sign {
