@@ -29,6 +29,8 @@ body, button, input {
 .star-row {
   /* 星星和評語排成一排 */
   display: flex;
+  flex-wrap: wrap;
+  /* 評語太長、一排放不下時，整句換到下一行（星星才不會被擠出畫面） */
   align-items: center;
   /* 上下置中 */
   justify-content: center;

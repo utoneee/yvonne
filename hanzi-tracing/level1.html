@@ -180,6 +180,13 @@
       /* 白字 */
     }
 
+    .choice-button.reveal {
+      /* 沒過關時，揭曉的正確答案：綠色粗框、淡綠底 */
+      border-color: #2f9e44;
+      background: #ebfbee;
+      color: #2b8a3e;
+    }
+
     @keyframes shake {
       /* 「搖一搖」動畫：往左、往右、回到原位 */
       0%   { transform: translateX(0); }
@@ -279,6 +286,9 @@
 
     const CHOICE_COUNT = 3;
     // 每一題有幾個選項
+
+    const MAX_WRONG = 2;
+    // 錯幾次就不能過關（3 個選項錯 2 次，剩下的一定是對的，那就是用猜的）
 
 
     // ---------- 2. 找出網頁上的元素 ----------
@@ -441,7 +451,7 @@
     function checkChoice(button, item) {
       if (answered || button.classList.contains('wrong')) {
         return;
-        // 已經答對了，或按的是已經選錯變灰的按鈕，就不理它
+        // 這一題已經結束了，或按的是已經選錯變灰的按鈕，就不理它
       }
       tries = tries + 1;
       // 選了幾次 +1
@@ -450,39 +460,68 @@
         // 選錯了
         button.classList.add('wrong');
         // 按鈕變灰、搖一搖
+        if (tries >= MAX_WRONG) {
+          // 連續錯 MAX_WRONG 次：這一題沒有過關
+          // （只有 3 個選項，錯 2 次之後剩下的那個一定是對的，那就變成用「刪去法」猜，不算認得這個字）
+          revealAnswer(item);
+          // 把正確答案標出來，讓孩子知道是哪一個
+          finishQuestion(item, 0);
+          // 0 顆星：沒過關
+          return;
+        }
         messageBox.textContent = '再想想看喔！🤔';
         return;
-        // 讓小朋友繼續選
+        // 讓小朋友再選一次
       }
 
       // 選對了
-      answered = true;
-      // 標記答對，其他按鈕不能再按
       button.classList.add('right');
       // 按鈕變綠色
-
-      let stars = 1;
-      // 星星數：先設 1 顆
+      let stars = 2;
+      // 第二次才選對：2 顆星
       if (tries === 1) {
         stars = 3;
         // 第一次就選對：3 顆星
-      } else if (tries === 2) {
-        stars = 2;
-        // 第二次選對：2 顆星
       }
-      // 第三次以後選對：維持 1 顆星
+      finishQuestion(item, stars);
+    }
+
+    function revealAnswer(item) {
+      // 沒過關時，把正確答案的按鈕標成綠框
+      const buttons = choicesBox.children;
+      for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].textContent === item.character) {
+          buttons[i].classList.add('reveal');
+          // 加上 reveal（揭曉）的樣子
+        }
+      }
+    }
+
+    function finishQuestion(item, stars) {
+      // 這一題結束：顯示星星、記錄結果、出現「下一題」或「回去釣魚」按鈕
+      answered = true;
+      // 標記這一題結束，選項不能再按
       totalStars = totalStars + stars;
       // 加到總星數
 
       let detail = '「' + item.character + '」';
       // 星星下面的說明：再說一次這個字（「答對了」不用寫，星星旁邊已經有「太棒了」之類的評語）
+      if (stars === 0) {
+        detail = '答案是「' + item.character + '」';
+        // 沒過關：告訴孩子正確答案
+      }
 
       if (FISH_CHARACTER !== null) {
         // 從釣魚過來的：記錄結果，告訴小朋友魚有沒有長大，然後回去釣魚
         const result = recordResult(item.character, 1, stars);
-        // 記錄「這個字在第一關拿到幾顆星」（game-data.js 會決定魚要不要長大）
-        detail = detail + '<br>' + growMessage(item.character, result);
-        // 加上「長大了！」之類的話
+        // 記錄「這個字在第一關拿到幾顆星」（game-data.js 會決定魚要不要長大；0 顆星不會長大）
+        if (stars > 0) {
+          detail = detail + '<br>' + growMessage(item.character, result);
+          // 過關：加上「長大了！」之類的話
+        } else {
+          detail = detail + '<br>下次釣到再挑戰吧！';
+          // 沒過關：魚不會長大，下次釣到這條魚會再出這一題
+        }
         nextButton.textContent = '回去釣魚 🎣';
         nextButton.style.background = '#20c997';
         // 湖水綠，跟其他關卡的「回去」按鈕同一個顏色
