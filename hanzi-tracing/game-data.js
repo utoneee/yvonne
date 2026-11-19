@@ -309,7 +309,7 @@ function isReturningFromLevel() {
   const time = Number(readStorage(RETURN_KEY));
   // 讀出記下的時間（沒有的話 Number(null) 是 0）
   writeStorage(RETURN_KEY, null);
-  // 用過就清掉，下次重新打開遊戲時，才會顯示「你是哪一位？」
+  // 用過就清掉，下次重新打開遊戲時，才會顯示選檔案的畫面
   if (params.get('continue') === '1') {
     return true;
     // 網址有 ?continue=1
